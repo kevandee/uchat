@@ -5,7 +5,6 @@
 t_list *users_list;
 
 void *client_work(void *param) {
-    printf("lox\n");
     t_client *cur = (t_client *)param;
     char name[NAME_LEN];
     char buff_out[MAX_LEN + NAME_LEN];
