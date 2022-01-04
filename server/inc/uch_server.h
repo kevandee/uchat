@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "../../libmx/inc/libmx.h"
+#include "../../frameworks/SQLite3/inc/sqlite3.h"
 
 #include <pthread.h>
 

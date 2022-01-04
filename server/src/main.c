@@ -67,6 +67,7 @@ void *client_work(void *param) {
 }
 
 int main(int argc, char *argv[]) {
+    printf("%s\n", sqlite3_libversion());
     signal(SIGPIPE, SIG_IGN);
     if (argc != 2) {
         mx_printerr("usage: ./uchat_server <port>\n");
