@@ -6,13 +6,16 @@ all: install
 install: 
 	@make server
 
-server: libmx/libmx.a
+server: ../libmx/libmx.a sql_lib
 	@mkdir -p obj
 	@clang $(FLAGS) -c src/*.c 
 	@mv *.o obj/
-	@clang $(FLAGS) -g -o uchat_server obj/*.o ../libmx/libmx.a -lpthread
+	@clang $(FLAGS) -g -o uchat_server obj/*.o ../frameworks/SQLite3/sql.a ../libmx/libmx.a -lpthread
 
-libmx/libmx.a:
+sql_lib:
+	@make -sC ../frameworks/SQLite3
+
+../libmx/libmx.a:
 	@make -sC ../libmx
 
 clean:
