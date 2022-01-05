@@ -21,7 +21,8 @@ typedef struct s_client {
     struct sockaddr_in adr;
     int cl_socket;
 
-    char *name;
+    char *login;
+    char *passwd;
 }              t_client;
 
 void clear_message(char *mes, const int size);

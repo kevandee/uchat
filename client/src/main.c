@@ -56,10 +56,34 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    char name[32];
-    printf("Enter name: ");
-    fgets(name, 32, stdin);
-    name[mx_strlen(name) - 1] = '\0';
+    char login[32];
+    char password[16];
+    char choise;
+    printf("Sign in or sign up? (i / u)\n");
+    fflush(stdin);
+    
+    choise = getchar();
+    fflush(stdin);
+    switch(choise) {
+        case 'u':
+        case 'i':
+            printf("Enter login: ");
+            fgets(login, 32, stdin);
+    fflush(stdin);
+            
+            login[mx_strlen(login) - 1] = '\0';
+            printf("Enter password: ");
+            fgets(password, 16, stdin);
+    fflush(stdin);
+            
+            password[mx_strlen(password) - 1] = '\0';
+            break;
+        default:
+            mx_printerr("Invalid choise\n");
+            exit(-1);
+            break;
+    }
+    
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in adr = {0};
     adr.sin_family = AF_INET;
@@ -67,15 +91,16 @@ int main(int argc, char *argv[]) {
     connect(fd, (struct sockaddr *)&adr, sizeof(adr));
     inet_pton(AF_INET, argv[1], &adr.sin_addr); //"127.0.0.1"
 
-    
-    send(fd, name, mx_strlen(name), 0);
-    
+    send(fd, &choise, 1, 0);
+    send(fd, login, mx_strlen(login), 0);
+    send(fd, password, mx_strlen(password), 0);
+
     pthread_t sender_th;
     pthread_t rec_th;
     t_client cur_client = {
         .adr = adr,
         .cl_socket = fd,
-        .name = name
+        .name = login
     };
     pthread_create(&sender_th, NULL, sender_func, &cur_client);
     pthread_create(&rec_th, NULL, rec_func, &fd);

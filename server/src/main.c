@@ -6,25 +6,53 @@ t_list *users_list;
 
 void *client_work(void *param) {
     t_client *cur = (t_client *)param;
-    char name[NAME_LEN];
+    char login[NAME_LEN];
+    char passwd[16];
     char buff_out[MAX_LEN + NAME_LEN];
     bool is_run = true;
-    // Name
-	if(recv(cur->cl_socket, name, NAME_LEN, 0) <= 0 || mx_strlen(name) <  2 || mx_strlen(name) >= 32){
+    char choise;
+    // sign up or sign in
+    recv(cur->cl_socket, &choise, 1, 0);
+    printf("choise %c\n", choise);
+    // login
+	if(recv(cur->cl_socket, login, NAME_LEN, 0) <= 0 || mx_strlen(login) <  2 || mx_strlen(login) >= 32){
 		printf("Didn't enter the name.\n");
 	} else{
-		cur->name=mx_strdup(name);
-        sprintf(buff_out, "%s has joined\n", cur->name);
+		cur->login=mx_strdup(login);
+        sprintf(buff_out, "%s has joined\n", cur->login);
 		printf("%s", buff_out);
-		send_message(buff_out,name);
+		send_message(buff_out,login);
 	}
+
+    //passwd
+    if(recv(cur->cl_socket, passwd, 16, 0) <= 0 || mx_strlen(passwd) <  8 || mx_strlen(passwd) > 16){
+		printf("Didn't enter the passwd.\n");
+	} else{
+		cur->passwd=mx_strdup(passwd);
+        sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
+		printf("%s", buff_out);
+		//send_message(buff_out,login);
+	}
+
+    // Дима, вот тут твоя работа с бд. Проверил или добавил по бд и нужно ответ на клиент сделать
+
+    switch(choise) {
+        case 'u':
+            // регистрация
+
+            break;
+        case 'i':
+            // вход
+
+            break;
+    }
 
     char message[MAX_LEN + NAME_LEN];
     while (is_run) {
         int mes_stat = recv(cur->cl_socket, message, MAX_LEN + NAME_LEN, 0);
 
         if (mes_stat == 0 || (mx_strcmp(message, "exit") == 0)) {
-            sprintf(buff_out, "%s has left\n", cur->name);
+            sprintf(buff_out, "%s has left\n", cur->login);
 			printf("%s", buff_out);
             is_run = false;
         }
@@ -34,12 +62,12 @@ void *client_work(void *param) {
             int i = 1;
             while (users_tmp) {
                 t_client *cl_tmp = (t_client *)(users_tmp->data);
-                if (cl_tmp->name) {
+                if (cl_tmp->login) {
                     char *num = mx_itoa(i);
                     table = mx_strjoin(table, num);
                     mx_strdel(&num);
                     table = mx_strjoin(table, ". ");
-                    table = mx_strjoin(table, cl_tmp->name);
+                    table = mx_strjoin(table, cl_tmp->login);
                     table = mx_strjoin(table, "\n");
                     i++;
                 }
@@ -51,15 +79,15 @@ void *client_work(void *param) {
             continue;
         }
         else if (mes_stat > 0) {
-            printf("Message Received from %s\n", name);
-		    send_message(message, name);
+            printf("Message Received from %s\n", login);
+		    send_message(message, login);
 
             clear_message(message, MAX_LEN + NAME_LEN);
         }
         
     }
     close(cur->cl_socket);
-    mx_strdel(&cur->name);
+    mx_strdel(&cur->login);
     free(cur);
     cur = NULL;
     pthread_detach(pthread_self());
@@ -98,7 +126,9 @@ int main(int argc, char *argv[]) {
         t_client *new_client = (t_client *)malloc(sizeof(t_client));
         new_client->adr = adr;
         new_client->cl_socket = client_fd;
-        new_client->name = NULL;
+        new_client->login = NULL;
+        new_client->passwd = NULL;
+
 
         mx_push_back(&users_list, new_client);
 
