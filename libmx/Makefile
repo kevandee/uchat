@@ -1,8 +1,8 @@
 all: install
 
-install: libmx
+install: libmx.a
 
-libmx: objects
+libmx.a: objects
 	ar -rcs libmx.a obj/*.o
 	ranlib libmx.a
 
