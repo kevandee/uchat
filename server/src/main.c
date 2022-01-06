@@ -5,6 +5,16 @@
 t_list *users_list;
 
 void *client_work(void *param) {
+    char *err;
+    sqlite3 *db;
+    sqlite3_stmt *stmt;
+    sqlite3_open("my.db", &db);
+    int rc = sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, password TEXT NOT NULL);", NULL, NULL, &err);
+    if (rc != SQLITE_OK) {
+        mx_printerr("db creation error");
+        mx_printerr("\n");
+        sqlite3_close(db);
+    }
     t_client *cur = (t_client *)param;
     char login[NAME_LEN];
     char passwd[16];
@@ -26,7 +36,7 @@ void *client_work(void *param) {
 
     //passwd
     if(recv(cur->cl_socket, passwd, 16, 0) <= 0 || mx_strlen(passwd) <  8 || mx_strlen(passwd) > 16){
-		printf("Didn't enter the passwd.\n");
+		printf("Didn't enter the password.\n");
 	} else{
 		cur->passwd=mx_strdup(passwd);
         sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
@@ -38,6 +48,32 @@ void *client_work(void *param) {
 
     switch(choise) {
         case 'u':
+            //printf("LOGIN = %s\n", cur->login);
+            //printf("Password = %s\n", cur->passwd);
+            rc = sqlite3_prepare_v2(db, "SELECT name FROM users WHERE name = ?", -1, &stmt, NULL);
+            if (rc != SQLITE_OK) {
+                mx_printerr("db selection error");
+                mx_printerr("\n");
+                sqlite3_close(db);
+            }
+            rc = sqlite3_bind_text(stmt, 1, cur->login, mx_strlen(cur->login), NULL);
+            if (rc != SQLITE_OK) {
+                mx_printerr("db binding error");                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   terr("\n");
+                sqlite3_close(db);
+            }
+            rc = sqlite3_step(stmt);
+            if (rc != SQLITE_DONE) {
+                printf("db evolution error => this name not finded. GOOD!!!");
+                //NAME REGISTRATION
+                rc = sqlite3_exec(db, "INSERT INTO users (name, password) VALUES ("cur->login", "cur->password");", NULL, NULL, &err);
+                if (rc != SQLITE_OK) {
+                mx_printerr("err: ");
+                //mx_printerr(rc);
+                }
+            }
+            //NAME ALREADY TAKEN
+
+
             // регистрация
 
             break;
