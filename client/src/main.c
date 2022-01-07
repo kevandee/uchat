@@ -9,11 +9,11 @@ void *sender_func(void *param) {
     while(1) {
         printf("> ");
         fflush(stdout);
-        fgets(message, 512, stdin);
-        if (mx_strcmp(message, "users\n") == 0) {
+        scanf("%s", message);
+        if (mx_strcmp(message, "users") == 0) {
             send(cur_client->cl_socket, message, mx_strlen(message) - 1, 0);
         }
-        else if (mx_strcmp(message, "exit\n") == 0) {
+        else if (mx_strcmp(message, "exit") == 0) {
             send(cur_client->cl_socket, message, 4, 0);
             break;
         }
@@ -34,7 +34,7 @@ void *rec_func(void *param) {
     while (1) {
 		int receive = recv(fd, message, 512, 0);
         if (receive > 0) {
-            printf("%s", message);
+            printf("%s\n", message);
             printf("> ");
             fflush(stdout);
         } else if (receive == 0) {
@@ -60,23 +60,17 @@ int main(int argc, char *argv[]) {
     char password[16];
     char choise;
     printf("Sign in or sign up? (i / u)\n");
-    fflush(stdin);
-    
-    choise = getchar();
-    fflush(stdin);
+
+    scanf("%c", &choise);
     switch(choise) {
         case 'u':
         case 'i':
             printf("Enter login: ");
-            fgets(login, 32, stdin);
-    fflush(stdin);
-            
-            login[mx_strlen(login) - 1] = '\0';
+            scanf("%s",login);
+
             printf("Enter password: ");
-            fgets(password, 16, stdin);
-    fflush(stdin);
-            
-            password[mx_strlen(password) - 1] = '\0';
+            scanf("%s",password);
+
             break;
         default:
             mx_printerr("Invalid choise\n");
@@ -92,8 +86,8 @@ int main(int argc, char *argv[]) {
     inet_pton(AF_INET, argv[1], &adr.sin_addr); //"127.0.0.1"
 
     send(fd, &choise, 1, 0);
-    send(fd, login, mx_strlen(login), 0);
-    send(fd, password, mx_strlen(password), 0);
+    send(fd, login, 32, 0);
+    send(fd, password, 16, 0);
 
     pthread_t sender_th;
     pthread_t rec_th;
