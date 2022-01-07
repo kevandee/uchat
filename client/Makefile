@@ -8,10 +8,9 @@ install:
 
 client: libmx/libmx.a sql_lib
 	@mkdir -p obj
-	@clang $(FLAGS) -c src/*.c
+	@clang $(FLAGS) `pkg-config --cflags gtk+-3.0` -DGDK_DISABLE_DEPRECATION_WARNINGS -c src/*.c 
 	@mv *.o obj/
-	@clang $(FLAGS) -g -o uchat obj/*.o  ../libmx/libmx.a ../frameworks/SQLite3/sql.a -lpthread
-
+	@clang $(FLAGS) -g -o uchat obj/*.o `pkg-config --libs gtk+-3.0` ../libmx/libmx.a ../frameworks/SQLite3/sql.a -lpthread
 sql_lib:
 	@make -sC ../frameworks/SQLite3
 

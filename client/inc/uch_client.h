@@ -15,6 +15,8 @@
 
 #include "../../libmx/inc/libmx.h"
 #include "../../frameworks/SQLite3/inc/sqlite3.h"
+//#include "../../frameworks/Gtk3.framework/include/gtk-3.0/gtk/gtk.h"
+#include <gtk/gtk.h>
 
 typedef struct s_client {
     struct sockaddr_in adr;
