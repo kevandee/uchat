@@ -4,12 +4,17 @@
 
 void *sender_func(void *param) {
     t_client *cur_client = (t_client *)param;
-    char message[512];
+    //char message[512];
+    char *message = (char *)malloc(512);
     char buf[512 + 32];
+    fseek(stdin,0,SEEK_END);
     while(1) {
         printf("> ");
         fflush(stdout);
-        scanf("%s", message);
+        size_t len;
+        getline(&message, &len, stdin);
+        //scanf("%s", message);
+        message = mx_strtrim(message);
         if (mx_strcmp(message, "users") == 0) {
             send(cur_client->cl_socket, message, mx_strlen(message) - 1, 0);
         }
