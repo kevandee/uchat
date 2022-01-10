@@ -17,6 +17,7 @@
 #include "../../frameworks/SQLite3/inc/sqlite3.h"
 
 #include <pthread.h>
+#include <curl/curl.h>
 
 typedef struct s_client {
     struct sockaddr_in adr;
