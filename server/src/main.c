@@ -26,13 +26,17 @@ void *client_work(void *param) {
     while (err_msg) {
         // sign up or sign in
         if(recv(cur->cl_socket, &choise, 1, 0) <= 0) {
-            break;
+    pthread_detach(pthread_self());
+            
+            return NULL;
         }
         printf("choise %c\n", choise);
         // login
         if(recv(cur->cl_socket, login, NAME_LEN, 0) <= 0 || mx_strlen(login) <  2 || mx_strlen(login) >= 32){
             printf("Didn't enter the name.\n");
-            break;
+            pthread_detach(pthread_self());
+
+            return NULL;
         } else{
             cur->login=mx_strdup(login);
         }
@@ -40,12 +44,12 @@ void *client_work(void *param) {
         //passwd
         if(recv(cur->cl_socket, passwd, 16, 0) <= 0 || mx_strlen(passwd) <  8 || mx_strlen(passwd) > 16){
             printf("Didn't enter the password.\n");
-            break;
+    pthread_detach(pthread_self());
+            
+            return NULL;
 
         } else{
             cur->passwd=mx_strdup(passwd);
-            sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
-            printf("%s", buff_out);
         }
 
         // Дима, вот тут твоя работа с бд. Проверил или добавил по бд и нужно ответ на клиент сделать
@@ -113,8 +117,10 @@ void *client_work(void *param) {
         }
     }
     send(cur->cl_socket, &err_msg,sizeof(bool), 0);
-    sprintf(buff_out, "%s has joined\n", cur->login);
+    sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
     printf("%s", buff_out);
+    sprintf(buff_out, "%s has joined\n", cur->login);
+    //printf("%s", buff_out);
     send_message(buff_out,login);
     char message[MAX_LEN + NAME_LEN];
     while (is_run) {
@@ -157,8 +163,30 @@ void *client_work(void *param) {
     }
     close(cur->cl_socket);
     mx_strdel(&cur->login);
+    /*printf("1\n");
+    t_list *del = users_list;
+    for (int i = 0; i < cur->id - 1; i++) {
+        del = del->next;
+    }
+    printf("2\n");*/
     free(cur);
     cur = NULL;
+
+    /*t_list *next = del->next->next;
+    free(del->next);
+    del->next = next;
+    printf("3\n");
+    del = del->next;
+    while (del) {
+        ((t_client *)del->data)->id--;
+        del = del->next;
+    }
+    printf("4\n");
+    del = users_list;
+    while(del) {
+        printf("id %d\n",  ((t_client *)del->data)->id);
+        del = del->next;
+    }*/
     pthread_detach(pthread_self());
     return NULL;
 }
@@ -229,6 +257,7 @@ int main(int argc, char *argv[]) {
 
     char *weather = get_weather("Kharkov");
     printf("%s\n", weather);
+    int client_id = 0;
     while(1) {
         client_fd = accept(serv_fd, (struct sockaddr *) &adr, &adrlen);
         
@@ -237,7 +266,7 @@ int main(int argc, char *argv[]) {
         new_client->cl_socket = client_fd;
         new_client->login = NULL;
         new_client->passwd = NULL;
-
+        new_client->id = client_id;
 
         mx_push_back(&users_list, new_client);
 

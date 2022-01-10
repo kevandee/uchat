@@ -23,6 +23,7 @@ typedef struct s_client {
     struct sockaddr_in adr;
     int cl_socket;
 
+    int id;
     char *login;
     char *passwd;
 }              t_client;

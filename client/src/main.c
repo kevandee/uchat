@@ -52,7 +52,6 @@ void *rec_func(void *param) {
 }
 
 
-
 int main(int argc, char *argv[]) {
     if (argc != 3) {
         mx_printerr("usage: ./uchat <server IP> <port>\n");
