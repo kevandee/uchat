@@ -28,13 +28,13 @@ typedef struct s_client {
     char *passwd;
 }              t_client;
 
-void clear_message(char *mes, const int size);
-
 extern t_list *users_list;
 extern pthread_mutex_t send_mutex;
 
 void send_message(char *mes, char *sender);
+void clear_message(char *mes, const int size);
 
+void free_client(t_client **client, t_list **users_list);
 
 
 char *get_weather(char *city);

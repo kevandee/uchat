@@ -27,7 +27,7 @@ void *client_work(void *param) {
     while (err_msg) {
         // sign up or sign in
         if(recv(cur->cl_socket, &choise, 1, 0) <= 0) {
-    pthread_detach(pthread_self());
+            free_client(&cur, &users_list);
             
             return NULL;
         }
@@ -35,7 +35,7 @@ void *client_work(void *param) {
         // login
         if(recv(cur->cl_socket, login, NAME_LEN, 0) <= 0 || mx_strlen(login) <  2 || mx_strlen(login) >= 32){
             printf("Didn't enter the name.\n");
-            pthread_detach(pthread_self());
+            free_client(&cur, &users_list);
 
             return NULL;
         } else{
@@ -45,7 +45,8 @@ void *client_work(void *param) {
         //passwd
         if(recv(cur->cl_socket, passwd, 16, 0) <= 0 || mx_strlen(passwd) <  8 || mx_strlen(passwd) > 16){
             printf("Didn't enter the password.\n");
-            pthread_detach(pthread_self());
+            free_client(&cur, &users_list);
+
             
             return NULL;
 
@@ -169,49 +170,7 @@ void *client_work(void *param) {
 
     // отключение клиента от сервера
     close(cur->cl_socket);
-    mx_strdel(&cur->login);
-    t_list *del = users_list;
-    t_list *prev = NULL;
-    while (del) {
-        if (((t_client *)del->data)->id == cur->id) {
-            break;
-        }
-        prev = del;
-        del = del->next;
-    }
-    if (!prev) {
-        //printf("front\n");
-        mx_pop_front(&users_list);
-        t_list *temp = users_list;
-        while (temp) {
-            ((t_client *)temp->data)->id--;
-            temp = temp->next;
-        }
-        free(cur);
-        cur = NULL;
-    }
-    else if (!del->next) {
-        //printf("back\n");
-        mx_pop_back(&users_list);
-        free(cur);
-        cur = NULL;
-    }
-    else {
-        //printf("prev = %d; del = %d;\n", ((t_client *)prev->data)->id, ((t_client *)del->data)->id);
-        
-        if (del->next) {
-            prev->next = del -> next;
-        }
-        else {
-            prev->next = NULL;
-        }
-        free(del);
-        del = NULL;
-        free(cur);
-        cur = NULL;
-    }
-
-    pthread_detach(pthread_self());
+    free_client(&cur, &users_list);
     return NULL;
 }
 
