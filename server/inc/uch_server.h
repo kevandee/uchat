@@ -35,4 +35,8 @@ extern pthread_mutex_t send_mutex;
 
 void send_message(char *mes, char *sender);
 
+
+
+char *get_weather(char *city);
+
 #endif

@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
     send(fd, &choise, 1, 0);
     send(fd, login, 32, 0);
     send(fd, password, 16, 0);
-
+    printf("%c || %s || %s\n", choise, login, password);
     bool err_aut;
     recv(fd, &err_aut, sizeof(bool), 0); // Ожидание ответа от сервера об успешности входа или регистрации
 

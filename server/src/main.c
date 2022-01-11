@@ -5,16 +5,17 @@
 t_list *users_list;
 
 void *client_work(void *param) {
-    char *err;
-    sqlite3 *db;
-    sqlite3_stmt *stmt;
-    sqlite3_open("my.db", &db);
-    int rc = sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, password TEXT NOT NULL);", NULL, NULL, &err);
-    if (rc != SQLITE_OK) {
+    //char *err;
+    //sqlite3 *db;
+    //sqlite3_stmt *stmt;
+    //sqlite3_config();
+    //sqlite3_open("my.db", &db);
+    //int rc = sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, password TEXT NOT NULL);", NULL, NULL, &err);
+    /*if (rc != SQLITE_OK) {
         mx_printerr("db creation error");
         mx_printerr("\n");
         sqlite3_close(db);
-    }
+    }*/
     t_client *cur = (t_client *)param;
     char login[NAME_LEN];
     char passwd[16];
@@ -44,7 +45,7 @@ void *client_work(void *param) {
         //passwd
         if(recv(cur->cl_socket, passwd, 16, 0) <= 0 || mx_strlen(passwd) <  8 || mx_strlen(passwd) > 16){
             printf("Didn't enter the password.\n");
-    pthread_detach(pthread_self());
+            pthread_detach(pthread_self());
             
             return NULL;
 
@@ -53,8 +54,8 @@ void *client_work(void *param) {
         }
 
         // Дима, вот тут твоя работа с бд. Проверил или добавил по бд и нужно ответ на клиент сделать
-
-        switch(choise) {
+        printf("%c || %s || %s\n", choise, login, passwd);
+        /*switch(choise) {
             case 'u':
                 rc = sqlite3_prepare_v2(db, "SELECT name FROM users WHERE name = ?", -1, &stmt, NULL);
                 if (rc != SQLITE_OK) {
@@ -115,7 +116,11 @@ void *client_work(void *param) {
                 }
                 break;
         }
+    */
+   err_msg = false;
     }
+    //sqlite3_close(db);
+    
     send(cur->cl_socket, &err_msg,sizeof(bool), 0);
     sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
     printf("%s", buff_out);
@@ -161,72 +166,55 @@ void *client_work(void *param) {
         }
         
     }
+
+    // отключение клиента от сервера
     close(cur->cl_socket);
     mx_strdel(&cur->login);
-    /*printf("1\n");
     t_list *del = users_list;
-    for (int i = 0; i < cur->id - 1; i++) {
-        del = del->next;
-    }
-    printf("2\n");*/
-    free(cur);
-    cur = NULL;
-
-    /*t_list *next = del->next->next;
-    free(del->next);
-    del->next = next;
-    printf("3\n");
-    del = del->next;
+    t_list *prev = NULL;
     while (del) {
-        ((t_client *)del->data)->id--;
+        if (((t_client *)del->data)->id == cur->id) {
+            break;
+        }
+        prev = del;
         del = del->next;
     }
-    printf("4\n");
-    del = users_list;
-    while(del) {
-        printf("id %d\n",  ((t_client *)del->data)->id);
-        del = del->next;
-    }*/
+    if (!prev) {
+        //printf("front\n");
+        mx_pop_front(&users_list);
+        t_list *temp = users_list;
+        while (temp) {
+            ((t_client *)temp->data)->id--;
+            temp = temp->next;
+        }
+        free(cur);
+        cur = NULL;
+    }
+    else if (!del->next) {
+        //printf("back\n");
+        mx_pop_back(&users_list);
+        free(cur);
+        cur = NULL;
+    }
+    else {
+        //printf("prev = %d; del = %d;\n", ((t_client *)prev->data)->id, ((t_client *)del->data)->id);
+        
+        if (del->next) {
+            prev->next = del -> next;
+        }
+        else {
+            prev->next = NULL;
+        }
+        free(del);
+        del = NULL;
+        free(cur);
+        cur = NULL;
+    }
+
     pthread_detach(pthread_self());
     return NULL;
 }
 
-size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream) {
-    size_t written;
-    written = fwrite(ptr, size, nmemb, stream);
-    return written;
-}
-
-char *get_weather(char *city) {
-    FILE *fp = fopen("weather.txt","wb");
-    CURL *curl;
-    (void)city;
-  CURLcode res;
-    
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://wttr.in/Kharkov");
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/7.47.1");
-    /* example.com is redirected, so we tell libcurl to follow redirection */
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data); 
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-    /* Perform the request, res will get the return code */
-    res = curl_easy_perform(curl);
-
-    /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
-
-    /* always cleanup */
-    curl_easy_cleanup(curl);
-
-  }
-  fclose(fp);
-  return mx_file_to_str("weather.txt");
-}
 
 int main(int argc, char *argv[]) {
     printf("%s\n", sqlite3_libversion());
@@ -267,7 +255,9 @@ int main(int argc, char *argv[]) {
         new_client->login = NULL;
         new_client->passwd = NULL;
         new_client->id = client_id;
-
+        printf("id %d\n", client_id);
+        
+        client_id++;
         mx_push_back(&users_list, new_client);
 
         pthread_create(&thread, NULL, client_work, (void *)new_client);
