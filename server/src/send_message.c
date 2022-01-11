@@ -17,5 +17,5 @@ void send_message(char *mes, char *sender) {
         users_tmp = users_tmp->next;
     }
     pthread_mutex_unlock(&send_mutex);
-    printf("sended for %d user\n", count);
+    printf("%d users\n", count);
 }
