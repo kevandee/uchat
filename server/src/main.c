@@ -118,7 +118,7 @@ void *client_work(void *param) {
                 break;
         }
     */
-   err_msg = false;
+    err_msg = false;
     }
     //sqlite3_close(db);
     
