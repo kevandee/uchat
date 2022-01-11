@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/stat.h>
 //#include <sqlite3.h>
 
 #include "../../libmx/inc/libmx.h"
@@ -38,5 +39,6 @@ void free_client(t_client **client, t_list **users_list);
 
 
 char *get_weather(char *city);
+void *sqlite3_exec_db(char *query, int type);
 
 #endif

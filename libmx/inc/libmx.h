@@ -67,6 +67,7 @@ char *mx_strjoin(char const *s1, char const *s2);
 char *mx_file_to_str(const char *filename);
 char *mx_replace_substr(const char *str, const char *sub, const char *replace);
 int mx_read_line(char **lineptr, size_t buf_size, char delim, const int fd);
+char *mx_strrejoin(char *s1, char const *s2);
 
 int mx_tolower(int c);
 int mx_toupper(int c);
