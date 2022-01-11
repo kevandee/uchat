@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/stat.h>
 //#include <sqlite3.h>
 
 #include "../../libmx/inc/libmx.h"
