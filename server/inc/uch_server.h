@@ -39,5 +39,6 @@ void send_message(char *mes, char *sender);
 
 
 char *get_weather(char *city);
+void *sqlite3_exec_db(char *query, int type);
 
 #endif
