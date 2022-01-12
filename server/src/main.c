@@ -4,6 +4,70 @@
 
 t_list *users_list;
 
+int recv_jpeg(int socket, char *path) {
+    int  recv_size = 0,size = 0, read_size, write_size, packet_index =1,stat;
+    char imagearray[10241];
+    FILE *image;
+
+    //Find the size of the image
+    stat = recv(socket, &size, sizeof(int), 0);
+    while (stat < 0) {
+        stat = recv(socket, &size, sizeof(int), 0);
+    }
+
+    printf("Packet received.\n");
+    printf("Packet size: %i\n",stat);
+    printf("Image size: %i\n",size);
+    printf("\n");
+
+    char buffer[] = "Got it";
+
+    //Send our verification signal
+    stat = send(socket, &buffer, sizeof(int), 0);
+    while (stat < 0) {
+        stat = send(socket, &buffer, sizeof(int), 0);
+    }
+
+    printf("Reply sent\n");
+
+    image = fopen(path, "wb");
+
+    if(!image) {
+        printf("Error has occurred. Image file could not be opened\n");
+        return -1; 
+    }
+
+    //Loop while we have not received the entire file yet
+    while(recv_size < size) {
+        read_size = recv(socket,imagearray, 10241, 0);
+        while(read_size <0) {
+            read_size = recv(socket,imagearray, 10241, 0);
+        }
+
+        printf("Packet number received: %i\n",packet_index);
+        printf("Packet size: %i\n",read_size);
+
+        //Write the currently read data into our image file
+        write_size = fwrite(imagearray,1,read_size, image);
+        printf("Written image size: %i\n",write_size); 
+
+        if(read_size !=write_size) {
+            printf("error in read write\n");    
+        }
+
+        recv_size += read_size;
+        packet_index++;
+        printf("Total received image size: %i\n",recv_size);
+        printf(" \n");
+        printf(" \n");
+
+    }
+
+    fclose(image);
+    printf("Image successfully Received!\n");
+    return 1;
+}
+
 void *client_work(void *param) {
     sqlite3_create_db();
 
@@ -44,7 +108,7 @@ void *client_work(void *param) {
         } else{
             cur->passwd=mx_strdup(passwd);
         }
-
+        //recv_jpeg(cur->cl_socket, "received.jpg");
         //DB SWITH
         printf("%c || %s || %s\n", choise, login, passwd);
         switch(choise) {
@@ -160,6 +224,7 @@ int main(int argc, char *argv[]) {
         mx_printerr("usage: ./uchat_server <port>\n");
         return -1;
     }
+    
     int serv_fd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in adr = {0};
     adr.sin_family = AF_INET;
