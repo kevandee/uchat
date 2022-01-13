@@ -141,7 +141,7 @@ static void activate(GtkApplication *application)
 
 
     provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(provider,"/Users/romanlitvinov/zTraining/style.css");
+    gtk_css_provider_load_from_path(provider,"style.css");
     load_css(provider, window, 0);
     load_css(provider, button1, 1);
     load_css(provider, fixed, 2);
@@ -200,8 +200,8 @@ int main(int argc, char *argv[]) {
     send(fd, &choise, 1, 0);
     send(fd, login, 32, 0);
     send(fd, password, 16, 0);
-    printf("%c || %s || %s\n", choise, login, password);
-    char *jpeg = "testp.png";//"test.jpg";
+    //printf("%c || %s || %s\n", choise, login, password);
+    //char *jpeg = "testp.png";//"test.jpg";
     //send_jpeg(fd, jpeg);
     bool err_aut;
     recv(fd, &err_aut, sizeof(bool), 0); // Ожидание ответа от сервера об успешности входа или регистрации
