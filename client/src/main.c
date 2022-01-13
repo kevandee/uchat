@@ -51,6 +51,73 @@ void *rec_func(void *param) {
 
 }
 
+static void print_LogIn()
+{
+  g_print ("Welcome, user!\n");
+}
+
+static void load_css(GtkCssProvider *provider, GtkWidget *widget, gint widg)
+{
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    if(widg == 0)
+    {
+        gtk_style_context_add_class(context,"window_entry");
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    }
+    else if(widg == 1)
+    {
+        gtk_style_context_add_class(context,"button_entry");
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    }
+    else
+    {
+        gtk_style_context_add_class(context,"fixed_entry");
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    }
+}
+
+static void activate(GtkApplication *application)
+{
+    GtkWidget *window;
+    GtkWidget *button1, *entry_field1, *entry_field2, *logo;
+    GtkWidget *fixed;
+    GtkCssProvider *provider;
+
+    window = gtk_application_window_new (application);
+    gtk_window_set_title (GTK_WINDOW (window), "Window");
+    gtk_window_set_default_size (GTK_WINDOW (window), 1200, 760);
+    gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
+
+    fixed = gtk_fixed_new();
+    button1 = gtk_button_new_with_label ("Log in");
+    g_signal_connect (button1, "clicked", G_CALLBACK (print_LogIn), NULL);
+    g_signal_connect_swapped (button1, "clicked", G_CALLBACK (gtk_window_destroy), window);
+    entry_field1 = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_field1),"Your login...");
+    entry_field2 = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_field2),"Your password...");
+    gtk_entry_set_visibility(GTK_ENTRY(entry_field2),FALSE);
+    logo = gtk_image_new_from_file("Logo.png");
+
+    gtk_fixed_put(GTK_FIXED(fixed), logo, 300, 100);
+    gtk_fixed_put(GTK_FIXED(fixed), entry_field1, 300, 300);
+    gtk_widget_set_size_request(entry_field1, 600, 30);
+    gtk_fixed_put(GTK_FIXED(fixed), entry_field2, 300, 350);
+    gtk_widget_set_size_request(entry_field2, 600, 30);
+    gtk_fixed_put(GTK_FIXED(fixed), button1, 400, 450);
+    gtk_widget_set_size_request(button1, 400, 30);
+    gtk_window_set_child (GTK_WINDOW (window), fixed);
+
+
+    provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_path(provider,"/Users/romanlitvinov/zTraining/style.css");
+    load_css(provider, window, 0);
+    load_css(provider, button1, 1);
+    load_css(provider, fixed, 2);
+    gtk_widget_show (window);
+
+}
+
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -58,6 +125,13 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     
+    GtkApplication *application;
+    gint status;
+    application = gtk_application_new("my.first.app", G_APPLICATION_FLAGS_NONE);
+    g_signal_connect(application, "activate", G_CALLBACK(activate), NULL);
+    status = g_application_run(G_APPLICATION(application), FALSE, NULL);
+
+
     // Переменные для авторизации
     char login[32];
     char password[16];
@@ -148,5 +222,5 @@ int main(int argc, char *argv[]) {
 
     close(fd);
 
-    return 0;
+    return status;
 }
