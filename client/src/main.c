@@ -31,6 +31,37 @@ void *sender_func(void *param) {
     return NULL;
 }
 
+void send_jpeg(int socket, char *file) {
+    int size, read_size;
+    int stat;
+    char send_buffer[10240], read_buffer[256];
+    FILE *picture = fopen(file, "rb");
+    fseek(picture, 0, SEEK_END);
+    size = ftell(picture);
+    fseek(picture, 0, SEEK_SET);
+    send(socket, &size, sizeof(int), 0);
+
+    //Send Picture as Byte Array
+    stat=recv(socket, &read_buffer , 255, 0);
+    while (stat < 0) { //Read while we get errors that are due to signals.
+       stat = recv(socket, &read_buffer , 255, 0);
+    } 
+
+    while(!feof(picture)) {
+       //Read from the file into our send buffer
+       read_size = fread(send_buffer, 1, sizeof(send_buffer)-1, picture);
+
+       //Send data through our socket
+       stat = send(socket, send_buffer, read_size, 0);
+       while (stat < 0){
+         stat = send(socket, send_buffer, read_size, 0);
+       }
+
+       //Zero out our send buffer
+       clear_message(send_buffer, sizeof(send_buffer));
+    }
+}
+
 void *rec_func(void *param) {
     int fd = *(int *)param;
     char message[512] = {0};
@@ -53,6 +84,7 @@ void *rec_func(void *param) {
 
 
 int main(int argc, char *argv[]) {
+    (void)argv;
     if (argc != 3) {
         mx_printerr("usage: ./uchat <server IP> <port>\n");
         return -1;
@@ -95,6 +127,8 @@ int main(int argc, char *argv[]) {
     send(fd, login, 32, 0);
     send(fd, password, 16, 0);
     printf("%c || %s || %s\n", choise, login, password);
+    char *jpeg = "testp.png";//"test.jpg";
+    //send_jpeg(fd, jpeg);
     bool err_aut;
     recv(fd, &err_aut, sizeof(bool), 0); // Ожидание ответа от сервера об успешности входа или регистрации
 
@@ -147,6 +181,6 @@ int main(int argc, char *argv[]) {
     pthread_join(rec_th, NULL);
 
     close(fd);
-
+    
     return 0;
 }
