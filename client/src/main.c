@@ -92,17 +92,17 @@ static void load_css(GtkCssProvider *provider, GtkWidget *widget, gint widg)
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
     if(widg == 0)
     {
-        gtk_style_context_add_class(context,"window_entry");
+        gtk_style_context_add_class(context,"window_login");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
     else if(widg == 1)
     {
-        gtk_style_context_add_class(context,"button_entry");
+        gtk_style_context_add_class(context,"button_login");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
     else
     {
-        gtk_style_context_add_class(context,"fixed_entry");
+        gtk_style_context_add_class(context,"fixed_login");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
 }
@@ -128,23 +128,25 @@ static void activate(GtkApplication *application)
     entry_field2 = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry_field2),"Your password...");
     gtk_entry_set_visibility(GTK_ENTRY(entry_field2),FALSE);
+    gtk_button_set_has_frame(GTK_BUTTON(button1), FALSE);
     logo = gtk_image_new_from_file("Logo.png");
 
-    gtk_fixed_put(GTK_FIXED(fixed), logo, 300, 100);
-    gtk_fixed_put(GTK_FIXED(fixed), entry_field1, 300, 300);
-    gtk_widget_set_size_request(entry_field1, 600, 30);
-    gtk_fixed_put(GTK_FIXED(fixed), entry_field2, 300, 350);
-    gtk_widget_set_size_request(entry_field2, 600, 30);
-    gtk_fixed_put(GTK_FIXED(fixed), button1, 400, 450);
-    gtk_widget_set_size_request(button1, 400, 30);
+    gtk_fixed_put(GTK_FIXED(fixed), logo, 489, 107);
+    gtk_fixed_put(GTK_FIXED(fixed), entry_field1, 445, 338);
+    gtk_widget_set_size_request(entry_field1, 310, 36);
+    gtk_fixed_put(GTK_FIXED(fixed), entry_field2, 445, 384);
+    gtk_widget_set_size_request(entry_field2, 310, 36);
+    gtk_fixed_put(GTK_FIXED(fixed), button1, 480, 450);
+    gtk_widget_set_size_request(button1, 240, 55);
     gtk_window_set_child (GTK_WINDOW (window), fixed);
 
 
     provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(provider,"style.css");
+    gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(provider),"client/style.css");
     load_css(provider, window, 0);
     load_css(provider, button1, 1);
     load_css(provider, fixed, 2);
+    g_object_unref(provider);
     gtk_widget_show (window);
 
 }

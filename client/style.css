@@ -1,15 +1,16 @@
-.window_entry
+
+/*LOGIN FORM*/
+
+/*main window*/
+.window_login{
+  background-color: rgb(22, 33, 44);
+}
+
+.fixed_login
 {
-font-family: cursive;
-background-color: rgb(23, 33, 43);
-opacity: 1;
+  background-color: rgb(22, 33, 44);
 }
-/*контейнер с полями ввода и кнопками (центрирование и оцтупы)*/
-.fixed_entry {
-  background-color: rgb(33, 45, 57);
-  background-size: 50px 50px;
-  padding: 20px 20px 15px 20px;
-}
+<<<<<<< HEAD
 .button_entry {
   /*margin-left: 15%;
   margin-top: 3%;
@@ -25,11 +26,26 @@ opacity: 1;
   padding:7px 24px;
   text-decoration:none;
   text-shadow:0px -1px 0px #5b6178;
+=======
+
+.button_login
+{
+  background:rgb(236, 179, 107);
+  font-family: 'Helvetica Neue';
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+>>>>>>> 5f043e48afd5dc6578595fb068ff1d22b06fbe0d
 }
-.button_entry:hover {
-  background:linear-gradient(to bottom, rgb(237, 179, 97) 5%,rgb(245, 198, 131) 100%);
-  background-color:#019ad2;
+
+.button_login:hover
+{
+  border: #ffffff;
 }
+
+
+
+
 /*.button_entry:active {
   position:relative;
   top:1px;
