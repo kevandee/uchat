@@ -16,24 +16,18 @@
 
 #include "../../libmx/inc/libmx.h"
 #include "../../frameworks/SQLite3/inc/sqlite3.h"
+#include "../../utils/inc/utils.h"
 
 #include <pthread.h>
 #include <curl/curl.h>
 
-typedef struct s_client {
-    struct sockaddr_in adr;
-    int cl_socket;
-
-    int id;
-    char *login;
-    char *passwd;
-}              t_client;
 
 extern t_list *users_list;
 extern pthread_mutex_t send_mutex;
 
-void send_message(char *mes, char *sender);
+void send_message(char *mes, char *sender, t_list **chat_list);
 void clear_message(char *mes, const int size);
+void send_new_chat(t_chat **new_chat);
 
 void free_client(t_client **client, t_list **users_list);
 

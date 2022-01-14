@@ -4,70 +4,6 @@
 
 t_list *users_list;
 
-int recv_jpeg(int socket, char *path) {
-    int  recv_size = 0,size = 0, read_size, write_size, packet_index =1,stat;
-    char imagearray[10241];
-    FILE *image;
-
-    //Find the size of the image
-    stat = recv(socket, &size, sizeof(int), 0);
-    while (stat < 0) {
-        stat = recv(socket, &size, sizeof(int), 0);
-    }
-
-    printf("Packet received.\n");
-    printf("Packet size: %i\n",stat);
-    printf("Image size: %i\n",size);
-    printf("\n");
-
-    char buffer[] = "Got it";
-
-    //Send our verification signal
-    stat = send(socket, &buffer, sizeof(int), 0);
-    while (stat < 0) {
-        stat = send(socket, &buffer, sizeof(int), 0);
-    }
-
-    printf("Reply sent\n");
-
-    image = fopen(path, "wb");
-
-    if(!image) {
-        printf("Error has occurred. Image file could not be opened\n");
-        return -1; 
-    }
-
-    //Loop while we have not received the entire file yet
-    while(recv_size < size) {
-        read_size = recv(socket,imagearray, 10241, 0);
-        while(read_size <0) {
-            read_size = recv(socket,imagearray, 10241, 0);
-        }
-
-        printf("Packet number received: %i\n",packet_index);
-        printf("Packet size: %i\n",read_size);
-
-        //Write the currently read data into our image file
-        write_size = fwrite(imagearray,1,read_size, image);
-        printf("Written image size: %i\n",write_size); 
-
-        if(read_size !=write_size) {
-            printf("error in read write\n");    
-        }
-
-        recv_size += read_size;
-        packet_index++;
-        printf("Total received image size: %i\n",recv_size);
-        printf(" \n");
-        printf(" \n");
-
-    }
-
-    fclose(image);
-    printf("Image successfully Received!\n");
-    return 1;
-}
-
 void *client_work(void *param) {
     sqlite3_create_db();
 
@@ -164,12 +100,25 @@ void *client_work(void *param) {
         }
     }
     
+    // auth success
+
+    switch (choise) {
+        case 'u':
+            cur->chat_count = 0;
+            cur->chats = NULL;
+            break;
+        case 'i':
+            //get_client_data(&cur);
+            break;
+    }
+    cur->chats = NULL;
+    
     send(cur->cl_socket, &err_msg,sizeof(bool), 0);
     sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
     printf("%s", buff_out);
     sprintf(buff_out, "%s has joined\n", cur->login);
     //printf("%s", buff_out);
-    send_message(buff_out,login);
+    send_message(buff_out,login, NULL);
     char message[MAX_LEN + NAME_LEN];
     while (is_run) {
         int mes_stat = recv(cur->cl_socket, message, MAX_LEN + NAME_LEN, 0);
@@ -201,10 +150,69 @@ void *client_work(void *param) {
             clear_message(message, MAX_LEN + NAME_LEN);
             continue;
         }
-        else if (mes_stat > 0) {
-            printf("Message Received from %s\n", login);
-		    send_message(message, login);
+        else if (mx_strncmp(message,"add chat",8) == 0) {
+            // работа со строкой, будет всё переделано под гтк
+            char *trim = message + 9;
 
+            char **arr = NULL;
+            arr = mx_strsplit(trim, ' ');
+            t_chat *new_chat = (t_chat *)malloc(sizeof(t_chat));
+            new_chat->users=NULL;
+            
+            mx_strcpy(new_chat->name, arr[0]);
+            int i;
+            mx_push_back(&new_chat->users, mx_strdup(cur->login));
+            for (i = 1; arr[i]; i++) {
+                printf("arr %s\n", arr[i]);
+                mx_push_back(&new_chat->users, mx_strdup(arr[i]));
+            } 
+            new_chat->messages = NULL;
+            new_chat->count_users = i;
+
+            /* 
+            Дим, вот тут нужно добавить новый чат в бд каждого юзера(все есть в линкед листе users), 
+            после чего он будет отправлен на клиенты
+            */
+
+
+
+            // отправка на клиенты
+            pthread_mutex_lock(&send_mutex);
+            send_new_chat(&new_chat);
+
+            mx_push_back(&cur->chats, new_chat);
+            printf("added\n");
+            pthread_mutex_unlock(&send_mutex);
+            clear_message(message, MAX_LEN + NAME_LEN);
+        }
+        else if (mx_strncmp(message, "change chat", 11) == 0) {
+            /*
+            Дим, а тут нужно поиск данных по чату достать из бд и заполнить структуру,
+            пока что тут идёт поиск по линкед листу, но надо из бд всё взять
+            */
+            char *trim = message + 12;
+            t_list *temp_chat_l = cur->chats;
+            char *find_chat = NULL;
+            while(temp_chat_l) {
+                if (mx_strcmp(trim, ((t_chat *)(temp_chat_l->data))->name ) == 0) {
+                    find_chat = ((t_chat *)(temp_chat_l->data))->name;
+                    break;
+                }
+                temp_chat_l = temp_chat_l->next;
+            }
+            if (temp_chat_l) {
+                cur->cur_chat = ((t_chat *)(temp_chat_l->data));
+                printf("cur name: %s\n", cur->cur_chat->name);
+                printf("1 user: %s\n", cur->cur_chat->users->data);
+                printf("2 user: %s\n", cur->cur_chat->users->next->data);
+            }
+        }
+        else if (mes_stat > 0) {
+            printf("Message Received from %s | %s |\n", login, message);
+		    if(cur->cur_chat)
+                send_message(message, login, &cur->cur_chat->users);
+            else
+                send_message(message, login, NULL);
             clear_message(message, MAX_LEN + NAME_LEN);
         }
         
@@ -245,8 +253,8 @@ int main(int argc, char *argv[]) {
     users_list = NULL;
     pthread_mutex_init(&send_mutex, NULL);
 
-    char *weather = get_weather("Kharkov");
-    printf("%s\n", weather);
+    //char *weather = get_weather("Kharkov");
+    //printf("%s\n", weather);
     int client_id = 0;
     while(1) {
         client_fd = accept(serv_fd, (struct sockaddr *) &adr, &adrlen);

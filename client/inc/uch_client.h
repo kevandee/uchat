@@ -15,15 +15,11 @@
 
 #include "../../libmx/inc/libmx.h"
 #include "../../frameworks/SQLite3/inc/sqlite3.h"
-//#include "../../frameworks/Gtk3.framework/include/gtk-3.0/gtk/gtk.h"
+#include "../../utils/inc/utils.h"
+
 #include <gtk/gtk.h>
 
-typedef struct s_client {
-    struct sockaddr_in adr;
-    int cl_socket;
-
-    char *name;
-}              t_client;
+extern t_client *cur_client;
 
 void clear_message(char *mes, const int size);
 
