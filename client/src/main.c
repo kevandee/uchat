@@ -1,5 +1,23 @@
 #include "../inc/uch_client.h"
 
+t_client *cur_client;
+
+int recv_all(int sockfd, char * buf, int len)
+{
+    ssize_t n;
+
+    while (len > 0)
+    {
+        n = recv(sockfd, buf, len, 0);
+        if (n <= 0)
+            return n;
+        buf += n;
+        len -= n;
+    }
+
+    return 1;
+}
+
 void *sender_func(void *param) {
     t_client *cur_client = (t_client *)param;
     //char message[512];
@@ -21,8 +39,8 @@ void *sender_func(void *param) {
             break;
         }
         else {
-            sprintf(buf, "%s: %s\n", cur_client->name, message);
-            send(cur_client->cl_socket, buf, mx_strlen(buf) - 1, 0);
+            //sprintf(buf, "%s: %s\n", cur_client->login, message);
+            send(cur_client->cl_socket, message, mx_strlen(message), 0);
         }
         clear_message(message, 512);
         clear_message(buf, 512 + 32);
@@ -31,46 +49,50 @@ void *sender_func(void *param) {
     return NULL;
 }
 
-void send_jpeg(int socket, char *file) {
-    int size, read_size;
-    int stat;
-    char send_buffer[10240], read_buffer[256];
-    FILE *picture = fopen(file, "rb");
-    fseek(picture, 0, SEEK_END);
-    size = ftell(picture);
-    fseek(picture, 0, SEEK_SET);
-    send(socket, &size, sizeof(int), 0);
-
-    //Send Picture as Byte Array
-    stat=recv(socket, &read_buffer , 255, 0);
-    while (stat < 0) { //Read while we get errors that are due to signals.
-       stat = recv(socket, &read_buffer , 255, 0);
-    } 
-
-    while(!feof(picture)) {
-       //Read from the file into our send buffer
-       read_size = fread(send_buffer, 1, sizeof(send_buffer)-1, picture);
-
-       //Send data through our socket
-       stat = send(socket, send_buffer, read_size, 0);
-       while (stat < 0){
-         stat = send(socket, send_buffer, read_size, 0);
-       }
-
-       //Zero out our send buffer
-       clear_message(send_buffer, sizeof(send_buffer));
-    }
-}
-
 void *rec_func(void *param) {
     int fd = *(int *)param;
     char message[512] = {0};
     while (1) {
 		int receive = recv(fd, message, 512, 0);
+        
         if (receive > 0) {
-            printf("%s\n", message);
-            printf("> ");
-            fflush(stdout);
+            printf("|%s|\n", message);
+            if(mx_strcmp(mx_strtrim(message), "add chat") == 0) {
+                t_chat *new_chat = (t_chat *)malloc(sizeof(t_chat));
+                //printf("%s geting chat\n", cur_client->login);
+                char buf_name[256] = {0};
+                receive = recv_all(fd, buf_name, 256);
+                while (receive < 0) {
+                    receive = recv_all(fd, buf_name, 256);
+                }
+                receive = recv(fd, &new_chat->count_users, sizeof(int), 0);
+                while (receive < 0) {
+                    receive = recv(fd, &new_chat->count_users, sizeof(int), 0);
+                }
+                for (int i = 0; i < new_chat->count_users; i++) {
+                    char buf[32] = {0};
+                    receive = recv_all(fd, buf, 32);
+                    while (receive < 0) {
+                        receive = recv_all(fd, buf, 32);
+                    }
+                    mx_push_back(&new_chat->users,mx_strdup(buf));
+                    clear_message(buf, 32);
+                }
+                mx_push_back(&cur_client->chats, new_chat);
+
+                /*
+                Дим, тут данные о новом чате приняты на клиент, добавляй на локальную бд
+                */
+
+                //printf("%s gets chat %s\n", cur_client->login, new_chat->name);
+                printf("> ");
+                fflush(stdout);
+            }
+            else {
+                printf("%s\n", message);
+                printf("> ");
+                fflush(stdout);
+            }
         } else if (receive == 0) {
             break;
         } else {
@@ -107,7 +129,7 @@ static void load_css(GtkCssProvider *provider, GtkWidget *widget, gint widg)
     }
 }
 
-static void activate(GtkApplication *application)
+/*static*/ void activate(GtkApplication *application)
 {
     GtkWidget *window;
     GtkWidget *button1, *entry_field1, *entry_field2, *logo;
@@ -159,12 +181,12 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     
-    GtkApplication *application;
+    /*GtkApplication *application;
     gint status;
     application = gtk_application_new("my.first.app", G_APPLICATION_FLAGS_NONE);
     g_signal_connect(application, "activate", G_CALLBACK(activate), NULL);
     status = g_application_run(G_APPLICATION(application), FALSE, NULL);
-
+    */
 
     // Переменные для авторизации
     char login[32];
@@ -240,12 +262,16 @@ int main(int argc, char *argv[]) {
     // Запуск потоков для приёма и отправки сообщений, будем смотреть. Может, придётся переделать под события из гтк
     pthread_t sender_th;
     pthread_t rec_th;
-    t_client cur_client = {
+    t_client cur = {
         .adr = adr,
         .cl_socket = fd,
-        .name = login
+        .login = login,
+        .chat_count = 0,
+        .chats = NULL,
+        .cur_chat =NULL
     };
-    pthread_create(&sender_th, NULL, sender_func, &cur_client);
+    cur_client = &cur;
+    pthread_create(&sender_th, NULL, sender_func, &cur);
     pthread_create(&rec_th, NULL, rec_func, &fd);
 
 
@@ -258,5 +284,5 @@ int main(int argc, char *argv[]) {
 
     close(fd);
 
-    return status;
+    return 0;//status;
 }

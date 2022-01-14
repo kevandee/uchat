@@ -10,23 +10,6 @@
 {
   background-color: rgb(22, 33, 44);
 }
-<<<<<<< HEAD
-.button_entry {
-  /*margin-left: 15%;
-  margin-top: 3%;
-  */
-  box-shadow: 0px 0px 0px 0px #f0f7fa;
-  background:linear-gradient(to bottom, rgb(245, 198, 131) 5%, rgb(237, 179, 97) 100%);
-  background-color:rgb(237, 179, 97);
-  border-radius:5px;
-  color:#ffffff;
-  font-family:Arial;
-  font-size:15px;
-  font-weight:bold;
-  padding:7px 24px;
-  text-decoration:none;
-  text-shadow:0px -1px 0px #5b6178;
-=======
 
 .button_login
 {
@@ -35,7 +18,6 @@
   font-size: 18px;
   font-weight: 700;
   color: #ffffff;
->>>>>>> 5f043e48afd5dc6578595fb068ff1d22b06fbe0d
 }
 
 .button_login:hover
