@@ -114,65 +114,123 @@ static void load_css(GtkCssProvider *provider, GtkWidget *widget, gint widg)
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
     if(widg == 0)
     {
-        gtk_style_context_add_class(context,"window_login");
+        gtk_style_context_add_class(context,"LOGIN_window");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
     else if(widg == 1)
     {
-        gtk_style_context_add_class(context,"button_login");
+        gtk_style_context_add_class(context,"LOGIN_main_box");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
-    else
+    else if(widg == 2)
     {
-        gtk_style_context_add_class(context,"fixed_login");
+        gtk_style_context_add_class(context,"LOGIN_logo_box");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    }
+    else if(widg == 3)
+    {
+        gtk_style_context_add_class(context,"LOGIN_button");
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    }
+    else if(widg == 4)
+    {
+        gtk_style_context_add_class(context,"LOGIN_text_under_logo");
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    }
+    else if(widg == 5)
+    {
+        gtk_style_context_add_class(context,"LOGIN_text_next_logo");
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);  
+    }
+    else if(widg == 6)
+    {
+        gtk_style_context_add_class(context,"LOGIN_create_account_text");
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);  
+    }
+    else if(widg == 7)
+    {
+        gtk_style_context_add_class(context,"LOGIN_create_account_button");
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);  
     }
 }
 
 /*static*/ void activate(GtkApplication *application)
 {
-    GtkWidget *window;
-    GtkWidget *button1, *entry_field1, *entry_field2, *logo;
-    GtkWidget *fixed;
-    GtkCssProvider *provider;
+    GtkWidget *LOGIN_window;
+    GtkWidget *LOGIN_main_box, *LOGIN_logo_box, *LOGIN_button_box, *LOGIN_create_account_box;
+    GtkWidget *LOGIN_button, *LOGIN_logo, *LOGIN_text_next_logo, *LOGIN_text_under_logo, *LOGIN_entry_field1, *LOGIN_entry_field2, *LOGIN_create_account_text, *LOGIN_create_account_button;
+    GtkCssProvider *provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_path(provider,"client/style.css");
 
-    window = gtk_application_window_new (application);
-    gtk_window_set_title (GTK_WINDOW (window), "Window");
-    gtk_window_set_default_size (GTK_WINDOW (window), 1200, 760);
-    gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
+    LOGIN_window = gtk_application_window_new (application);
+    gtk_window_set_title (GTK_WINDOW (LOGIN_window), "Swiftchat");
+    gtk_window_set_default_size (GTK_WINDOW (LOGIN_window), 1200, 760);
+    gtk_window_set_resizable (GTK_WINDOW (LOGIN_window), FALSE);
 
-    fixed = gtk_fixed_new();
-    button1 = gtk_button_new_with_label ("Log in");
-    g_signal_connect (button1, "clicked", G_CALLBACK (print_LogIn), NULL);
-    g_signal_connect_swapped (button1, "clicked", G_CALLBACK (gtk_window_destroy), window);
-    entry_field1 = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_field1),"Your login...");
-    entry_field2 = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_field2),"Your password...");
-    gtk_entry_set_visibility(GTK_ENTRY(entry_field2),FALSE);
-    gtk_button_set_has_frame(GTK_BUTTON(button1), FALSE);
-    logo = gtk_image_new_from_file("Logo.png");
-
-    gtk_fixed_put(GTK_FIXED(fixed), logo, 489, 107);
-    gtk_fixed_put(GTK_FIXED(fixed), entry_field1, 445, 338);
-    gtk_widget_set_size_request(entry_field1, 310, 36);
-    gtk_fixed_put(GTK_FIXED(fixed), entry_field2, 445, 384);
-    gtk_widget_set_size_request(entry_field2, 310, 36);
-    gtk_fixed_put(GTK_FIXED(fixed), button1, 480, 450);
-    gtk_widget_set_size_request(button1, 240, 55);
-    gtk_window_set_child (GTK_WINDOW (window), fixed);
+    LOGIN_main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_size_request(GTK_WIDGET(LOGIN_main_box), 430, 0);
+    gtk_widget_set_halign(GTK_WIDGET(LOGIN_main_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(LOGIN_main_box), GTK_ALIGN_CENTER);
+    LOGIN_logo_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0); //бокс с логотипом и текстом
+    gtk_widget_set_halign(GTK_WIDGET(LOGIN_logo_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(LOGIN_logo_box), GTK_ALIGN_CENTER);
+    LOGIN_button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0); //бокс с кнопкой
+    gtk_widget_set_halign(GTK_WIDGET(LOGIN_button_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(LOGIN_button_box), GTK_ALIGN_CENTER);
+    LOGIN_create_account_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0); //бокс с кнопкой
+    gtk_widget_set_halign(GTK_WIDGET(LOGIN_create_account_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(LOGIN_create_account_box), GTK_ALIGN_CENTER);
 
 
-    provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(provider),"client/style.css");
-    load_css(provider, window, 0);
-    load_css(provider, button1, 1);
-    load_css(provider, fixed, 2);
-    g_object_unref(provider);
-    gtk_widget_show (window);
+    LOGIN_logo = gtk_image_new_from_file("client/Logo.png");
+    gtk_widget_set_size_request(LOGIN_logo, 40, 40);
+    gtk_box_append (GTK_BOX(LOGIN_logo_box), LOGIN_logo);
+    LOGIN_text_next_logo = gtk_label_new("Swiftchat");
+    gtk_widget_set_name(GTK_WIDGET(LOGIN_text_next_logo), "login_label");
+    gtk_box_append (GTK_BOX(LOGIN_logo_box), LOGIN_text_next_logo);
+    LOGIN_button = gtk_button_new_with_label ("Log in");
+    gtk_widget_set_size_request(LOGIN_button, 180, 43);
+    gtk_box_append (GTK_BOX(LOGIN_button_box), LOGIN_button);
+    g_signal_connect (LOGIN_button, "clicked", G_CALLBACK (print_LogIn), NULL);
+    LOGIN_create_account_text = gtk_label_new("New here? ");
+    gtk_box_append (GTK_BOX(LOGIN_create_account_box), LOGIN_create_account_text);
+    LOGIN_create_account_button = gtk_label_new("Create an account");
+    gtk_box_append (GTK_BOX(LOGIN_create_account_box), LOGIN_create_account_button);
+
+//-----------------------------------------main_box--------------------------------------------------//
+    LOGIN_entry_field1 = gtk_entry_new();
+    gtk_widget_set_size_request(LOGIN_entry_field1, 232, 39);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field1),"Your login...");
+    LOGIN_entry_field2 = gtk_entry_new();
+    gtk_widget_set_size_request(LOGIN_entry_field2, 232, 39);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field2),"Your password...");
+    gtk_entry_set_visibility(GTK_ENTRY(LOGIN_entry_field2),FALSE);
+    LOGIN_text_under_logo= gtk_label_new("Log in to your account to continue");
+    gtk_widget_set_name(GTK_WIDGET(LOGIN_text_under_logo), "login_label");
+
+    gtk_box_append (GTK_BOX(LOGIN_main_box), LOGIN_logo_box);
+    gtk_box_append (GTK_BOX(LOGIN_main_box), LOGIN_text_under_logo);
+    gtk_box_append (GTK_BOX(LOGIN_main_box), LOGIN_entry_field1);
+    gtk_box_append (GTK_BOX(LOGIN_main_box), LOGIN_entry_field2);
+    gtk_box_append (GTK_BOX(LOGIN_main_box), LOGIN_button_box);
+    gtk_box_append (GTK_BOX(LOGIN_main_box), LOGIN_create_account_box);
+    gtk_box_set_spacing (GTK_BOX(LOGIN_main_box), 5);
+//-----------------------------------------main_box--------------------------------------------------//
+    gtk_window_set_child (GTK_WINDOW (LOGIN_window), LOGIN_main_box);
+
+
+    load_css(provider, LOGIN_window, 0);
+    load_css(provider, LOGIN_main_box, 1);
+    load_css(provider, LOGIN_logo_box, 2);
+    load_css(provider, LOGIN_button, 3);
+    load_css(provider, LOGIN_text_under_logo, 4);
+    load_css(provider, LOGIN_text_next_logo, 5);
+    load_css(provider, LOGIN_create_account_text, 6);
+    load_css(provider, LOGIN_create_account_button, 7);
+
+    gtk_widget_show (LOGIN_window);
 
 }
-
 
 int main(int argc, char *argv[]) {
     (void)argv;

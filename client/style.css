@@ -1,33 +1,60 @@
-
-/*LOGIN FORM*/
-
-/*main window*/
-.window_login{
-  background-color: rgb(22, 33, 44);
-}
-
-.fixed_login
+.LOGIN_window
 {
-  background-color: rgb(22, 33, 44);
+font-family: cursive;
+background-color: rgb(23, 33, 43);
+opacity: 1;
+}
+/*контейнер с полями ввода и кнопками (центрирование и оцтупы)*/
+.LOGIN_main_box {
+  background-color: rgb(33, 45, 57);
+  background-size: 50px 50px;
+  border-radius: 15px;
+  padding: 100px 100px 100px 100px;
+  color: white;
 }
 
-.button_login
+.LOGIN_text_next_logo
 {
-  background:rgb(236, 179, 107);
-  font-family: 'Helvetica Neue';
-  font-size: 18px;
-  font-weight: 700;
-  color: #ffffff;
+  margin-top: 5px;
+  color: white;
+  font-size: 30px;
 }
 
-.button_login:hover
+.LOGIN_button {
+  margin-top: 15px;
+  box-shadow: 0px 0px 0px 0px #f0f7fa;
+  background:linear-gradient(to bottom, rgb(245, 198, 131) 5%, rgb(237, 179, 97) 100%);
+  background-color:rgb(237, 179, 97);
+  border-radius:5px;
+  color:#ffffff;
+  font-family:Arial;
+  font-size:15px;
+  font-weight:bold;
+  padding:7px 24px;
+  text-decoration:none;
+  text-shadow:0px -1px 0px #5b6178;
+}
+.LOGIN_button:hover {
+  background:linear-gradient(to bottom, rgb(237, 179, 97) 5%,rgb(245, 198, 131) 100%);
+  background-color:#019ad2;
+}
+
+.LOGIN_text_under_logo{
+  margin-bottom: 15px;
+}
+
+.LOGIN_create_account_button
 {
-  border: #ffffff;
+  font-size: 10px;
+  color: white;
 }
-
-
-
-
+.LOGIN_create_account_button:hover{
+  color: grey;
+}
+.LOGIN_create_account_text{
+    font-size: 10px;
+    color: white;
+}
 /*.button_entry:active {
   position:relative;
   top:1px;
