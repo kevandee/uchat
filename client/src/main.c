@@ -154,6 +154,16 @@ static void load_css(GtkCssProvider *provider, GtkWidget *widget, gint widg)
         gtk_style_context_add_class(context,"LOGIN_create_account_button");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);  
     }
+    else if(widg == 8)
+    {
+        gtk_style_context_add_class(context,"LOGIN_button_box");
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    }
+    else if(widg == 9)
+    {
+        gtk_style_context_add_class(context,"LOGIN_entry_field1");
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    }
 }
 
 GtkWidget *LOGIN_window;
@@ -190,14 +200,14 @@ GtkWidget *LOGIN_window;
     gtk_widget_set_valign(GTK_WIDGET(LOGIN_create_account_box), GTK_ALIGN_CENTER);
 
 
-    LOGIN_logo = gtk_image_new_from_file("client/Logo.png");
-    gtk_widget_set_size_request(LOGIN_logo, 40, 40);
+    LOGIN_logo = gtk_image_new_from_file("client/logo2.png");
+    gtk_widget_set_size_request(LOGIN_logo, 47, 47);
     gtk_box_append (GTK_BOX(LOGIN_logo_box), LOGIN_logo);
     LOGIN_text_next_logo = gtk_label_new("Swiftchat");
     gtk_widget_set_name(GTK_WIDGET(LOGIN_text_next_logo), "login_label");
     gtk_box_append (GTK_BOX(LOGIN_logo_box), LOGIN_text_next_logo);
     LOGIN_button = gtk_button_new_with_label ("Log in");
-    gtk_widget_set_size_request(LOGIN_button, 180, 43);
+    gtk_widget_set_size_request(LOGIN_button, 240, 55);
     gtk_box_append (GTK_BOX(LOGIN_button_box), LOGIN_button);
     g_signal_connect (LOGIN_button, "clicked", G_CALLBACK (print_LogIn), NULL);
     LOGIN_create_account_text = gtk_label_new("New here? ");
@@ -213,13 +223,13 @@ GtkWidget *LOGIN_window;
     
 //-----------------------------------------main_box--------------------------------------------------//
     LOGIN_entry_field1 = gtk_entry_new();
-    gtk_widget_set_size_request(LOGIN_entry_field1, 232, 39);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field1),"Your login...");
+    gtk_widget_set_size_request(LOGIN_entry_field1, 310, 36);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field1),"Username");
     LOGIN_entry_field2 = gtk_entry_new();
-    gtk_widget_set_size_request(LOGIN_entry_field2, 232, 39);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field2),"Your password...");
+    gtk_widget_set_size_request(LOGIN_entry_field2, 310, 36);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field2),"Password");
     gtk_entry_set_visibility(GTK_ENTRY(LOGIN_entry_field2),FALSE);
-    LOGIN_text_under_logo= gtk_label_new("Log in to your account to continue");
+    LOGIN_text_under_logo= gtk_label_new("LOG IN TO YOUR ACCOUNT TO CONTINUE");
     gtk_widget_set_name(GTK_WIDGET(LOGIN_text_under_logo), "login_label");
 
     gtk_box_append (GTK_BOX(LOGIN_main_box), LOGIN_logo_box);
@@ -228,7 +238,7 @@ GtkWidget *LOGIN_window;
     gtk_box_append (GTK_BOX(LOGIN_main_box), LOGIN_entry_field2);
     gtk_box_append (GTK_BOX(LOGIN_main_box), LOGIN_button_box);
     gtk_box_append (GTK_BOX(LOGIN_main_box), LOGIN_create_account_box);
-    gtk_box_set_spacing (GTK_BOX(LOGIN_main_box), 5);
+    gtk_box_set_spacing (GTK_BOX(LOGIN_main_box), 0);
 //-----------------------------------------main_box--------------------------------------------------//
     gtk_window_set_child (GTK_WINDOW (LOGIN_window), LOGIN_main_box);
 
@@ -241,6 +251,8 @@ GtkWidget *LOGIN_window;
     load_css(provider, LOGIN_text_next_logo, 5);
     load_css(provider, LOGIN_create_account_text, 6);
     load_css(provider, LOGIN_create_account_button, 7);
+    load_css(provider, LOGIN_button_box, 8);
+    load_css(provider, LOGIN_entry_field1, 9);
 
     gtk_widget_show (LOGIN_window);
 
@@ -252,13 +264,13 @@ int main(int argc, char *argv[]) {
         mx_printerr("usage: ./uchat <server IP> <port>\n");
         return -1;
     }
-    /*
+    
     GtkApplication *application;
     gint status;
     application = gtk_application_new("my.first.app", G_APPLICATION_FLAGS_NONE);
     g_signal_connect(application, "activate", G_CALLBACK(activate), NULL);
     status = g_application_run(G_APPLICATION(application), FALSE, NULL);
-    */
+    
 
     // Переменные для авторизации
     char login[32];
