@@ -47,4 +47,9 @@ typedef struct s_client {
 void send_image(int socket, char *file);
 int recv_image(int socket, char *path);
 
+int send_all(int sockfd, const char *buf, int len);
+int recv_all(int sockfd, char * buf, int len);
+
+void clear_message(char *mes, const int size);
+
 #endif

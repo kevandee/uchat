@@ -19,7 +19,7 @@
 
 #include <gtk/gtk.h>
 
-extern t_client *cur_client;
+extern t_client cur_client;
 
 void clear_message(char *mes, const int size);
 

@@ -1,26 +1,9 @@
 #include "../inc/uch_client.h"
 
-t_client *cur_client;
-
-int recv_all(int sockfd, char * buf, int len)
-{
-    ssize_t n;
-
-    while (len > 0)
-    {
-        n = recv(sockfd, buf, len, 0);
-        if (n <= 0)
-            return n;
-        buf += n;
-        len -= n;
-    }
-
-    return 1;
-}
+t_client cur_client;
 
 void *sender_func(void *param) {
     t_client *cur_client = (t_client *)param;
-    //char message[512];
     char *message = (char *)malloc(512);
     char buf[512 + 32];
     fseek(stdin,0,SEEK_END);
@@ -29,7 +12,6 @@ void *sender_func(void *param) {
         fflush(stdout);
         size_t len;
         getline(&message, &len, stdin);
-        //scanf("%s", message);
         message = mx_strtrim(message);
         if (mx_strcmp(message, "users") == 0) {
             send(cur_client->cl_socket, message, mx_strlen(message) - 1, 0);
@@ -39,7 +21,6 @@ void *sender_func(void *param) {
             break;
         }
         else {
-            //sprintf(buf, "%s: %s\n", cur_client->login, message);
             send(cur_client->cl_socket, message, mx_strlen(message), 0);
         }
         clear_message(message, 512);
@@ -78,7 +59,7 @@ void *rec_func(void *param) {
                     mx_push_back(&new_chat->users,mx_strdup(buf));
                     clear_message(buf, 32);
                 }
-                mx_push_back(&cur_client->chats, new_chat);
+                mx_push_back(&cur_client.chats, new_chat);
 
                 /*
                 Дим, тут данные о новом чате приняты на клиент, добавляй на локальную бд
@@ -102,13 +83,6 @@ void *rec_func(void *param) {
     }
     return NULL;
 
-}
-
-
-
-static void print_LogIn()
-{
-  g_print ("Welcome, user!\n");
 }
 
 static void load_css(GtkCssProvider *provider, GtkWidget *widget, gint widg)
@@ -166,16 +140,20 @@ static void load_css(GtkCssProvider *provider, GtkWidget *widget, gint widg)
     }
 }
 
-GtkWidget *LOGIN_window;
+GtkWidget *LOGIN_window, *LOGIN_entry_field1, *LOGIN_entry_field2;
 
-//static void hide_all() {
-    //gtk_window_destroy(LOGIN_window);
-//}
+
+static void print_LogIn() {
+  cur_client.login = mx_strdup(gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY (LOGIN_entry_field1))));
+  cur_client.passwd = mx_strdup(gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY (LOGIN_entry_field2))));
+
+  printf("Hello, %s with password %s\n", cur_client.login, cur_client.passwd);
+}
 
 /*static*/ void activate(GtkApplication *application)
 {
     GtkWidget *LOGIN_main_box, *LOGIN_logo_box, *LOGIN_button_box, *LOGIN_create_account_box;
-    GtkWidget *LOGIN_button, *LOGIN_logo, *LOGIN_text_next_logo, *LOGIN_text_under_logo, *LOGIN_entry_field1, *LOGIN_entry_field2, *LOGIN_create_account_text, *LOGIN_create_account_button;
+    GtkWidget *LOGIN_button, *LOGIN_logo, *LOGIN_text_next_logo, *LOGIN_text_under_logo, /**LOGIN_entry_field1, *LOGIN_entry_field2,*/ *LOGIN_create_account_text, *LOGIN_create_account_button;
     GtkCssProvider *provider = gtk_css_provider_new();
     gtk_css_provider_load_from_path(provider,"client/style.css");
 
@@ -349,12 +327,13 @@ int main(int argc, char *argv[]) {
     t_client cur = {
         .adr = adr,
         .cl_socket = fd,
-        .login = login,
+        .login = NULL,
+        .passwd = NULL,
         .chat_count = 0,
         .chats = NULL,
         .cur_chat =NULL
     };
-    cur_client = &cur;
+    cur_client = cur;
     pthread_create(&sender_th, NULL, sender_func, &cur);
     pthread_create(&rec_th, NULL, rec_func, &fd);
 

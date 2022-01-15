@@ -212,7 +212,7 @@ void *client_work(void *param) {
         else if (mes_stat > 0) {
             printf("Message Received from %s | %s |\n", login, message);
 		    if(cur->cur_chat)
-                send_message(message, login, &cur->cur_chat->users);
+                send_message(message, login, cur->cur_chat);
             else
                 send_message(message, login, NULL);
             clear_message(message, MAX_LEN + NAME_LEN);

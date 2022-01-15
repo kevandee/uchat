@@ -1,4 +1,4 @@
-#include "../inc/uch_client.h"
+#include "../inc/utils.h"
 
 void clear_message(char *mes, const int size) {
     for (int i = 0; i < size; i++) {
