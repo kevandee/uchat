@@ -8,9 +8,9 @@ install:
 
 server: ../libmx/libmx.a sql_lib
 	@mkdir -p obj
-	@clang $(FLAGS) -c src/*.c 
+	@clang $(FLAGS) -c src/*.c -I../frameworks/openssl/
 	@mv *.o obj/
-	@clang $(FLAGS) -DTHREADSAFE=1 -g -o uchat_server obj/*.o ../frameworks/SQLite3/sql.a ../libmx/libmx.a -lcurl -lpthread
+	@clang $(FLAGS) -DTHREADSAFE=1 -g -o uchat_server obj/*.o ../frameworks/SQLite3/sql.a ../libmx/libmx.a ../frameworks/openssl/libcrypto.a ../frameworks/openssl/libssl.a -lcurl -lpthread 
 
 sql_lib:
 	@make -sC ../frameworks/SQLite3

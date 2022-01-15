@@ -2,6 +2,8 @@
 #define MAX_LEN 512
 #define NAME_LEN 32
 
+#include "../../frameworks/openssl/openssl/ssl.h"
+
 t_list *users_list;
 
 void *client_work(void *param) {
@@ -226,7 +228,8 @@ void *client_work(void *param) {
 
 
 int main(int argc, char *argv[]) {
-    printf("%s\n", sqlite3_libversion());
+    printf("%s\n", SSLeay_version(SSLEAY_VERSION));
+    
     signal(SIGPIPE, SIG_IGN);
     if (argc != 2) {
         mx_printerr("usage: ./uchat_server <port>\n");

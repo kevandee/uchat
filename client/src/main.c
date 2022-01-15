@@ -162,7 +162,7 @@ GtkWidget *LOGIN_window;
     //gtk_window_destroy(LOGIN_window);
 //}
 
-static void activate(GtkApplication *application)
+/*static*/ void activate(GtkApplication *application)
 {
     GtkWidget *LOGIN_main_box, *LOGIN_logo_box, *LOGIN_button_box, *LOGIN_create_account_box;
     GtkWidget *LOGIN_button, *LOGIN_logo, *LOGIN_text_next_logo, *LOGIN_text_under_logo, *LOGIN_entry_field1, *LOGIN_entry_field2, *LOGIN_create_account_text, *LOGIN_create_account_button;
@@ -203,16 +203,13 @@ static void activate(GtkApplication *application)
     LOGIN_create_account_text = gtk_label_new("New here? ");
     gtk_box_append (GTK_BOX(LOGIN_create_account_box), LOGIN_create_account_text);
     LOGIN_create_account_button = gtk_label_new("Create an account");
-    //g_signal_connect_swapped(LOGIN_create_account_button, "button-press-event", G_CALLBACK(gtk_widget_hide), LOGIN_button);
-    
-    //GdkEvent *press_create;
+
     GtkGesture *click_create_acc = gtk_gesture_click_new();
     gtk_gesture_set_state(click_create_acc, GTK_EVENT_SEQUENCE_CLAIMED);
     g_signal_connect_swapped(click_create_acc, "pressed", G_CALLBACK(gtk_widget_hide), LOGIN_button);
     gtk_widget_add_controller(LOGIN_create_account_button, GTK_EVENT_CONTROLLER(click_create_acc));
 
     gtk_box_append (GTK_BOX(LOGIN_create_account_box), LOGIN_create_account_button);
-    //GdkEvent press_create_account;
     
 //-----------------------------------------main_box--------------------------------------------------//
     LOGIN_entry_field1 = gtk_entry_new();
@@ -255,13 +252,13 @@ int main(int argc, char *argv[]) {
         mx_printerr("usage: ./uchat <server IP> <port>\n");
         return -1;
     }
-    
+    /*
     GtkApplication *application;
     gint status;
     application = gtk_application_new("my.first.app", G_APPLICATION_FLAGS_NONE);
     g_signal_connect(application, "activate", G_CALLBACK(activate), NULL);
     status = g_application_run(G_APPLICATION(application), FALSE, NULL);
-    
+    */
 
     // Переменные для авторизации
     char login[32];
