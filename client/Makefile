@@ -10,7 +10,7 @@ client: ../libmx/libmx.a sql_lib ../utils/utils.a
 	@mkdir -p obj
 	@clang $(FLAGS) `pkg-config --cflags gtk4`    -c src/*.c  -I../frameworks/openssl/
 	@mv *.o obj/
-	@clang $(FLAGS) `pkg-config --cflags gtk4` -g -o uchat obj/*.o  `pkg-config --libs gtk4` ../utils/utils.a ../libmx/libmx.a ../frameworks/SQLite3/sql.a ../frameworks/openssl/libcrypto.a ../frameworks/openssl/libssl.a -lpthread 
+	@clang $(FLAGS) `pkg-config --cflags gtk4`  -g -o uchat obj/*.o  `pkg-config --libs gtk4` ../utils/utils.a ../libmx/libmx.a ../frameworks/SQLite3/sql.a ../frameworks/openssl/libcrypto.a ../frameworks/openssl/libssl.a -lpthread 
 sql_lib:
 	@make -sC ../frameworks/SQLite3
 

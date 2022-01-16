@@ -144,6 +144,56 @@ static void load_css(GtkCssProvider *provider, GtkWidget *widget, gint widg)
     }
 }
 
+static void draw_circle(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpointer data) {
+    (void)widget;
+    (void)w;
+    (void)h;
+
+    cairo_surface_t *image = (cairo_surface_t *)data;
+
+    cairo_set_source_surface (cr, image, 1, 1);
+    cairo_arc(cr, 328, 328, 300, 0, 2 * M_PI);
+    cairo_clip(cr);
+    cairo_paint(cr);
+    //cairo_fill(cr);
+
+    //return FALSE;
+}
+
+static void main_chat(GtkWidget *window) {
+    GtkWidget *main_box = NULL;//, *logo_box = NULL,  *logo = NULL, *text_next_logo = NULL;
+    main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_size_request(GTK_WIDGET(main_box), 1100, 0);
+    gtk_widget_set_halign(GTK_WIDGET(main_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(main_box), GTK_ALIGN_CENTER);
+    
+   // draw circle frow image
+
+    GtkWidget *darea = NULL;
+    gint width, height;
+
+    cairo_surface_t *image = cairo_image_surface_create_from_png("test_circle.png");
+    width = cairo_image_surface_get_width(image);
+    height = cairo_image_surface_get_height(image);
+    printf("%d %d\n", width, height);
+
+
+    darea = gtk_drawing_area_new();
+    gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 200);
+    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 200);
+    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle, image, NULL);
+    
+    //gtk_box_append (GTK_BOX(main_box), logo_box);
+    gtk_box_append (GTK_BOX(main_box), darea);
+    gtk_box_set_spacing (GTK_BOX(main_box), 0);
+
+    gtk_window_set_child(GTK_WINDOW(window), main_box);
+
+
+
+    gtk_widget_show(window);
+}
+
 static void send_login(GtkWidget *widget, gpointer data) {
     (void)widget;
     GtkWidget **entry_field = (GtkWidget **)data;
@@ -167,8 +217,11 @@ static void send_login(GtkWidget *widget, gpointer data) {
         // ошибка
         mx_printerr("login err\n");
     }
-
+    GtkWidget *child = gtk_window_get_child(GTK_WINDOW (entry_field[2]));
+    
+    gtk_widget_unparent(child);
     // можем заходить в чат, вход успешен
+    main_chat(entry_field[2]);
 }
 
 static void activate(GtkApplication *application)
@@ -231,17 +284,10 @@ static void activate(GtkApplication *application)
     LOGIN_text_under_logo= gtk_label_new("LOG IN TO YOUR ACCOUNT TO CONTINUE");
     gtk_widget_set_name(GTK_WIDGET(LOGIN_text_under_logo), "login_label");
 
-    GtkWidget **entry_arr = (GtkWidget **)malloc(2 * sizeof(GtkWidget *));//{LOGIN_entry_field1, LOGIN_entry_field2};
+    GtkWidget **entry_arr = (GtkWidget **)malloc(3 * sizeof(GtkWidget *));//{LOGIN_entry_field1, LOGIN_entry_field2};
     entry_arr[0] = LOGIN_entry_field1;
     entry_arr[1] = LOGIN_entry_field2;
-
-    if (!entry_arr[0]) {
-        printf("1\n");
-    }
-
-    if (!entry_arr[1]) {
-        printf("2\n");
-    }
+    entry_arr[2] = LOGIN_window;
 
     g_signal_connect(LOGIN_button, "clicked", G_CALLBACK (send_login), entry_arr);
 
