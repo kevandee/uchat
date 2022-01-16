@@ -32,7 +32,7 @@ void *client_work(void *param) {
 
             return NULL;
         } else{
-            cur->login=mx_strdup(login);
+            cur->login=mx_strtrim(login);
         }
 
         //passwd
@@ -44,7 +44,7 @@ void *client_work(void *param) {
             return NULL;
 
         } else{
-            cur->passwd=mx_strdup(passwd);
+            cur->passwd=mx_strtrim(passwd);
         }
         //recv_jpeg(cur->cl_socket, "received.jpg");
         //DB SWITH
@@ -113,7 +113,7 @@ void *client_work(void *param) {
             //get_client_data(&cur);
             break;
     }
-    cur->chats = NULL;
+
     
     send(cur->cl_socket, &err_msg,sizeof(bool), 0);
     sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
@@ -211,10 +211,12 @@ void *client_work(void *param) {
         }
         else if (mes_stat > 0) {
             printf("Message Received from %s | %s |\n", login, message);
-		    if(cur->cur_chat)
-                send_message(message, login, cur->cur_chat);
-            else
-                send_message(message, login, NULL);
+		    if(cur->cur_chat){
+                send_message(message, cur->login, cur->cur_chat);
+            }
+            else {
+                send_message(message, cur->login, NULL);
+            }
             clear_message(message, MAX_LEN + NAME_LEN);
         }
         
@@ -268,12 +270,15 @@ int main(int argc, char *argv[]) {
         new_client->login = NULL;
         new_client->passwd = NULL;
         new_client->id = client_id;
+        new_client->chats = NULL;
+        new_client->cur_chat = NULL;
+
         printf("id %d\n", client_id);
         
         client_id++;
         mx_push_back(&users_list, new_client);
 
-        pthread_create(&thread, NULL, client_work, (void *)new_client);
+        pthread_create(&thread, NULL, client_work, new_client);
         sleep(1);
     }
 

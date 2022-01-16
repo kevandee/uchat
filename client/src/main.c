@@ -3,7 +3,7 @@
 t_client cur_client;
 
 void *sender_func(void *param) {
-    t_client *cur_client = (t_client *)param;
+    (void)param;
     char *message = (char *)malloc(512);
     char buf[512 + 32];
     fseek(stdin,0,SEEK_END);
@@ -14,14 +14,14 @@ void *sender_func(void *param) {
         getline(&message, &len, stdin);
         message = mx_strtrim(message);
         if (mx_strcmp(message, "users") == 0) {
-            send(cur_client->cl_socket, message, mx_strlen(message) - 1, 0);
+            send(cur_client.serv_fd, message, mx_strlen(message) - 1, 0);
         }
         else if (mx_strcmp(message, "exit") == 0) {
-            send(cur_client->cl_socket, message, 4, 0);
+            send(cur_client.serv_fd, message, 4, 0);
             break;
         }
         else {
-            send(cur_client->cl_socket, message, mx_strlen(message), 0);
+            send(cur_client.serv_fd, message, mx_strlen(message), 0);
         }
         clear_message(message, 512);
         clear_message(buf, 512 + 32);
@@ -31,7 +31,8 @@ void *sender_func(void *param) {
 }
 
 void *rec_func(void *param) {
-    int fd = *(int *)param;
+    int fd = cur_client.serv_fd;
+    (void)param;
     char message[512] = {0};
     while (1) {
 		int receive = recv(fd, message, 512, 0);
@@ -40,12 +41,15 @@ void *rec_func(void *param) {
             printf("|%s|\n", message);
             if(mx_strcmp(mx_strtrim(message), "add chat") == 0) {
                 t_chat *new_chat = (t_chat *)malloc(sizeof(t_chat));
+                new_chat->messages = NULL;
+                new_chat->users = NULL;
                 //printf("%s geting chat\n", cur_client->login);
                 char buf_name[256] = {0};
                 receive = recv_all(fd, buf_name, 256);
                 while (receive < 0) {
                     receive = recv_all(fd, buf_name, 256);
                 }
+                mx_strcpy(new_chat->name, buf_name);
                 receive = recv(fd, &new_chat->count_users, sizeof(int), 0);
                 while (receive < 0) {
                     receive = recv(fd, &new_chat->count_users, sizeof(int), 0);
@@ -140,20 +144,38 @@ static void load_css(GtkCssProvider *provider, GtkWidget *widget, gint widg)
     }
 }
 
-GtkWidget *LOGIN_window, *LOGIN_entry_field1, *LOGIN_entry_field2;
+static void send_login(GtkWidget *widget, gpointer data) {
+    (void)widget;
+    GtkWidget **entry_field = (GtkWidget **)data;
 
+    cur_client.login = mx_strdup(gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY (entry_field[0]))));
+    cur_client.passwd = mx_strdup(gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY (entry_field[1]))));
 
-static void print_LogIn() {
-  cur_client.login = mx_strdup(gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY (LOGIN_entry_field1))));
-  cur_client.passwd = mx_strdup(gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY (LOGIN_entry_field2))));
+    char message[32] = {0};
+    // Отправка данных для авторизации на сервер
+    send(cur_client.serv_fd, "i", 1, 0);
+    sprintf(message, "%s", cur_client.login);
+    send(cur_client.serv_fd, message, 32, 0);
+    clear_message(message, 32);
+    sprintf(message, "%s", cur_client.passwd);
+    send(cur_client.serv_fd, message, 16, 0);
 
-  printf("Hello, %s with password %s\n", cur_client.login, cur_client.passwd);
+    bool err_aut;
+    recv(cur_client.serv_fd, &err_aut, sizeof(bool), 0); // Ожидание ответа от сервера об успешности входа или регистрации
+    
+    if (err_aut) {
+        // ошибка
+        mx_printerr("login err\n");
+    }
+
+    // можем заходить в чат, вход успешен
 }
 
-/*static*/ void activate(GtkApplication *application)
+static void activate(GtkApplication *application)
 {
-    GtkWidget *LOGIN_main_box, *LOGIN_logo_box, *LOGIN_button_box, *LOGIN_create_account_box;
-    GtkWidget *LOGIN_button, *LOGIN_logo, *LOGIN_text_next_logo, *LOGIN_text_under_logo, /**LOGIN_entry_field1, *LOGIN_entry_field2,*/ *LOGIN_create_account_text, *LOGIN_create_account_button;
+    GtkWidget *LOGIN_window = NULL;
+    GtkWidget *LOGIN_main_box = NULL, *LOGIN_logo_box = NULL, *LOGIN_button_box = NULL, *LOGIN_create_account_box = NULL;
+    GtkWidget *LOGIN_button = NULL, *LOGIN_logo = NULL, *LOGIN_text_next_logo = NULL, *LOGIN_text_under_logo = NULL, *LOGIN_entry_field1 = NULL, *LOGIN_entry_field2 = NULL, *LOGIN_create_account_text = NULL, *LOGIN_create_account_button = NULL;
     GtkCssProvider *provider = gtk_css_provider_new();
     gtk_css_provider_load_from_path(provider,"client/style.css");
 
@@ -187,7 +209,6 @@ static void print_LogIn() {
     LOGIN_button = gtk_button_new_with_label ("Log in");
     gtk_widget_set_size_request(LOGIN_button, 240, 55);
     gtk_box_append (GTK_BOX(LOGIN_button_box), LOGIN_button);
-    g_signal_connect (LOGIN_button, "clicked", G_CALLBACK (print_LogIn), NULL);
     LOGIN_create_account_text = gtk_label_new("New here? ");
     gtk_box_append (GTK_BOX(LOGIN_create_account_box), LOGIN_create_account_text);
     LOGIN_create_account_button = gtk_label_new("Create an account");
@@ -209,6 +230,20 @@ static void print_LogIn() {
     gtk_entry_set_visibility(GTK_ENTRY(LOGIN_entry_field2),FALSE);
     LOGIN_text_under_logo= gtk_label_new("LOG IN TO YOUR ACCOUNT TO CONTINUE");
     gtk_widget_set_name(GTK_WIDGET(LOGIN_text_under_logo), "login_label");
+
+    GtkWidget **entry_arr = (GtkWidget **)malloc(2 * sizeof(GtkWidget *));//{LOGIN_entry_field1, LOGIN_entry_field2};
+    entry_arr[0] = LOGIN_entry_field1;
+    entry_arr[1] = LOGIN_entry_field2;
+
+    if (!entry_arr[0]) {
+        printf("1\n");
+    }
+
+    if (!entry_arr[1]) {
+        printf("2\n");
+    }
+
+    g_signal_connect(LOGIN_button, "clicked", G_CALLBACK (send_login), entry_arr);
 
     gtk_box_append (GTK_BOX(LOGIN_main_box), LOGIN_logo_box);
     gtk_box_append (GTK_BOX(LOGIN_main_box), LOGIN_text_under_logo);
@@ -242,7 +277,24 @@ int main(int argc, char *argv[]) {
         mx_printerr("usage: ./uchat <server IP> <port>\n");
         return -1;
     }
+    t_client cur = {
+        .login = NULL,
+        .passwd = NULL,
+        .chat_count = 0,
+        .chats = NULL,
+        .cur_chat =NULL
+    };
+    cur_client = cur;
     
+    // Подключение к серверу, тут ничего менять не надо
+    cur_client.serv_fd = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in adr = {0};
+    adr.sin_family = AF_INET;
+    adr.sin_port = htons(mx_atoi(argv[2]));
+    connect(cur_client.serv_fd, (struct sockaddr *)&adr, sizeof(adr));
+    inet_pton(AF_INET, argv[1], &adr.sin_addr); //"127.0.0.1"
+    cur_client.adr = adr;
+
     GtkApplication *application;
     gint status;
     application = gtk_application_new("my.first.app", G_APPLICATION_FLAGS_NONE);
@@ -251,10 +303,10 @@ int main(int argc, char *argv[]) {
     
 
     // Переменные для авторизации
-    char login[32];
-    char password[16];
-    char choise; // i - вход, u - регистрация
-
+    //char login[32];
+    //char password[16];
+    //char choise = 'i'; // i - вход, u - регистрация
+    /*
     printf("Sign in or sign up? (i / u)\n");
 
     scanf("%c", &choise); // все сканфы убрать, оставил для наглядности, как считывает в терминале
@@ -274,13 +326,7 @@ int main(int argc, char *argv[]) {
             break;
     }
 
-    // Подключение к серверу, тут ничего менять не надо
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in adr = {0};
-    adr.sin_family = AF_INET;
-    adr.sin_port = htons(mx_atoi(argv[2]));
-    connect(fd, (struct sockaddr *)&adr, sizeof(adr));
-    inet_pton(AF_INET, argv[1], &adr.sin_addr); //"127.0.0.1"
+    
 
     // Отправка данных для авторизации на сервер
     send(fd, &choise, 1, 0);
@@ -288,9 +334,9 @@ int main(int argc, char *argv[]) {
     send(fd, password, 16, 0);
     //printf("%c || %s || %s\n", choise, login, password);
     //char *jpeg = "testp.png";//"test.jpg";
-    //send_jpeg(fd, jpeg);
-    bool err_aut;
-    recv(fd, &err_aut, sizeof(bool), 0); // Ожидание ответа от сервера об успешности входа или регистрации
+    //send_jpeg(fd, jpeg);*/
+    /*bool err_aut;
+    recv(cur_client.serv_fd, &err_aut, sizeof(bool), 0); // Ожидание ответа от сервера об успешности входа или регистрации
 
     // Обработка ошибок от сервера, нужно ввести заново поля
     while (err_aut) {
@@ -314,38 +360,25 @@ int main(int argc, char *argv[]) {
                 break;
         }
         // Снова отправляем данные на сервер
-        send(fd, &choise, 1, 0);
-        send(fd, login, 32, 0);
-        send(fd, password, 16, 0);
-        recv(fd, &err_aut, sizeof(bool), 0);
+        send(cur_client.serv_fd, &choise, 1, 0);
+        send(cur_client.serv_fd, login, 32, 0);
+        send(cur_client.serv_fd, password, 16, 0);
+        recv(cur_client.serv_fd, &err_aut, sizeof(bool), 0);
     }
-
+    */
 
     // Запуск потоков для приёма и отправки сообщений, будем смотреть. Может, придётся переделать под события из гтк
     pthread_t sender_th;
     pthread_t rec_th;
-    t_client cur = {
-        .adr = adr,
-        .cl_socket = fd,
-        .login = NULL,
-        .passwd = NULL,
-        .chat_count = 0,
-        .chats = NULL,
-        .cur_chat =NULL
-    };
-    cur_client = cur;
-    pthread_create(&sender_th, NULL, sender_func, &cur);
-    pthread_create(&rec_th, NULL, rec_func, &fd);
-
-
-
-
+    
+    pthread_create(&sender_th, NULL, sender_func, &cur_client);
+    pthread_create(&rec_th, NULL, rec_func, &cur_client.serv_fd);
 
     //ожидание завершения потоков, если нужно добавить код, то добавлять до этих функций
     pthread_join(sender_th, NULL);
     pthread_join(rec_th, NULL);
 
-    close(fd);
+    close(cur_client.serv_fd);
 
     return 0;//status;
 }

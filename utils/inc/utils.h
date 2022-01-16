@@ -30,6 +30,8 @@ typedef struct s_message {
 }              t_message;
 
 typedef struct s_client {
+    int serv_fd;
+    
     struct sockaddr_in adr;
     int cl_socket;
 

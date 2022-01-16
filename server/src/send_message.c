@@ -15,7 +15,6 @@ void send_message(char *mes, char *sender, t_chat *chat) {
         users_tmp = chat->users;
     }
     while (users_tmp) {
-        printf("%s\n", (users_tmp->data));
         count++;
         if (!chat) {
             if (((t_client *)(users_tmp->data))->login && mx_strcmp(((t_client *)(users_tmp->data))->login, sender) != 0) {
