@@ -170,13 +170,32 @@ void *client_work(void *param) {
             } 
             new_chat->messages = NULL;
             new_chat->count_users = i;
-
-            /* 
-            Дим, вот тут нужно добавить новый чат в бд каждого юзера(все есть в линкед листе users), 
-            после чего он будет отправлен на клиенты
-            */
-
-
+            
+            //ADD TO TABLES CHAT AND MEMBERS
+            char *query = NULL;
+            char *sql_pattern = NULL;
+            sql_pattern = "INSERT INTO chats (name, members) VALUES ('%s', %d);";
+            asprintf(&query, sql_pattern, new_chat->name, new_chat->count_users);
+            int *data = sqlite3_exec_db(query, 2);
+            int c_id = data[0];
+            printf("c_id: %i\n", c_id);
+            t_list *temp_list = new_chat->users;
+            int admin = 1;
+            while (temp_list) {
+                int u_id = get_user_id ((char *)temp_list->data);
+                //printf("User: %s\n", temp_list->data);
+                //printf("User id: %s\n", u_id->data);
+                if (admin == 1) {
+                    sql_pattern = "INSERT INTO members (chat_id, user_id, admin) VALUES (%d, %d, TRUE);";
+                    admin = 0;
+                }
+                else {
+                    sql_pattern = "INSERT INTO members (chat_id, user_id) VALUES (%d, %d);";
+                }
+                asprintf(&query, sql_pattern, c_id, u_id);
+                sqlite3_exec_db(query, 2);
+                temp_list = temp_list->next;
+            }
 
             // отправка на клиенты
             pthread_mutex_lock(&send_mutex);
