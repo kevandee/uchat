@@ -179,8 +179,8 @@ static void main_chat(GtkWidget *window) {
 
 
     darea = gtk_drawing_area_new();
-    gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 200);
-    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 200);
+    gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 700);
+    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 700);
     gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle, image, NULL);
     
     //gtk_box_append (GTK_BOX(main_box), logo_box);
