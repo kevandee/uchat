@@ -23,4 +23,22 @@ extern t_client cur_client;
 
 void clear_message(char *mes, const int size);
 
+struct
+{
+    GtkWidget *LOGIN_menu;
+    GtkWidget *REGISTRATION_menu;
+}   t_auth;
+
+struct
+{
+    GtkWidget *main_window;
+    GtkCssProvider *provider;
+} t_screen;
+
+
+void chat_show_reg_screen();
+void load_css_auth(GtkCssProvider *provider, GtkWidget *widget, gint widg);
+void chat_show_auth_screen();
+void send_login(GtkWidget *widget, gpointer data);
+
 #endif
