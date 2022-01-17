@@ -92,7 +92,7 @@ void *rec_func(void *param) {
 static void load_css()
 {
     t_screen.provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(t_screen.provider,"client/style.css");
+    gtk_css_provider_load_from_path(t_screen.provider,"client/themes/dark.css");
 }
 
 static void draw_circle(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpointer data) {

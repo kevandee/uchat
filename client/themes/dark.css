@@ -1,0 +1,75 @@
+/*MAIN WINDOW*/
+.AUTH_window
+{
+  font-family: cursive;
+  background-color: rgb(22, 33, 44);
+  opacity: 1;
+}
+
+/*BOX WITH ALL CONTENT*/
+.AUTH_main_box
+{
+  background-color: rgb(33, 45, 56);
+  background-size: 50px 50px;
+  border-radius: 15px;
+  padding: 80px 85px 85px 80px;
+  color: white;
+}
+
+/*SWIFTCHAT TEXT-LOGO*/
+.AUTH_text_next_logo
+{
+  margin-left: 5px;
+  color: white;
+  font-weight:700;
+  font-size: 40px;
+  font-family: 'Helvetica Neue';
+}
+
+/*TEXT UNDER LOGO*/
+.AUTH_text_under_logo{
+  color: rgb(165, 165, 165);
+  padding-top: 5px;
+}
+
+/*MAIN AUTH BUTTON*/
+.AUTH_button {
+  background:rgb(236, 179, 101);
+  font-family: 'Helvetica Neue';
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  border: 10px;
+}
+
+/*MAIN AUTH BUTTON HOVER*/
+.AUTH_button:hover {
+  background:rgb(237, 168, 74);
+}
+
+/*MAIN LOGO BOX (MARGINS)*/
+.AUTH_button_box
+{
+  margin-top: 30px;
+  margin-bottom: 8px;
+}
+
+/*SIGN UP BUTTON*/
+.AUTH_create_account_button
+{
+  font-size: 13px;
+  color: white;
+}
+
+/*SIGN UP BUTTON HOVER*/
+.AUTH_create_account_button:hover{
+  text-decoration: underline;
+}
+
+/*TEXT NEAR SIGN UP BUTTON*/
+.AUTH_create_account_text{
+  font-size: 13px;
+  color: rgb(165, 165, 165);
+}
+
+

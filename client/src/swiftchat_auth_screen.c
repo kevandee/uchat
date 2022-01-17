@@ -5,52 +5,52 @@ void load_css_auth(GtkCssProvider *provider, GtkWidget *widget, gint widg)
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
     if(widg == 0)
     {
-        gtk_style_context_add_class(context,"LOGIN_window");
+        gtk_style_context_add_class(context,"AUTH_window");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
     else if(widg == 1)
     {
-        gtk_style_context_add_class(context,"LOGIN_main_box");
+        gtk_style_context_add_class(context,"AUTH_main_box");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
     else if(widg == 2)
     {
-        gtk_style_context_add_class(context,"LOGIN_logo_box");
+        gtk_style_context_add_class(context,"AUTH_logo_box");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
     else if(widg == 3)
     {
-        gtk_style_context_add_class(context,"LOGIN_button");
+        gtk_style_context_add_class(context,"AUTH_button");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
     else if(widg == 4)
     {
-        gtk_style_context_add_class(context,"LOGIN_text_under_logo");
+        gtk_style_context_add_class(context,"AUTH_text_under_logo");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
     else if(widg == 5)
     {
-        gtk_style_context_add_class(context,"LOGIN_text_next_logo");
+        gtk_style_context_add_class(context,"AUTH_text_next_logo");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);  
     }
     else if(widg == 6)
     {
-        gtk_style_context_add_class(context,"LOGIN_create_account_text");
+        gtk_style_context_add_class(context,"AUTH_create_account_text");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);  
     }
     else if(widg == 7)
     {
-        gtk_style_context_add_class(context,"LOGIN_create_account_button");
+        gtk_style_context_add_class(context,"AUTH_create_account_button");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);  
     }
     else if(widg == 8)
     {
-        gtk_style_context_add_class(context,"LOGIN_button_box");
+        gtk_style_context_add_class(context,"AUTH_button_box");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
     else if(widg == 9)
     {
-        gtk_style_context_add_class(context,"LOGIN_entry_field1");
+        gtk_style_context_add_class(context,"AUTH_entry_field1");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
 }
@@ -60,7 +60,7 @@ static void register_button_click(GtkWidget *widget)
     if(widget){}
 
     GtkCssProvider *provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(provider,"client/style.css");
+    gtk_css_provider_load_from_path(provider,"client/themes/dark.css");
     gtk_widget_unparent(widget);
     chat_show_auth_screen();
     gtk_window_set_child(GTK_WINDOW(t_screen.main_window), t_auth.LOGIN_menu);
@@ -85,7 +85,7 @@ void chat_show_reg_screen()
     gtk_widget_set_halign(GTK_WIDGET(REGISTER_back_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(REGISTER_back_box), GTK_ALIGN_CENTER);
 
-    REGISTER_logo = gtk_image_new_from_file("client/Logo.png");
+    REGISTER_logo = gtk_image_new_from_file("client/media/Logo.png");
     gtk_widget_set_size_request(REGISTER_logo, 47, 47);
     gtk_box_append (GTK_BOX(REGISTER_logo_box), REGISTER_logo);
     REGISTER_Swiftchat_text = gtk_label_new("Swiftchat");
@@ -173,7 +173,7 @@ void chat_show_auth_screen()
     gtk_widget_set_valign(GTK_WIDGET(LOGIN_create_account_box), GTK_ALIGN_CENTER);
 
 
-    LOGIN_logo = gtk_image_new_from_file("client/Logo.png");
+    LOGIN_logo = gtk_image_new_from_file("client/media/Logo.png");
     gtk_widget_set_size_request(LOGIN_logo, 47, 47);
     gtk_box_append (GTK_BOX(LOGIN_logo_box), LOGIN_logo);
     LOGIN_text_next_logo = gtk_label_new("Swiftchat");
@@ -190,12 +190,12 @@ void chat_show_auth_screen()
 //-----------------------------------------main_box--------------------------------------------------//
     LOGIN_entry_field1 = gtk_entry_new();
     gtk_widget_set_size_request(LOGIN_entry_field1, 310, 36);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field1),"Your login...");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field1),"Username");
     gtk_widget_set_margin_bottom (LOGIN_entry_field1, 10);
     gtk_widget_set_margin_top (LOGIN_entry_field1, 40);
     LOGIN_entry_field2 = gtk_entry_new();
     gtk_widget_set_size_request(LOGIN_entry_field2, 310, 36);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field2),"Your password...");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field2),"Password");
     gtk_entry_set_visibility(GTK_ENTRY(LOGIN_entry_field2),FALSE);
     LOGIN_text_under_logo= gtk_label_new("LOG IN TO YOUR ACCOUNT TO CONTINUE");
     gtk_widget_set_name(GTK_WIDGET(LOGIN_text_under_logo), "login_label");
