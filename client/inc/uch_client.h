@@ -32,13 +32,13 @@ struct
 struct
 {
     GtkWidget *main_window;
+    GtkWidget *headerbar;
     GtkCssProvider *provider;
 } t_screen;
 
-
 void chat_show_reg_screen();
-void load_css_auth(GtkCssProvider *provider, GtkWidget *widget, gint widg);
 void chat_show_auth_screen();
+void chat_decorate_headerbar();
 void send_login(GtkWidget *widget, gpointer data);
 
 #endif

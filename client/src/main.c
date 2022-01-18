@@ -183,12 +183,9 @@ static void activate(GtkApplication *application)
     gtk_window_set_resizable (GTK_WINDOW ( t_screen.main_window), FALSE);
 
     load_css();
-
     chat_show_auth_screen();
+    chat_decorate_headerbar();
 
-    load_css_auth(t_screen.provider, t_screen.main_window, 0);
-
-    gtk_window_set_child (GTK_WINDOW(t_screen.main_window), t_auth.LOGIN_menu);
     gtk_widget_show(t_screen.main_window);
 }
 
