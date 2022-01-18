@@ -58,12 +58,8 @@ void load_css_auth(GtkCssProvider *provider, GtkWidget *widget, gint widg)
 static void register_button_click(GtkWidget *widget)
 {
     if(widget){}
-
-    GtkCssProvider *provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(provider,"client/themes/dark.css");
     gtk_widget_unparent(widget);
     chat_show_auth_screen();
-    gtk_window_set_child(GTK_WINDOW(t_screen.main_window), t_auth.LOGIN_menu);
 }
 
 void chat_show_reg_screen()
@@ -125,6 +121,7 @@ void chat_show_reg_screen()
     gtk_box_append (GTK_BOX(t_auth.REGISTRATION_menu ), REGISTER_back_box);
     gtk_box_set_spacing (GTK_BOX(t_auth.REGISTRATION_menu ), 0);
 
+    load_css_auth(t_screen.provider, t_screen.main_window, 0);
     load_css_auth(t_screen.provider, t_auth.REGISTRATION_menu , 1);
     load_css_auth(t_screen.provider, REGISTER_logo_box, 2);
     load_css_auth(t_screen.provider, REGISTER_button, 3);
@@ -217,6 +214,7 @@ void chat_show_auth_screen()
 
 //-----------------------------------------main_box--------------------------------------------------//
 
+    load_css_auth(t_screen.provider, t_screen.main_window, 0);
     load_css_auth(t_screen.provider, t_auth.LOGIN_menu, 1);
     load_css_auth(t_screen.provider, LOGIN_logo_box, 2);
     load_css_auth(t_screen.provider, LOGIN_button, 3);
@@ -226,6 +224,7 @@ void chat_show_auth_screen()
     load_css_auth(t_screen.provider, LOGIN_create_account_button, 7);
     load_css_auth(t_screen.provider, LOGIN_button_box, 8);
 
+    gtk_window_set_child (GTK_WINDOW(t_screen.main_window), t_auth.LOGIN_menu);
     GtkGesture *click_create_acc = gtk_gesture_click_new();
     gtk_gesture_set_state(click_create_acc, GTK_EVENT_SEQUENCE_CLAIMED);
     g_signal_connect_swapped(click_create_acc, "pressed", G_CALLBACK(account_button_click), t_auth.LOGIN_menu);

@@ -13,8 +13,12 @@ void sqlite3_create_db() {
             exit(EXIT_FAILURE);
         }
         sql = mx_strrejoin(sql, "PRAGMA encoding = \"UTF-8\";");
-        sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL , password TEXT NOT NULL);");
+        sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, password TEXT NOT NULL);");
+        sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER PRIMARY KEY, name TEXT NOT NULL, members INTEGER NOT NULL);");
+        sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, admin BOOLEAN NOT NULL DEFAULT FALSE);");
+        sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, date DATETIME NOT NULL, text TEXT DEFAULT NULL);");
         sql = mx_strrejoin(sql, "INSERT INTO users (name, password) VALUES ('Dima', 'Dimapassword');");
+        sql = mx_strrejoin(sql, "INSERT INTO users (name, password) VALUES ('Fibbs', 'Mafilirkan');");
         rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
         if (rc != SQLITE_OK) {
             fprintf(stderr, "Failed to select data\n");
@@ -65,4 +69,13 @@ void *sqlite3_exec_db(char *query, int type) {
         return p;
     }
     return NULL;
+}
+
+int get_user_id (char *name) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT id FROM users WHERE name = ('%s');";
+    asprintf(&query, sql_pattern, name);
+    t_list *list = sqlite3_exec_db(query, 1);
+    int u_id = mx_atoi(list->data);
+    return u_id;
 }

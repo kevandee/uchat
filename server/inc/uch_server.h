@@ -35,5 +35,6 @@ char *get_weather(char *city);
 
 void sqlite3_create_db();
 void *sqlite3_exec_db(char *query, int type);
+int get_user_id (char *name);
 
 #endif
