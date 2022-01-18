@@ -41,4 +41,6 @@ void chat_show_auth_screen();
 void chat_decorate_headerbar();
 void send_login(GtkWidget *widget, gpointer data);
 
+int check_auth_input(const char *str);
+
 #endif

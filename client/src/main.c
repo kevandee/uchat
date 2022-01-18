@@ -95,13 +95,27 @@ static void load_css()
     gtk_css_provider_load_from_path(t_screen.provider,"client/themes/dark.css");
 }
 
+cairo_surface_t *scale_to_half(cairo_surface_t *s, int orig_width, int orig_height) { 
+    //int param1 = orig_width/64;
+    //printf("param %d\n", param1);
+    //int param2 = orig_height/64;
+    cairo_surface_t *result = cairo_surface_create_similar(s, cairo_surface_get_content(s), orig_width/10, orig_height/10); 
+    cairo_t *cr = cairo_create(result); 
+    cairo_scale(cr, 0.1, 0.1); 
+    cairo_set_source_surface(cr, s, 0, 0); 
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE); 
+    cairo_paint(cr); 
+    cairo_destroy(cr); 
+    return result; 
+}
+
 static void draw_circle(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpointer data) {
     (void)widget;
     (void)w;
     (void)h;
 
     cairo_surface_t *image = (cairo_surface_t *)data;
-
+    
     cairo_set_source_surface (cr, image, 1, 1);
     cairo_arc(cr, 328, 328, 300, 0, 2 * M_PI);
     cairo_clip(cr);
@@ -122,18 +136,21 @@ static void main_chat(GtkWidget *window) {
 
     GtkWidget *darea = NULL;
     gint width, height;
-
+    
     cairo_surface_t *image = cairo_image_surface_create_from_png("test_circle.png");
+    //cairo_surface_t *scaled_image = cairo_image_surface_create_for_data(cairo_image_surface_get_data(image), CAIRO_FORMAT_RGB24, 64, 64, cairo_image_surface_get_stride(image));
     width = cairo_image_surface_get_width(image);
     height = cairo_image_surface_get_height(image);
     printf("%d %d\n", width, height);
-
+    
+    //cairo_surface_t *scaled_image = scale_to_half(image, width, height);
 
     darea = gtk_drawing_area_new();
     gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 700);
     gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 700);
     gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle, image, NULL);
-    
+    gtk_widget_set_halign(GTK_WIDGET(darea), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(darea), GTK_ALIGN_CENTER);
     //gtk_box_append (GTK_BOX(main_box), logo_box);
     gtk_box_append (GTK_BOX(main_box), darea);
     gtk_box_set_spacing (GTK_BOX(main_box), 0);
@@ -145,12 +162,59 @@ static void main_chat(GtkWidget *window) {
     gtk_widget_show(window);
 }
 
+
  void send_login(GtkWidget *widget, gpointer data) {
     (void)widget;
     GtkWidget **entry_field = (GtkWidget **)data;
+    GtkEntryBuffer *login_field_buf = gtk_entry_get_buffer(GTK_ENTRY (entry_field[0]));
+    GtkEntryBuffer *password_field_buf = gtk_entry_get_buffer(GTK_ENTRY (entry_field[1]));
+    
+    int login_len = gtk_entry_buffer_get_length(login_field_buf);
+    int password_len = gtk_entry_buffer_get_length(password_field_buf);
 
-    cur_client.login = mx_strdup(gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY (entry_field[0]))));
-    cur_client.passwd = mx_strdup(gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY (entry_field[1]))));
+    if (login_len < 6 || login_len > 20) {
+        // Error
+
+        return;
+    }
+
+    if (password_len < 8 || password_len > 16) {
+        // Error
+
+        return;
+    }
+    
+    cur_client.login = mx_strdup(gtk_entry_buffer_get_text(login_field_buf));
+    cur_client.passwd = mx_strdup(gtk_entry_buffer_get_text(password_field_buf));
+    int status = check_auth_input(cur_client.login);
+    switch(status) {
+        case 0:
+            break;
+        case -1:
+            // несколько точек подряд
+            return;
+        case -2:
+            // точка в начале или конце
+            return;
+        default:
+            // запрещённый символ, переменная status == этому символу
+            return;
+    }
+
+    status = check_auth_input(cur_client.passwd);
+    switch(status) {
+        case 0:
+            break;
+        case -1:
+            // несколько точек подряд
+            return;
+        case -2:
+            // точка в начале или конце
+            return;
+        default:
+            // запрещённый символ, переменная status == этому символу
+            return;
+    }
 
     char message[32] = {0};
     // Отправка данных для авторизации на сервер
@@ -167,12 +231,13 @@ static void main_chat(GtkWidget *window) {
     if (err_aut) {
         // ошибка
         mx_printerr("login err\n");
+        return;
     }
-    GtkWidget *child = gtk_window_get_child(GTK_WINDOW (entry_field[2]));
+    GtkWidget *child = gtk_window_get_child(GTK_WINDOW (t_screen.main_window));
     
     gtk_widget_unparent(child);
     // можем заходить в чат, вход успешен
-    main_chat(entry_field[2]);
+    main_chat(t_screen.main_window);
 }
 
 static void activate(GtkApplication *application)

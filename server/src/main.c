@@ -65,7 +65,8 @@ void *client_work(void *param) {
                     sql_pattern = "INSERT INTO users (name, password) VALUES ('%s', '%s');";
                     asprintf(&query, sql_pattern, cur->login, cur->passwd);
                     sqlite3_exec_db(query, 2);
-                    err_msg = false;
+                    const bool success_reg = false;
+                    send(cur->cl_socket, &success_reg, sizeof(bool), 0);
                 }
                 else {
                     //NAME ALREDAY TAKEN
