@@ -8,6 +8,16 @@ headerbar{
   font-size:25px;
 }
 
+#close{
+  -gtk-icon-size:  12px;
+}
+#minimize{
+  -gtk-icon-size:  12px;
+}
+#maximize{
+  -gtk-icon-size:  12px;
+}
+
 /*MAIN WINDOW*/
 .AUTH_window
 {
