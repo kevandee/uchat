@@ -55,6 +55,10 @@ void load_css_auth(GtkCssProvider *provider, GtkWidget *widget, gint widg)
         gtk_style_context_add_class(context,"AUTH_entry_field1");
         gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
+    else
+    {
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    }
 }
 
 static void register_button_click(GtkWidget *widget, gpointer data)
@@ -68,14 +72,14 @@ static void register_button_click(GtkWidget *widget, gpointer data)
     int password_len = gtk_entry_buffer_get_length(password_field_buf1);
 
     if (login_len < 6 || login_len > 20) {
-        // Error
-
+        gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessage), "LOGIN MUST CONTAIN 6-20 SYMBOLS");
+        gtk_widget_show(t_auth.ErrorMessage);
         return;
     }
 
     if (password_len < 8 || password_len > 16) {
-        // Error
-
+        gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessage), "LOGIN MUST CONSIST OF 8-16 SYMBOLS");
+        gtk_widget_show(t_auth.ErrorMessage);
         return;
     }
     
@@ -84,7 +88,8 @@ static void register_button_click(GtkWidget *widget, gpointer data)
     const char *password_str_2 = gtk_entry_buffer_get_text(password_field_buf2);
 
     if (mx_strcmp(password_str_1, password_str_2) != 0) {
-        // пароли не совпадают
+        gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessage), "PASSWORDS DOESN'T MATCH");
+        gtk_widget_show(t_auth.ErrorMessage);
         return;
     }
 
@@ -93,30 +98,48 @@ static void register_button_click(GtkWidget *widget, gpointer data)
     switch(status) {
         case 0:
             break;
-        case -1:
+        case -1:{
             // несколько точек подряд
+            gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessage), "LOGIN: A LOT OF '.' SYMBOLS NEAR");
+            gtk_widget_show(t_auth.ErrorMessage); 
             return;
-        case -2:
+        }
+        case -2:{
             // точка в начале или конце
+            gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessage), "LOGIN: '.' SYMBOL WHETHER AT THE START OR AT THE END");
+            gtk_widget_show(t_auth.ErrorMessage); 
             return;
-        default:
+        }
+        default:{
             // запрещённый символ, переменная status == этому символу
+            gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessage), "LOGIN: FORBIDDEN SYMBOL");
+            gtk_widget_show(t_auth.ErrorMessage); 
             return;
+        }
     }
 
     status = check_auth_input(cur_client.passwd);
     switch(status) {
         case 0:
             break;
-        case -1:
+        case -1:{
             // несколько точек подряд
+            gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessage), "PASSWORDS: A LOT OF '.' SYMBOLS NEAR");
+            gtk_widget_show(t_auth.ErrorMessage); 
             return;
-        case -2:
+        }
+        case -2:{
             // точка в начале или конце
+            gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessage), "PASSWORDS: '.' SYMBOL WHETHER AT THE START OR AT THE END");
+            gtk_widget_show(t_auth.ErrorMessage); 
             return;
-        default:
+        }
+        default:{
             // запрещённый символ, переменная status == этому символу
+            gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessage), "PASSWORDS: FORBIDDEN SYMBOL");
+            gtk_widget_show(t_auth.ErrorMessage); 
             return;
+        }
     }
     
     char message[32] = {0};
@@ -132,7 +155,8 @@ static void register_button_click(GtkWidget *widget, gpointer data)
     recv(cur_client.serv_fd, &err_aut, sizeof(bool), 0); // Ожидание ответа от сервера об успешности регистрации
     
     if (err_aut) {
-        // ошибка
+        gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessage), "REGISTRATION ERROR");
+        gtk_widget_show(t_auth.ErrorMessage); 
         mx_printerr("reg err\n");
         return;
     }
@@ -149,6 +173,8 @@ void chat_show_reg_screen()
 {
     GtkWidget* REGISTER_logo_box, *REGISTER_button_box, *REGISTER_back_box;
     GtkWidget* REGISTER_logo, *REGISTER_text_under_logo, * REGISTER_Swiftchat_text, *REGISTER_entry_field1, *REGISTER_entry_field2, *REGISTER_entry_field3, *REGISTER_button, *REGISTER_signin_text, *REGISTER_signin_button;
+    gtk_widget_set_name(t_auth.ErrorMessage, "error");
+    gtk_widget_set_margin_bottom(t_auth.ErrorMessage, 5);
 
     t_auth.REGISTRATION_menu = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_size_request(GTK_WIDGET(t_auth.REGISTRATION_menu ), 430, 0);
@@ -180,11 +206,11 @@ void chat_show_reg_screen()
 
     REGISTER_text_under_logo = gtk_label_new("CREATE AN ACCOUNT TO CONTINUE");
     gtk_widget_set_name(GTK_WIDGET(REGISTER_text_under_logo), "login_label");
+    gtk_widget_set_margin_bottom(REGISTER_text_under_logo, 40);
     REGISTER_entry_field1 = gtk_entry_new();
     gtk_widget_set_size_request(REGISTER_entry_field1, 310, 36);
     gtk_entry_set_placeholder_text(GTK_ENTRY(REGISTER_entry_field1),"Enter your username");
     gtk_widget_set_margin_bottom (REGISTER_entry_field1, 10);
-    gtk_widget_set_margin_top (REGISTER_entry_field1, 40);
     REGISTER_entry_field2 = gtk_entry_new();
     gtk_widget_set_size_request(REGISTER_entry_field2, 310, 36);
     gtk_entry_set_placeholder_text(GTK_ENTRY(REGISTER_entry_field2),"Enter your password");
@@ -204,6 +230,8 @@ void chat_show_reg_screen()
 
     gtk_box_append (GTK_BOX(t_auth.REGISTRATION_menu ), REGISTER_logo_box);
     gtk_box_append (GTK_BOX(t_auth.REGISTRATION_menu ), REGISTER_text_under_logo);
+    gtk_box_append (GTK_BOX(t_auth.REGISTRATION_menu ), t_auth.ErrorMessage);
+    gtk_widget_hide(t_auth.ErrorMessage);
     gtk_box_append (GTK_BOX(t_auth.REGISTRATION_menu ), REGISTER_entry_field1);
     gtk_box_append (GTK_BOX(t_auth.REGISTRATION_menu ), REGISTER_entry_field2);
     gtk_box_append (GTK_BOX(t_auth.REGISTRATION_menu ), REGISTER_entry_field3);
@@ -220,6 +248,7 @@ void chat_show_reg_screen()
     load_css_auth(t_screen.provider, REGISTER_signin_text, 6);
     load_css_auth(t_screen.provider, REGISTER_signin_button, 7);
     load_css_auth(t_screen.provider, REGISTER_button_box, 8);
+    load_css_auth(t_screen.provider, t_auth.ErrorMessage, 127);
 
 
     gtk_window_set_child(GTK_WINDOW(t_screen.main_window), t_auth.REGISTRATION_menu);
@@ -244,6 +273,7 @@ void chat_show_auth_screen()
 {
     GtkWidget *LOGIN_logo_box, *LOGIN_button_box, *LOGIN_create_account_box;
     GtkWidget *LOGIN_button, *LOGIN_logo, *LOGIN_text_next_logo, *LOGIN_text_under_logo, *LOGIN_entry_field1, *LOGIN_entry_field2, *LOGIN_create_account_text, *LOGIN_create_account_button;
+    t_auth.ErrorMessage = gtk_label_new("ERROR!");
     
     t_auth.LOGIN_menu = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_size_request(GTK_WIDGET(t_auth.LOGIN_menu), 430, 0);

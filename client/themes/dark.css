@@ -47,6 +47,11 @@ headerbar{
   font-family: 'Helvetica Neue';
 }
 
+#error
+{
+  color: red;
+}
+
 /*TEXT UNDER LOGO*/
 .AUTH_text_under_logo{
   color: rgb(165, 165, 165);

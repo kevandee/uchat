@@ -27,6 +27,7 @@ struct
 {
     GtkWidget *LOGIN_menu;
     GtkWidget *REGISTRATION_menu;
+    GtkWidget *ErrorMessage;
 }   t_auth;
 
 struct
