@@ -97,7 +97,7 @@ static void load_css()
 
 
 
-int x = 64,y = 64;
+int x = 0,y = 0;
 
 gboolean key_press_event(GtkEventControllerKey *controller,
                guint                  keyval,
@@ -124,7 +124,6 @@ gboolean key_press_event(GtkEventControllerKey *controller,
     }
     
     gtk_widget_queue_draw(GTK_WIDGET(user_data));
-    
 
     return TRUE;
 }
@@ -136,13 +135,24 @@ static void draw_circle(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpoin
     (void)h;
 
     cairo_surface_t *image = (cairo_surface_t *)data;
-        
-    cairo_set_source_surface (cr, image, 1, 1);
-    cairo_arc(cr, x, y, 60, 0, 2 * M_PI);
+    cairo_surface_t *target = cairo_image_surface_create(cairo_image_surface_get_format(image), 128, 128); //gdk_surface_create_similar_surface(GDK_SURFACE (image), cairo_surface_get_content(image), cairo_image_surface_get_width(image), cairo_image_surface_get_height(image));
+    cairo_t *cr_new = cairo_create(target);    
+    cairo_set_source_surface (cr, image, x, y);
+    
+    cairo_arc(cr, 64, 64, 60, 0, 2 * M_PI);
     cairo_clip(cr);
-    cairo_paint(cr);
     //cairo_fill(cr);
+    cairo_paint(cr);
 
+    cairo_set_source_surface (cr_new, image, 1, 1);
+
+    
+    cairo_arc(cr_new, x, y, 60, 0, 2 * M_PI);
+    cairo_clip(cr_new);
+    cairo_paint(cr_new);
+
+    //cairo_fill(cr);
+    cairo_surface_write_to_png (target, "output.png");
     //return FALSE;
 }
 

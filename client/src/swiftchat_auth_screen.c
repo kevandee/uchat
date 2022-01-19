@@ -181,16 +181,19 @@ void chat_show_reg_screen()
     REGISTER_text_under_logo = gtk_label_new("CREATE AN ACCOUNT TO CONTINUE");
     gtk_widget_set_name(GTK_WIDGET(REGISTER_text_under_logo), "login_label");
     REGISTER_entry_field1 = gtk_entry_new();
+    gtk_entry_buffer_set_max_length(GTK_ENTRY_BUFFER (gtk_entry_get_buffer(GTK_ENTRY (REGISTER_entry_field1))), 20);
     gtk_widget_set_size_request(REGISTER_entry_field1, 310, 36);
     gtk_entry_set_placeholder_text(GTK_ENTRY(REGISTER_entry_field1),"Enter your username");
     gtk_widget_set_margin_bottom (REGISTER_entry_field1, 10);
     gtk_widget_set_margin_top (REGISTER_entry_field1, 40);
     REGISTER_entry_field2 = gtk_entry_new();
+    gtk_entry_buffer_set_max_length(GTK_ENTRY_BUFFER (gtk_entry_get_buffer(GTK_ENTRY (REGISTER_entry_field2))), 16);
     gtk_widget_set_size_request(REGISTER_entry_field2, 310, 36);
     gtk_entry_set_placeholder_text(GTK_ENTRY(REGISTER_entry_field2),"Enter your password");
     gtk_entry_set_visibility(GTK_ENTRY(REGISTER_entry_field2),FALSE);
     gtk_widget_set_margin_bottom (REGISTER_entry_field2, 10);
     REGISTER_entry_field3 = gtk_entry_new();
+    gtk_entry_buffer_set_max_length(GTK_ENTRY_BUFFER (gtk_entry_get_buffer(GTK_ENTRY (REGISTER_entry_field3))), 16);
     gtk_widget_set_size_request(REGISTER_entry_field3, 310, 36);
     gtk_entry_set_placeholder_text(GTK_ENTRY(REGISTER_entry_field3),"Repeat your password");
     gtk_entry_set_visibility(GTK_ENTRY(REGISTER_entry_field3),FALSE);
@@ -276,17 +279,19 @@ void chat_show_auth_screen()
 
 //-----------------------------------------main_box--------------------------------------------------//
     LOGIN_entry_field1 = gtk_entry_new();
+    gtk_entry_buffer_set_max_length(GTK_ENTRY_BUFFER (gtk_entry_get_buffer(GTK_ENTRY (LOGIN_entry_field1))), 20);
     gtk_widget_set_size_request(LOGIN_entry_field1, 310, 36);
     gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field1),"Username");
     gtk_widget_set_margin_bottom (LOGIN_entry_field1, 10);
     gtk_widget_set_margin_top (LOGIN_entry_field1, 40);
     LOGIN_entry_field2 = gtk_entry_new();
+    gtk_entry_buffer_set_max_length(GTK_ENTRY_BUFFER (gtk_entry_get_buffer(GTK_ENTRY (LOGIN_entry_field2))), 16);
     gtk_widget_set_size_request(LOGIN_entry_field2, 310, 36);
     gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field2),"Password");
     gtk_entry_set_visibility(GTK_ENTRY(LOGIN_entry_field2),FALSE);
     LOGIN_text_under_logo= gtk_label_new("LOG IN TO YOUR ACCOUNT TO CONTINUE");
     gtk_widget_set_name(GTK_WIDGET(LOGIN_text_under_logo), "login_label");
-
+    
     GtkWidget **entry_arr = (GtkWidget **)malloc(2 * sizeof(GtkWidget *));//{LOGIN_entry_field1, LOGIN_entry_field2};
     entry_arr[0] = LOGIN_entry_field1;
     entry_arr[1] = LOGIN_entry_field2;
