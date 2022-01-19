@@ -17,8 +17,8 @@ void sqlite3_create_db() {
         sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER PRIMARY KEY, name TEXT NOT NULL, members INTEGER NOT NULL);");
         sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, admin BOOLEAN NOT NULL DEFAULT FALSE);");
         sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, date DATETIME NOT NULL, text TEXT DEFAULT NULL);");
-        sql = mx_strrejoin(sql, "INSERT INTO users (name, password) VALUES ('Dima', 'Dimapassword');");
-        sql = mx_strrejoin(sql, "INSERT INTO users (name, password) VALUES ('Fibbs', 'Mafilirkan');");
+        sql = mx_strrejoin(sql, "INSERT INTO users (name, password) VALUES ('Dima123', 'Dimapassword');");
+        sql = mx_strrejoin(sql, "INSERT INTO users (name, password) VALUES ('Fibbs123', 'Mafilirkan');");
         rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
         if (rc != SQLITE_OK) {
             fprintf(stderr, "Failed to select data\n");
@@ -71,7 +71,7 @@ void *sqlite3_exec_db(char *query, int type) {
     return NULL;
 }
 
-int get_user_id (char *name) {
+int get_user_id(char *name) {
     char *query = NULL;
     char *sql_pattern = "SELECT id FROM users WHERE name = ('%s');";
     asprintf(&query, sql_pattern, name);
@@ -79,3 +79,30 @@ int get_user_id (char *name) {
     int u_id = mx_atoi(list->data);
     return u_id;
 }
+
+int get_chat_id(char *name) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT id FROM chats WHERE name = ('%s');";
+    asprintf(&query, sql_pattern, name);
+    t_list *list = sqlite3_exec_db(query, 1);
+    int c_id = mx_atoi(list->data);
+    return c_id;
+}
+
+int get_chat_members(int id) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT members FROM chats WHERE id = (%d);";
+    asprintf(&query, sql_pattern, id);
+    t_list *list = sqlite3_exec_db(query, 1);
+    int mc = mx_atoi(list->data);
+    return mc;
+}
+
+t_list *get_chat_users(int c_id) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT name FROM users INNER JOIN members ON users.id=members.user_id WHERE members.chat_id = (%d);";
+    asprintf(&query, sql_pattern, c_id);
+    t_list *list = sqlite3_exec_db(query, 1);
+    return list;
+}
+

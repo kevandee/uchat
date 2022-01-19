@@ -213,22 +213,43 @@ void *client_work(void *param) {
             пока что тут идёт поиск по линкед листу, но надо из бд всё взять
             */
             char *trim = message + 12;
-            t_list *temp_chat_l = cur->chats;
-            char *find_chat = NULL;
-            while(temp_chat_l) {
-                if (mx_strcmp(trim, ((t_chat *)(temp_chat_l->data))->name ) == 0) {
-                    find_chat = ((t_chat *)(temp_chat_l->data))->name;
-                    break;
+            cur->cur_chat = (t_chat *)malloc(sizeof(t_chat));
+            char *query = NULL;
+            char *sql_pattern = NULL;
+            t_list *list = NULL;
+            sql_pattern = "SELECT EXISTS (SELECT id FROM chats WHERE name=('%s'));";
+            asprintf(&query, sql_pattern, trim);
+            list = sqlite3_exec_db(query, 1);
+            if (strcmp(list->data, "1") == 0) {
+                sql_pattern = "SELECT name FROM chats WHERE name=('%s');";
+                asprintf(&query, sql_pattern, trim);
+                list = sqlite3_exec_db(query, 1);
+                char *c_name = mx_strdup(list->data);
+                int c_id = get_chat_id(c_name);
+                int u_id = get_user_id(cur->login);
+                sql_pattern = "SELECT EXISTS (SELECT id FROM members WHERE chat_id=(%d) AND user_id=(%d));";
+                asprintf(&query, sql_pattern, c_id, u_id);
+                list = sqlite3_exec_db(query, 1);
+                printf("check %s\n", list->data);
+                if (strcmp(list->data, "1") == 0) {
+                    //
+                    mx_strcpy(cur->cur_chat->name, c_name);
+                    cur->cur_chat->id = c_id;
+                    cur->cur_chat->count_users = get_chat_members(cur->cur_chat->id);
+                    cur->cur_chat->users = get_chat_users(cur->cur_chat->id);
+                    //
+                    printf("cur name: %s\n", cur->cur_chat->name);
+                    printf("1 user: %s\n", cur->cur_chat->users->data);
+                    printf("2 user: %s\n", cur->cur_chat->users->next->data);
                 }
-                temp_chat_l = temp_chat_l->next;
+                else {
+                    //NOT CHAT MEMBER
+                }
             }
-            if (temp_chat_l) {
-                cur->cur_chat = ((t_chat *)(temp_chat_l->data));
-                printf("cur name: %s\n", cur->cur_chat->name);
-                printf("1 user: %s\n", cur->cur_chat->users->data);
-                printf("2 user: %s\n", cur->cur_chat->users->next->data);
+            else {
+                //NO SUCH CHAT
             }
-        }
+        } 
         else if (mes_stat > 0) {
             printf("Message Received from %s | %s |\n", login, message);
 		    if(cur->cur_chat){
