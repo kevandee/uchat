@@ -43,4 +43,7 @@ void send_login(GtkWidget *widget, gpointer data);
 
 int check_auth_input(const char *str);
 
+cairo_surface_t *get_surface_from_jpg(const char *filename);
+cairo_surface_t *scale_to_half(cairo_surface_t *s, int orig_width, int orig_height, int scaled_width, int scaled_height);
+
 #endif

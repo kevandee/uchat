@@ -43,7 +43,7 @@ void *rec_func(void *param) {
                 t_chat *new_chat = (t_chat *)malloc(sizeof(t_chat));
                 new_chat->messages = NULL;
                 new_chat->users = NULL;
-                //printf("%s geting chat\n", cur_client->login);
+
                 char buf_name[256] = {0};
                 receive = recv_all(fd, buf_name, 256);
                 while (receive < 0) {
@@ -95,19 +95,40 @@ static void load_css()
     gtk_css_provider_load_from_path(t_screen.provider,"client/themes/dark.css");
 }
 
-cairo_surface_t *scale_to_half(cairo_surface_t *s, int orig_width, int orig_height) { 
-    //int param1 = orig_width/64;
-    //printf("param %d\n", param1);
-    //int param2 = orig_height/64;
-    cairo_surface_t *result = cairo_surface_create_similar(s, cairo_surface_get_content(s), orig_width/10, orig_height/10); 
-    cairo_t *cr = cairo_create(result); 
-    cairo_scale(cr, 0.1, 0.1); 
-    cairo_set_source_surface(cr, s, 0, 0); 
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE); 
-    cairo_paint(cr); 
-    cairo_destroy(cr); 
-    return result; 
+
+
+int x = 64,y = 64;
+
+gboolean key_press_event(GtkEventControllerKey *controller,
+               guint                  keyval,
+               guint                  keycode,
+               GdkModifierType        state,
+               gpointer               user_data) {
+    (void)controller;
+    (void)keycode;
+    (void)state;
+    (void)user_data;
+    switch(keyval) {
+        case GDK_KEY_Down:
+            y++;
+            break;
+        case GDK_KEY_Up:
+            y--;
+            break;
+        case GDK_KEY_Left:
+            x--;
+            break;
+        case GDK_KEY_Right:
+            x++;
+            break;
+    }
+    
+    gtk_widget_queue_draw(GTK_WIDGET(user_data));
+    
+
+    return TRUE;
 }
+
 
 static void draw_circle(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpointer data) {
     (void)widget;
@@ -115,9 +136,9 @@ static void draw_circle(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpoin
     (void)h;
 
     cairo_surface_t *image = (cairo_surface_t *)data;
-    
+        
     cairo_set_source_surface (cr, image, 1, 1);
-    cairo_arc(cr, 328, 328, 300, 0, 2 * M_PI);
+    cairo_arc(cr, x, y, 60, 0, 2 * M_PI);
     cairo_clip(cr);
     cairo_paint(cr);
     //cairo_fill(cr);
@@ -132,27 +153,51 @@ static void main_chat(GtkWidget *window) {
     gtk_widget_set_halign(GTK_WIDGET(main_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(main_box), GTK_ALIGN_CENTER);
     
+    GtkEventController *keys_controller = gtk_event_controller_key_new();
+    gtk_widget_add_controller(t_screen.main_window, keys_controller);
+    
    // draw circle frow image
 
     GtkWidget *darea = NULL;
     gint width, height;
     
-    cairo_surface_t *image = cairo_image_surface_create_from_png("test_circle.png");
+    cairo_surface_t *image = get_surface_from_jpg("test.jpeg");//cairo_image_surface_create_from_png("test_circle.png");
     //cairo_surface_t *scaled_image = cairo_image_surface_create_for_data(cairo_image_surface_get_data(image), CAIRO_FORMAT_RGB24, 64, 64, cairo_image_surface_get_stride(image));
     width = cairo_image_surface_get_width(image);
     height = cairo_image_surface_get_height(image);
     printf("%d %d\n", width, height);
     
-    //cairo_surface_t *scaled_image = scale_to_half(image, width, height);
+    cairo_surface_t *scaled_image = scale_to_half(image, width, height, 128, 128);
+    width = cairo_image_surface_get_width(scaled_image);
+    height = cairo_image_surface_get_height(scaled_image);
+    printf("%d %d\n", width, height);
+    
 
     darea = gtk_drawing_area_new();
-    gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 700);
-    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 700);
-    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle, image, NULL);
+    gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 256);
+    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 256);
+    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle, scaled_image, NULL);
     gtk_widget_set_halign(GTK_WIDGET(darea), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(darea), GTK_ALIGN_CENTER);
-    //gtk_box_append (GTK_BOX(main_box), logo_box);
+
+    g_signal_connect(keys_controller, "key-pressed", G_CALLBACK(key_press_event), darea);
+    /*GtkWidget *grid = gtk_grid_new();
+
+    for (int i = 0; i < 9; i++) {
+        //gtk_widget_set_valign(GTK_WIDGET(darea), GTK_ALIGN_CENTER);
+        for (int j = 0; j < 5; j++) {
+            darea = gtk_drawing_area_new();
+            gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 128);
+            gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 128);
+            gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle, scaled_image, NULL);
+            
+            gtk_grid_attach(GTK_GRID (grid), darea, i, j, 1, 1);   
+        }
+    }
+    */
     gtk_box_append (GTK_BOX(main_box), darea);
+    
+    //gtk_box_append (GTK_BOX(main_box), grid);
     gtk_box_set_spacing (GTK_BOX(main_box), 0);
 
     gtk_window_set_child(GTK_WINDOW(window), main_box);
@@ -283,72 +328,6 @@ int main(int argc, char *argv[]) {
     application = gtk_application_new("my.first.app", G_APPLICATION_FLAGS_NONE);
     g_signal_connect(application, "activate", G_CALLBACK(activate), NULL);
     status = g_application_run(G_APPLICATION(application), FALSE, NULL);
-    
-
-    // Переменные для авторизации
-    //char login[32];
-    //char password[16];
-    //char choise = 'i'; // i - вход, u - регистрация
-    /*
-    printf("Sign in or sign up? (i / u)\n");
-
-    scanf("%c", &choise); // все сканфы убрать, оставил для наглядности, как считывает в терминале
-    switch(choise) {
-        case 'u':
-        case 'i':
-            printf("Enter login: ");
-            scanf("%s",login);
-
-            printf("Enter password: ");
-            scanf("%s",password);
-
-            break;
-        default:
-            mx_printerr("Invalid choise\n");
-            exit(-1);
-            break;
-    }
-
-    
-
-    // Отправка данных для авторизации на сервер
-    send(fd, &choise, 1, 0);
-    send(fd, login, 32, 0);
-    send(fd, password, 16, 0);
-    //printf("%c || %s || %s\n", choise, login, password);
-    //char *jpeg = "testp.png";//"test.jpg";
-    //send_jpeg(fd, jpeg);*/
-    /*bool err_aut;
-    recv(cur_client.serv_fd, &err_aut, sizeof(bool), 0); // Ожидание ответа от сервера об успешности входа или регистрации
-
-    // Обработка ошибок от сервера, нужно ввести заново поля
-    while (err_aut) {
-        switch (choise) {
-            case 'u':
-                printf("user with this login already exists\n");
-                printf("Enter login: ");
-                scanf("%s",login);
-
-                printf("Enter password: ");
-                scanf("%s",password);
-                break;
-            
-            case 'i':
-                printf("login or password is invalid\n");
-                printf("Enter login: ");
-                scanf("%s",login);
-
-                printf("Enter password: ");
-                scanf("%s",password);
-                break;
-        }
-        // Снова отправляем данные на сервер
-        send(cur_client.serv_fd, &choise, 1, 0);
-        send(cur_client.serv_fd, login, 32, 0);
-        send(cur_client.serv_fd, password, 16, 0);
-        recv(cur_client.serv_fd, &err_aut, sizeof(bool), 0);
-    }
-    */
 
     // Запуск потоков для приёма и отправки сообщений, будем смотреть. Может, придётся переделать под события из гтк
     pthread_t sender_th;
