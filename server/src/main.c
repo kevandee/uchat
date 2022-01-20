@@ -90,6 +90,11 @@ void *client_work(void *param) {
                 if (strcmp(list->data, "1") == 0) {
                     //USER FOUND
                     err_msg = false;
+
+                    sql_pattern = "SELECT id FROM users WHERE name=('%s') AND password=('%s');";
+                    asprintf(&query, sql_pattern, cur->login, cur->passwd);
+                    list = sqlite3_exec_db(query, 1);
+                    cur->id = mx_atoi(list->data);
                 }
                 else {
                     //USER NOT FOUND
@@ -179,6 +184,7 @@ void *client_work(void *param) {
             asprintf(&query, sql_pattern, new_chat->name, new_chat->count_users);
             int *data = sqlite3_exec_db(query, 2);
             int c_id = data[0];
+            new_chat->id = c_id;
             printf("c_id: %i\n", c_id);
             t_list *temp_list = new_chat->users;
             int admin = 1;
@@ -200,6 +206,7 @@ void *client_work(void *param) {
 
             // отправка на клиенты
             pthread_mutex_lock(&send_mutex);
+
             send_new_chat(&new_chat);
 
             mx_push_back(&cur->chats, new_chat);
@@ -213,7 +220,6 @@ void *client_work(void *param) {
             пока что тут идёт поиск по линкед листу, но надо из бд всё взять
             */
             char *trim = message + 12;
-            cur->cur_chat = (t_chat *)malloc(sizeof(t_chat));
             char *query = NULL;
             char *sql_pattern = NULL;
             t_list *list = NULL;
@@ -233,14 +239,14 @@ void *client_work(void *param) {
                 printf("check %s\n", list->data);
                 if (strcmp(list->data, "1") == 0) {
                     //
-                    mx_strcpy(cur->cur_chat->name, c_name);
-                    cur->cur_chat->id = c_id;
-                    cur->cur_chat->count_users = get_chat_members(cur->cur_chat->id);
-                    cur->cur_chat->users = get_chat_users(cur->cur_chat->id);
+                    mx_strcpy(cur->cur_chat.name, c_name);
+                    cur->cur_chat.id = c_id;
+                    cur->cur_chat.count_users = get_chat_members(cur->cur_chat.id);
+                    cur->cur_chat.users = get_chat_users(cur->cur_chat.id);
                     //
-                    printf("cur name: %s\n", cur->cur_chat->name);
-                    printf("1 user: %s\n", cur->cur_chat->users->data);
-                    printf("2 user: %s\n", cur->cur_chat->users->next->data);
+                    printf("cur name: %s\n", cur->cur_chat.name);
+                    printf("1 user: %s\n", cur->cur_chat.users->data);
+                    printf("2 user: %s\n", cur->cur_chat.users->next->data);
                 }
                 else {
                     //NOT CHAT MEMBER
@@ -252,8 +258,8 @@ void *client_work(void *param) {
         } 
         else if (mes_stat > 0) {
             printf("Message Received from %s | %s |\n", login, message);
-		    if(cur->cur_chat){
-                send_message(message, cur->login, cur->cur_chat);
+		    if(cur->cur_chat.id != 0){
+                send_message(message, cur->login, &cur->cur_chat);
             }
             else {
                 send_message(message, cur->login, NULL);
@@ -310,9 +316,10 @@ int main(int argc, char *argv[]) {
         new_client->cl_socket = client_fd;
         new_client->login = NULL;
         new_client->passwd = NULL;
-        new_client->id = client_id;
+        //new_client->id = client_id;
         new_client->chats = NULL;
-        new_client->cur_chat = NULL;
+        t_chat init_chat = {0};
+        new_client->cur_chat = init_chat;
 
         printf("id %d\n", client_id);
         

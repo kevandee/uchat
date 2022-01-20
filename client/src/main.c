@@ -50,6 +50,10 @@ void *rec_func(void *param) {
                     receive = recv_all(fd, buf_name, 256);
                 }
                 mx_strcpy(new_chat->name, buf_name);
+                receive = recv(fd, &new_chat->id, sizeof(int), 0);
+                while (receive < 0) {
+                    receive = recv(fd, &new_chat->id, sizeof(int), 0);
+                }
                 receive = recv(fd, &new_chat->count_users, sizeof(int), 0);
                 while (receive < 0) {
                     receive = recv(fd, &new_chat->count_users, sizeof(int), 0);
@@ -110,16 +114,16 @@ gboolean key_press_event(GtkEventControllerKey *controller,
     (void)user_data;
     switch(keyval) {
         case GDK_KEY_Down:
-            y++;
-            break;
-        case GDK_KEY_Up:
             y--;
             break;
+        case GDK_KEY_Up:
+            y++;
+            break;
         case GDK_KEY_Left:
-            x--;
+            x++;
             break;
         case GDK_KEY_Right:
-            x++;
+            x--;
             break;
     }
     
@@ -163,51 +167,10 @@ static void main_chat(GtkWidget *window) {
     gtk_widget_set_halign(GTK_WIDGET(main_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(main_box), GTK_ALIGN_CENTER);
     
-    GtkEventController *keys_controller = gtk_event_controller_key_new();
-    gtk_widget_add_controller(t_screen.main_window, keys_controller);
-    
-   // draw circle frow image
+    GtkStackSidebar *left_sidebar = gtk_stack_sidebar_new();
 
-    GtkWidget *darea = NULL;
-    gint width, height;
-    
-    cairo_surface_t *image = get_surface_from_jpg("test.jpeg");//cairo_image_surface_create_from_png("test_circle.png");
-    //cairo_surface_t *scaled_image = cairo_image_surface_create_for_data(cairo_image_surface_get_data(image), CAIRO_FORMAT_RGB24, 64, 64, cairo_image_surface_get_stride(image));
-    width = cairo_image_surface_get_width(image);
-    height = cairo_image_surface_get_height(image);
-    printf("%d %d\n", width, height);
-    
-    cairo_surface_t *scaled_image = scale_to_half(image, width, height, 128, 128);
-    width = cairo_image_surface_get_width(scaled_image);
-    height = cairo_image_surface_get_height(scaled_image);
-    printf("%d %d\n", width, height);
-    
+    GtkStack *stack;
 
-    darea = gtk_drawing_area_new();
-    gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 256);
-    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 256);
-    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle, scaled_image, NULL);
-    gtk_widget_set_halign(GTK_WIDGET(darea), GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(GTK_WIDGET(darea), GTK_ALIGN_CENTER);
-
-    g_signal_connect(keys_controller, "key-pressed", G_CALLBACK(key_press_event), darea);
-    /*GtkWidget *grid = gtk_grid_new();
-
-    for (int i = 0; i < 9; i++) {
-        //gtk_widget_set_valign(GTK_WIDGET(darea), GTK_ALIGN_CENTER);
-        for (int j = 0; j < 5; j++) {
-            darea = gtk_drawing_area_new();
-            gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 128);
-            gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 128);
-            gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle, scaled_image, NULL);
-            
-            gtk_grid_attach(GTK_GRID (grid), darea, i, j, 1, 1);   
-        }
-    }
-    */
-    gtk_box_append (GTK_BOX(main_box), darea);
-    
-    //gtk_box_append (GTK_BOX(main_box), grid);
     gtk_box_set_spacing (GTK_BOX(main_box), 0);
 
     gtk_window_set_child(GTK_WINDOW(window), main_box);
@@ -319,8 +282,7 @@ int main(int argc, char *argv[]) {
         .login = NULL,
         .passwd = NULL,
         .chat_count = 0,
-        .chats = NULL,
-        .cur_chat =NULL
+        .chats = NULL
     };
     cur_client = cur;
     

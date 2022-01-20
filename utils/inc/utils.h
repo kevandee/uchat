@@ -43,7 +43,7 @@ typedef struct s_client {
     t_list *chats;
 
     int id_cur_chat; // id чата в бд
-    t_chat *cur_chat;
+    t_chat cur_chat;
 }              t_client;
 
 void send_image(int socket, char *file);
