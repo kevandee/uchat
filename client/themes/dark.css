@@ -51,9 +51,10 @@ headerbar{
   font-family: 'Helvetica Neue';
 }
 
+/*AUTH ERRORS*/
 .error
 {
-  color: red;
+  color: #DE3131;
 }
 
 /*TEXT UNDER LOGO*/

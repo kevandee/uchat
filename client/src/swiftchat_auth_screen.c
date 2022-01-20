@@ -79,7 +79,7 @@ static void register_button_click(GtkWidget *widget, gpointer data)
     }
 
     if (password_len < 8 || password_len > 16) {
-        gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessageRegister), "LOGIN MUST CONSIST OF 8-16 SYMBOLS");
+        gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessageRegister), "PASSWORD MUST CONSIST OF 8-16 SYMBOLS");
         gtk_widget_show(t_auth.ErrorMessageRegister);
         return;
     }
