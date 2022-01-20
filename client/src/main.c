@@ -31,6 +31,9 @@ void *sender_func(void *param) {
 }
 
 void *rec_func(void *param) {
+    while(!cur_client.login) {
+        sleep(1);
+    }
     int fd = cur_client.serv_fd;
     (void)param;
     char message[512] = {0};
@@ -69,10 +72,13 @@ void *rec_func(void *param) {
                 }
                 mx_push_back(&cur_client.chats, new_chat);
 
+                add_chat_node(new_chat);
+
                 /*
                 Дим, тут данные о новом чате приняты на клиент, добавляй на локальную бд
                 */
-
+                
+            
                 //printf("%s gets chat %s\n", cur_client->login, new_chat->name);
                 printf("> ");
                 fflush(stdout);
@@ -92,94 +98,10 @@ void *rec_func(void *param) {
     return NULL;
 
 }
-
-static void load_css()
-{
+static void load_css() {
     t_screen.provider = gtk_css_provider_new();
     gtk_css_provider_load_from_path(t_screen.provider,"client/themes/dark.css");
 }
-
-
-
-int x = 0,y = 0;
-
-gboolean key_press_event(GtkEventControllerKey *controller,
-               guint                  keyval,
-               guint                  keycode,
-               GdkModifierType        state,
-               gpointer               user_data) {
-    (void)controller;
-    (void)keycode;
-    (void)state;
-    (void)user_data;
-    switch(keyval) {
-        case GDK_KEY_Down:
-            y--;
-            break;
-        case GDK_KEY_Up:
-            y++;
-            break;
-        case GDK_KEY_Left:
-            x++;
-            break;
-        case GDK_KEY_Right:
-            x--;
-            break;
-    }
-    
-    gtk_widget_queue_draw(GTK_WIDGET(user_data));
-
-    return TRUE;
-}
-
-
-static void draw_circle(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpointer data) {
-    (void)widget;
-    (void)w;
-    (void)h;
-
-    cairo_surface_t *image = (cairo_surface_t *)data;
-    cairo_surface_t *target = cairo_image_surface_create(cairo_image_surface_get_format(image), 128, 128); //gdk_surface_create_similar_surface(GDK_SURFACE (image), cairo_surface_get_content(image), cairo_image_surface_get_width(image), cairo_image_surface_get_height(image));
-    cairo_t *cr_new = cairo_create(target);    
-    cairo_set_source_surface (cr, image, x, y);
-    
-    cairo_arc(cr, 64, 64, 60, 0, 2 * M_PI);
-    cairo_clip(cr);
-    //cairo_fill(cr);
-    cairo_paint(cr);
-
-    cairo_set_source_surface (cr_new, image, 1, 1);
-
-    
-    cairo_arc(cr_new, x, y, 60, 0, 2 * M_PI);
-    cairo_clip(cr_new);
-    cairo_paint(cr_new);
-
-    //cairo_fill(cr);
-    cairo_surface_write_to_png (target, "output.png");
-    //return FALSE;
-}
-
-static void main_chat(GtkWidget *window) {
-    GtkWidget *main_box = NULL;//, *logo_box = NULL,  *logo = NULL, *text_next_logo = NULL;
-    main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_size_request(GTK_WIDGET(main_box), 1100, 0);
-    gtk_widget_set_halign(GTK_WIDGET(main_box), GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(GTK_WIDGET(main_box), GTK_ALIGN_CENTER);
-    
-    GtkStackSidebar *left_sidebar = gtk_stack_sidebar_new();
-
-    GtkStack *stack;
-
-    gtk_box_set_spacing (GTK_BOX(main_box), 0);
-
-    gtk_window_set_child(GTK_WINDOW(window), main_box);
-
-
-
-    gtk_widget_show(window);
-}
-
 
  void send_login(GtkWidget *widget, gpointer data) {
     (void)widget;
@@ -208,7 +130,9 @@ static void main_chat(GtkWidget *window) {
     switch(status) {
         case 0:
             break;
-        default:{   
+        default:{
+            mx_strdel(&cur_client.login);
+            mx_strdel(&cur_client.passwd);   
             gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessageLogin), "INCORRECT LOGIN OR PASSWORD");
             gtk_widget_show(t_auth.ErrorMessageLogin); 
             return;
@@ -220,6 +144,8 @@ static void main_chat(GtkWidget *window) {
         case 0:
             break;
         default:{
+            mx_strdel(&cur_client.login);
+            mx_strdel(&cur_client.passwd);
             gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessageLogin), "INCORRECT LOGIN OR PASSWORD");
             gtk_widget_show(t_auth.ErrorMessageLogin); 
             return;
@@ -239,6 +165,8 @@ static void main_chat(GtkWidget *window) {
     recv(cur_client.serv_fd, &err_aut, sizeof(bool), 0); // Ожидание ответа от сервера об успешности входа или регистрации
     
     if (err_aut) {
+        mx_strdel(&cur_client.login);
+        mx_strdel(&cur_client.passwd);
         gtk_label_set_label(GTK_LABEL(t_auth.ErrorMessageLogin), "INCORRECT LOGIN OR PASSWORD");
         gtk_widget_show(t_auth.ErrorMessageLogin);
         mx_printerr("login err\n");
@@ -248,7 +176,7 @@ static void main_chat(GtkWidget *window) {
     
     gtk_widget_unparent(child);
     // можем заходить в чат, вход успешен
-    main_chat(t_screen.main_window);
+    chat_show_main_screen(t_screen.main_window);
 }
 
 static void activate(GtkApplication *application)
@@ -287,13 +215,6 @@ int main(int argc, char *argv[]) {
     connect(cur_client.serv_fd, (struct sockaddr *)&adr, sizeof(adr));
     inet_pton(AF_INET, argv[1], &adr.sin_addr); //"127.0.0.1"
     cur_client.adr = adr;
-
-    GtkApplication *application;
-    gint status;
-    application = gtk_application_new("my.first.app", G_APPLICATION_FLAGS_NONE);
-    g_signal_connect(application, "activate", G_CALLBACK(activate), NULL);
-    status = g_application_run(G_APPLICATION(application), FALSE, NULL);
-
     // Запуск потоков для приёма и отправки сообщений, будем смотреть. Может, придётся переделать под события из гтк
     pthread_t sender_th;
     pthread_t rec_th;
@@ -301,9 +222,18 @@ int main(int argc, char *argv[]) {
     pthread_create(&sender_th, NULL, sender_func, &cur_client);
     pthread_create(&rec_th, NULL, rec_func, &cur_client.serv_fd);
 
+    GtkApplication *application;
+    gint status;
+    application = gtk_application_new("my.first.app", G_APPLICATION_FLAGS_NONE);
+    g_signal_connect(application, "activate", G_CALLBACK(activate), NULL);
+    status = g_application_run(G_APPLICATION(application), FALSE, NULL);
+
+
     //ожидание завершения потоков, если нужно добавить код, то добавлять до этих функций
     pthread_join(sender_th, NULL);
     pthread_join(rec_th, NULL);
+
+
 
     close(cur_client.serv_fd);
 

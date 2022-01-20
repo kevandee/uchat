@@ -25,6 +25,11 @@ void clear_message(char *mes, const int size);
 
 struct
 {
+    GtkWidget *scroll_box;
+}   t_main;
+
+struct
+{
     GtkWidget *LOGIN_menu;
     GtkWidget *REGISTRATION_menu;
     GtkWidget *ErrorMessageLogin;
@@ -43,9 +48,14 @@ void chat_show_auth_screen();
 void chat_decorate_headerbar();
 void send_login(GtkWidget *widget, gpointer data);
 
+void chat_show_main_screen(GtkWidget *window);
+void add_chat_node(t_chat *chat);
+
 int check_auth_input(const char *str);
 
 cairo_surface_t *get_surface_from_jpg(const char *filename);
 cairo_surface_t *scale_to_half(cairo_surface_t *s, int orig_width, int orig_height, int scaled_width, int scaled_height);
+
+GtkWidget *get_circle_widget_from_png(const char *filename);
 
 #endif

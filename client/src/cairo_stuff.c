@@ -1,5 +1,38 @@
 #include "../inc/uch_client.h"
 
+static void draw_circle(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpointer data) {
+    (void)widget;
+    (void)w;
+    (void)h;
+
+    cairo_surface_t *image = (cairo_surface_t *)data;
+    cairo_set_source_surface (cr, image, 0, 0); 
+    
+    cairo_arc(cr, 30, 30, 30, 0, 2 * M_PI);
+    cairo_clip(cr);
+    cairo_paint(cr);
+}
+
+GtkWidget *get_circle_widget_from_png(const char *filename) {
+    GtkWidget *darea = NULL;
+    gint width, height;
+    
+    cairo_surface_t *image = cairo_image_surface_create_from_png(filename);
+    width = cairo_image_surface_get_width(image);
+    height = cairo_image_surface_get_height(image);
+    
+    cairo_surface_t *scaled_image = scale_to_half(image, width, height, 60, 60);
+    width = cairo_image_surface_get_width(scaled_image);
+    height = cairo_image_surface_get_height(scaled_image);
+
+    darea = gtk_drawing_area_new();
+    gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 60);
+    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 60);
+    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle, scaled_image, NULL);
+
+    return GTK_WIDGET (darea);
+}
+
 cairo_surface_t *get_surface_from_jpg(const char *filename) {
         GdkPixbuf *pixbuf;
         gint width;
@@ -91,3 +124,64 @@ cairo_surface_t *scale_to_half(cairo_surface_t *s, int orig_width, int orig_heig
     
     gtk_box_append (GTK_BOX(main_box), darea);
     */
+
+
+   /*const gchar *c = NULL;
+
+    GtkStackSidebar *left_sidebar = GTK_STACK_SIDEBAR (gtk_stack_sidebar_new());
+    gtk_widget_set_size_request(GTK_WIDGET(left_sidebar), 200, 600);
+    stack = GTK_STACK(gtk_stack_new());
+    gtk_stack_set_transition_type(stack, GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);
+    //gtk_stack_add_titled(stack, gtk_label_new("1"), "cock", "2");
+    //gtk_stack_add_titled(stack, gtk_label_new("1"), "cock", "3");
+    //gtk_stack_add_titled(stack, gtk_label_new("1"), "cock", "4");
+    
+
+    GtkWidget *widget;
+
+      for (int i=0; (c = *(pages+i)) != NULL; i++ )
+        {
+          
+            widget = gtk_label_new (c);
+            gtk_widget_set_size_request(GTK_WIDGET(widget), 200, 0);
+          //gtk_stack_add_named (GTK_STACK (stack), widget, c);
+         // gtk_container_child_set (GTK_CONTAINER (stack), widget, "title", c, NULL);
+         gtk_stack_add_titled(stack, widget, mx_itoa(i), c);
+        }
+
+       
+    gtk_stack_sidebar_set_stack(left_sidebar, stack);*/
+
+
+/*
+int x = 0,y = 0;
+
+gboolean key_press_event(GtkEventControllerKey *controller,
+               guint                  keyval,
+               guint                  keycode,
+               GdkModifierType        state,
+               gpointer               user_data) {
+    (void)controller;
+    (void)keycode;
+    (void)state;
+    (void)user_data;
+    switch(keyval) {
+        case GDK_KEY_Down:
+            y--;
+            break;
+        case GDK_KEY_Up:
+            y++;
+            break;
+        case GDK_KEY_Left:
+            x++;
+            break;
+        case GDK_KEY_Right:
+            x--;
+            break;
+    }
+    
+    gtk_widget_queue_draw(GTK_WIDGET(user_data));
+
+    return TRUE;
+}
+*/
