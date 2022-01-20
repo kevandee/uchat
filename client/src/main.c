@@ -191,14 +191,14 @@ static void main_chat(GtkWidget *window) {
     int password_len = gtk_entry_buffer_get_length(password_field_buf);
 
     if (login_len < 6 || login_len > 20) {
-        // Error
-
+        gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessageLogin), "LOGIN MUST CONTAIN MORE THAN 3 CHARACTERS");
+        gtk_widget_show(t_auth.ErrorMessageLogin);
         return;
     }
 
     if (password_len < 8 || password_len > 16) {
-        // Error
-
+        gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessageLogin), "PASSWORD MUST CONTAIN MORE THAN 8 CHARACTERS");
+        gtk_widget_show(t_auth.ErrorMessageLogin);
         return;
     }
     
@@ -208,30 +208,22 @@ static void main_chat(GtkWidget *window) {
     switch(status) {
         case 0:
             break;
-        case -1:
-            // несколько точек подряд
+        default:{   
+            gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessageLogin), "INCORRECT LOGIN OR PASSWORD");
+            gtk_widget_show(t_auth.ErrorMessageLogin); 
             return;
-        case -2:
-            // точка в начале или конце
-            return;
-        default:
-            // запрещённый символ, переменная status == этому символу
-            return;
+        }
     }
 
     status = check_auth_input(cur_client.passwd);
     switch(status) {
         case 0:
             break;
-        case -1:
-            // несколько точек подряд
+        default:{
+            gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessageLogin), "INCORRECT LOGIN OR PASSWORD");
+            gtk_widget_show(t_auth.ErrorMessageLogin); 
             return;
-        case -2:
-            // точка в начале или конце
-            return;
-        default:
-            // запрещённый символ, переменная status == этому символу
-            return;
+        }
     }
 
     char message[32] = {0};
@@ -247,7 +239,8 @@ static void main_chat(GtkWidget *window) {
     recv(cur_client.serv_fd, &err_aut, sizeof(bool), 0); // Ожидание ответа от сервера об успешности входа или регистрации
     
     if (err_aut) {
-        // ошибка
+        gtk_label_set_label(GTK_LABEL(t_auth.ErrorMessageLogin), "INCORRECT LOGIN OR PASSWORD");
+        gtk_widget_show(t_auth.ErrorMessageLogin);
         mx_printerr("login err\n");
         return;
     }

@@ -51,7 +51,7 @@ headerbar{
   font-family: 'Helvetica Neue';
 }
 
-#error
+.error
 {
   color: red;
 }
