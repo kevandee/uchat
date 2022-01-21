@@ -17,6 +17,8 @@ void *client_work(void *param) {
     char choise;
 
     bool err_msg = true;
+    printf("1\n");
+
     while (err_msg) {
         // sign up or sign in
         if(recv(cur->cl_socket, &choise, 1, 0) <= 0) {
@@ -48,7 +50,7 @@ void *client_work(void *param) {
         }
         //recv_jpeg(cur->cl_socket, "received.jpg");
         //DB SWITH
-        printf("%c || %s || %s\n", choise, login, passwd);
+        printf("%c || %s || %s\n", choise, cur->login, cur->passwd);
         switch(choise) {
             case 'u': {
                 char *query = NULL;
@@ -81,6 +83,7 @@ void *client_work(void *param) {
                 char *query = NULL;
                 char *sql_pattern = NULL;
                 t_list *list = NULL;
+                
                 sql_pattern = "SELECT EXISTS (SELECT id FROM users WHERE login=('%s') AND password=('%s'));";
                 // 1 = nachol
                 // 0 = ne nachol
@@ -108,7 +111,6 @@ void *client_work(void *param) {
         }
     }
     
-    
     // auth success
 
     switch (choise) {
@@ -120,9 +122,10 @@ void *client_work(void *param) {
             //get_client_data(&cur);
             break;
     }
-
     
     send(cur->cl_socket, &err_msg,sizeof(bool), 0);
+    
+    send_all_user_data(cur);
     sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
     printf("%s", buff_out);
     sprintf(buff_out, "%s has joined\n", cur->login);
@@ -205,12 +208,10 @@ void *client_work(void *param) {
                 temp_list = temp_list->next;
             }
 
-            get_user_info(1);
-
             // отправка на клиенты
             pthread_mutex_lock(&send_mutex);
 
-            send_new_chat(&new_chat);
+            send_new_chat(new_chat);
 
             mx_push_back(&cur->chats, new_chat);
             printf("added\n");
@@ -323,7 +324,7 @@ int main(int argc, char *argv[]) {
         new_client->chats = NULL;
         t_chat init_chat = {0};
         new_client->cur_chat = init_chat;
-
+    
         printf("id %d\n", client_id);
         
         client_id++;

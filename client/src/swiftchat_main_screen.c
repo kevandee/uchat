@@ -15,7 +15,11 @@ void chat_show_main_screen(GtkWidget *window) {
     
     t_chat pop_smoke;
     mx_strcpy(pop_smoke.name, "Pop Smoke");
-    add_chat_node(&pop_smoke);
+    t_list *chats = cur_client.chats;
+    while (chats) {
+        add_chat_node(chats->data);
+        chats = chats->next;
+    }
     
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (scrolled_window),t_main.scroll_box);
 
