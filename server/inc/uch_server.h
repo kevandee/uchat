@@ -35,9 +35,12 @@ char *get_weather(char *city);
 
 void sqlite3_create_db();
 void *sqlite3_exec_db(char *query, int type);
-int get_user_id(char *name);
+int get_user_id(char *login);
+char *get_user_login(int id);
 int get_chat_id(char *name);
 int get_chat_members(int id);
 t_list *get_chat_users(int c_id);
+t_chat *chat_info (int c_id);
+t_client *get_user_info(int id);
 
 #endif

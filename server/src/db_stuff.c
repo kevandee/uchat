@@ -13,12 +13,12 @@ void sqlite3_create_db() {
             exit(EXIT_FAILURE);
         }
         sql = mx_strrejoin(sql, "PRAGMA encoding = \"UTF-8\";");
-        sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, password TEXT NOT NULL);");
+        sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL);");
         sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER PRIMARY KEY, name TEXT NOT NULL, members INTEGER NOT NULL);");
         sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, admin BOOLEAN NOT NULL DEFAULT FALSE);");
         sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, date DATETIME NOT NULL, text TEXT DEFAULT NULL);");
-        sql = mx_strrejoin(sql, "INSERT INTO users (name, password) VALUES ('Dima123', 'Dimapassword');");
-        sql = mx_strrejoin(sql, "INSERT INTO users (name, password) VALUES ('Fibbs123', 'Mafilirkan');");
+        sql = mx_strrejoin(sql, "INSERT INTO users (login, password) VALUES ('Dima123', 'Dimapassword');");
+        sql = mx_strrejoin(sql, "INSERT INTO users (login, password) VALUES ('Fibbs123', 'Mafilirkan');");
         rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
         if (rc != SQLITE_OK) {
             fprintf(stderr, "Failed to select data\n");
@@ -71,13 +71,22 @@ void *sqlite3_exec_db(char *query, int type) {
     return NULL;
 }
 
-int get_user_id(char *name) {
+int get_user_id(char *login) {
     char *query = NULL;
-    char *sql_pattern = "SELECT id FROM users WHERE name = ('%s');";
-    asprintf(&query, sql_pattern, name);
+    char *sql_pattern = "SELECT id FROM users WHERE login = ('%s');";
+    asprintf(&query, sql_pattern, login);
     t_list *list = sqlite3_exec_db(query, 1);
     int u_id = mx_atoi(list->data);
     return u_id;
+}
+
+char  *get_user_login(int id) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT login FROM users WHERE id = (%d);";
+    asprintf(&query, sql_pattern, id);
+    t_list *list = sqlite3_exec_db(query, 1);
+    char *login = list->data;
+    return login;
 }
 
 int get_chat_id(char *name) {
@@ -89,10 +98,18 @@ int get_chat_id(char *name) {
     return c_id;
 }
 
-int get_chat_members(int id) {
+t_list *get_chats_id (int u_id) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT chat_id FROM members WHERE user_id = (%d);";
+    asprintf(&query, sql_pattern, u_id);
+    t_list *list = sqlite3_exec_db(query, 1);
+    return list;
+}
+
+int get_chat_members(int c_id) {
     char *query = NULL;
     char *sql_pattern = "SELECT members FROM chats WHERE id = (%d);";
-    asprintf(&query, sql_pattern, id);
+    asprintf(&query, sql_pattern, c_id);
     t_list *list = sqlite3_exec_db(query, 1);
     int mc = mx_atoi(list->data);
     return mc;
@@ -100,9 +117,40 @@ int get_chat_members(int id) {
 
 t_list *get_chat_users(int c_id) {
     char *query = NULL;
-    char *sql_pattern = "SELECT name FROM users INNER JOIN members ON users.id=members.user_id WHERE members.chat_id = (%d);";
+    char *sql_pattern = "SELECT login FROM users INNER JOIN members ON users.id=members.user_id WHERE members.chat_id = (%d);";
     asprintf(&query, sql_pattern, c_id);
     t_list *list = sqlite3_exec_db(query, 1);
     return list;
 }
+
+t_chat *chat_info (int c_id) {
+    t_chat *chat = (t_chat *)malloc(sizeof(t_chat));
+    char *query = NULL;
+    char *sql_pattern = "SELECT name, members FROM chats WHERE id = (%d);";
+    asprintf(&query, sql_pattern, c_id);
+    t_list *list = sqlite3_exec_db(query, 1);
+    char *temp = mx_strdup(list->data);
+    mx_strcpy(chat->name, temp);
+    chat->count_users = mx_atoi(list->next->data);
+    chat->users = get_chat_users(c_id);
+    return chat;
+}
+
+t_client *get_user_info(int id) {
+    t_client *user = (t_client *)malloc(sizeof(t_client));
+    user->login = get_user_login(id);
+    t_list *chats_id = get_chats_id(id);
+    t_list *chats_info = NULL;
+    int i = 0;
+    while(chats_id != NULL && chats_id->data != NULL) {
+        i++;
+        mx_push_back(&chats_info, chat_info(mx_atoi(chats_id->data)));
+        chats_id = chats_id->next;
+    
+    }
+    user->chat_count = i;
+    user->chats = chats_info;
+    return user;
+ }
+
 

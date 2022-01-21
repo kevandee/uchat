@@ -54,7 +54,7 @@ void *client_work(void *param) {
                 char *query = NULL;
                 char *sql_pattern = NULL;
                 t_list *list = NULL;
-                sql_pattern = "SELECT EXISTS (SELECT id FROM users WHERE name=('%s'));";
+                sql_pattern = "SELECT EXISTS (SELECT id FROM users WHERE login=('%s'));";
                 // 1 = nachol
                 // 0 = ne nachol
                 asprintf(&query, sql_pattern, cur->login);
@@ -62,14 +62,14 @@ void *client_work(void *param) {
                 printf("list head = '%s' \n", list->data);
                 if (strcmp(list->data, "0") == 0) {
                     //REGESTRATION TO DB
-                    sql_pattern = "INSERT INTO users (name, password) VALUES ('%s', '%s');";
+                    sql_pattern = "INSERT INTO users (login, password) VALUES ('%s', '%s');";
                     asprintf(&query, sql_pattern, cur->login, cur->passwd);
                     sqlite3_exec_db(query, 2);
                     const bool success_reg = false;
                     send(cur->cl_socket, &success_reg, sizeof(bool), 0);
                 }
                 else {
-                    //NAME ALREDAY TAKEN
+                    //LOGIN ALREDAY TAKEN
                     send(cur->cl_socket, &err_msg, sizeof(bool), 0);
                 }
                 /*mx_clear_list(&list);
@@ -81,7 +81,7 @@ void *client_work(void *param) {
                 char *query = NULL;
                 char *sql_pattern = NULL;
                 t_list *list = NULL;
-                sql_pattern = "SELECT EXISTS (SELECT id FROM users WHERE name=('%s') AND password=('%s'));";
+                sql_pattern = "SELECT EXISTS (SELECT id FROM users WHERE login=('%s') AND password=('%s'));";
                 // 1 = nachol
                 // 0 = ne nachol
                 asprintf(&query, sql_pattern, cur->login, cur->passwd);
@@ -91,7 +91,7 @@ void *client_work(void *param) {
                     //USER FOUND
                     err_msg = false;
 
-                    sql_pattern = "SELECT id FROM users WHERE name=('%s') AND password=('%s');";
+                    sql_pattern = "SELECT id FROM users WHERE login=('%s') AND password=('%s');";
                     asprintf(&query, sql_pattern, cur->login, cur->passwd);
                     list = sqlite3_exec_db(query, 1);
                     cur->id = mx_atoi(list->data);
@@ -107,6 +107,7 @@ void *client_work(void *param) {
             }
         }
     }
+    
     
     // auth success
 
@@ -203,6 +204,8 @@ void *client_work(void *param) {
                 sqlite3_exec_db(query, 2);
                 temp_list = temp_list->next;
             }
+
+            get_user_info(1);
 
             // отправка на клиенты
             pthread_mutex_lock(&send_mutex);
