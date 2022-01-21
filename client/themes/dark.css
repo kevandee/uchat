@@ -103,4 +103,14 @@ headerbar{
   color: rgb(165, 165, 165);
 }
 
+#search_field{
+  background: grey;
+  border-radius: 50px;
+}
+#left_panel{
+  background-color: blue;
+  padding-right: 8px;
+  padding-left: 8px;
+  padding-top: 8px;
+}
 

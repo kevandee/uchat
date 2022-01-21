@@ -26,6 +26,7 @@ void clear_message(char *mes, const int size);
 struct
 {
     GtkWidget *scroll_box;
+    GtkWidget *search_panel;
 }   t_main;
 
 struct
