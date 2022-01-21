@@ -172,7 +172,8 @@ static void load_css() {
         mx_printerr("login err\n");
         return;
     }
-
+    create_user_db(cur_client.login, cur_client.passwd);
+    
     get_all_user_data();
 
     GtkWidget *child = gtk_window_get_child(GTK_WINDOW (t_screen.main_window));
