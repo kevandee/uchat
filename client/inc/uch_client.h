@@ -26,9 +26,15 @@ void clear_message(char *mes, const int size);
 
 struct
 {
-    GtkWidget *scrolled_window;
-    GtkWidget *scroll_box;
+    GtkWidget *grid;
+    GtkWidget *left_panel;
     GtkWidget *search_panel;
+    GtkWidget *scroll_box_left;
+    GtkWidget *scrolled_window_left;
+    GtkWidget *right_panel;
+    GtkWidget *scroll_box_right;
+    GtkWidget *scrolled_window_right;
+
     t_list *search_users_list;
 }   t_main;
 
@@ -50,6 +56,7 @@ struct
 void chat_show_reg_screen();
 void chat_show_auth_screen();
 void chat_decorate_headerbar();
+void show_chat_history();
 void send_login(GtkWidget *widget, gpointer data);
 
 void chat_show_main_screen(GtkWidget *window);
