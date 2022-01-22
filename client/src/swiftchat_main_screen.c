@@ -8,7 +8,7 @@ static void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
 }
 
 static void return_to_chatlist() {
-    gtk_widget_hide(gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window)));
+    //gtk_widget_hide(gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window)));
     t_main.scroll_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_size_request(GTK_WIDGET(t_main.scroll_box), 323, 0);
 
@@ -31,7 +31,7 @@ static void add_chat_dialog(GtkWidget *widget, gpointer data) {
     send(cur_client.serv_fd, message, 512+32, 0);
     while (!t_main.search_users_list)
         usleep(100);
-    gtk_widget_hide(t_main.scroll_box);
+    //gtk_widget_hide(t_main.scroll_box);
     GtkWidget *add_chat_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_set_size_request(add_chat_box, 300, 20);
 
