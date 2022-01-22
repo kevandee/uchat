@@ -1,6 +1,7 @@
 #include "../inc/uch_client.h"
 
 t_client cur_client;
+pthread_mutex_t cl_mutex;
 
 void *sender_func(void *param) {
     (void)param;
@@ -36,13 +37,13 @@ void *rec_func(void *param) {
     }
     int fd = cur_client.serv_fd;
     (void)param;
-    char message[512] = {0};
+    char message[512 + 32] = {0};
     while (1) {
-		int receive = recv(fd, message, 512, 0);
-        
+		int receive = recv(fd, message, 512 + 32, 0);
+
         if (receive > 0) {
             printf("|%s|\n", message);
-            if(mx_strcmp(mx_strtrim(message), "add chat") == 0) {
+            if(mx_strcmp(mx_strtrim(message), "<add chat>") == 0) {
                 t_chat *new_chat = (t_chat *)malloc(sizeof(t_chat));
                 new_chat->messages = NULL;
                 new_chat->users = NULL;
@@ -83,7 +84,22 @@ void *rec_func(void *param) {
                 printf("> ");
                 fflush(stdout);
             }
-            else {
+            else if (mx_strcmp(mx_strtrim(message), "<users list>") == 0) {
+                pthread_mutex_lock(&cl_mutex);
+                t_list *users_list = NULL;
+                int count_users;
+                recv(cur_client.serv_fd, &count_users, sizeof(int), 0);
+                for (int i = 0; i < count_users; i++) {
+                    printf("reseive\n");
+                    char buf[20] = {0};
+                    recv_all(cur_client.serv_fd, buf, 20);
+                    mx_push_back(&users_list, mx_strtrim(buf));
+                }
+                t_main.search_users_list = users_list;
+                pthread_mutex_unlock(&cl_mutex);
+
+            }
+            else{
                 printf("%s\n", message);
                 printf("> ");
                 fflush(stdout);
@@ -221,7 +237,7 @@ int main(int argc, char *argv[]) {
     // Запуск потоков для приёма и отправки сообщений, будем смотреть. Может, придётся переделать под события из гтк
     pthread_t sender_th;
     pthread_t rec_th;
-    
+    pthread_mutex_init(&cl_mutex, NULL);
     pthread_create(&sender_th, NULL, sender_func, &cur_client);
     pthread_create(&rec_th, NULL, rec_func, &cur_client.serv_fd);
 

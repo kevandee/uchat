@@ -140,25 +140,19 @@ void *client_work(void *param) {
 			printf("%s", buff_out);
             is_run = false;
         }
-        else if (mx_strcmp(message, "users") == 0) {
-            char *table = NULL;
-            t_list *users_tmp = users_list;
-            int i = 1;
-            while (users_tmp) {
-                t_client *cl_tmp = (t_client *)(users_tmp->data);
-                if (cl_tmp->login) {
-                    char *num = mx_itoa(i);
-                    table = mx_strjoin(table, num);
-                    mx_strdel(&num);
-                    table = mx_strjoin(table, ". ");
-                    table = mx_strjoin(table, cl_tmp->login);
-                    table = mx_strjoin(table, "\n");
-                    i++;
-                }
-
-                users_tmp = users_tmp->next;
+        else if (mx_strcmp(message, "<users list>") == 0) {
+            send_all(cur->cl_socket, "<users list>", 13);
+            t_list *users_l = sqlite3_exec_db("SELECT login FROM users", 1);
+            
+            int users_count = mx_list_size(users_l);
+            printf("users count %d\n", users_count);
+            send(cur->cl_socket, &users_count, sizeof(int), 0);
+            while (users_l) {
+                char buf[20] = {0};
+                sprintf(buf, "%s", users_l->data);
+                send_all(cur->cl_socket, buf, 20);
+                users_l = users_l->next;
             }
-            send(cur->cl_socket, table, mx_strlen(table), 0);
             clear_message(message, MAX_LEN + NAME_LEN);
             continue;
         }

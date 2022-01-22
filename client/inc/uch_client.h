@@ -20,13 +20,16 @@
 #include <gtk/gtk.h>
 
 extern t_client cur_client;
+extern pthread_mutex_t cl_mutex;
 
 void clear_message(char *mes, const int size);
 
 struct
 {
+    GtkWidget *scrolled_window;
     GtkWidget *scroll_box;
     GtkWidget *search_panel;
+    t_list *search_users_list;
 }   t_main;
 
 struct

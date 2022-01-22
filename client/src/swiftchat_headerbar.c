@@ -34,5 +34,7 @@ void chat_decorate_headerbar()
     load_css_headerbar(headerbar_button2);
     load_css_headerbar(headerbar_button3);
     gtk_window_set_titlebar (GTK_WINDOW(t_screen.main_window), t_screen.headerbar);
+
+    //gtk_header_bar_set_title_widget();
 }
 
