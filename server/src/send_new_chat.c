@@ -8,7 +8,6 @@ void send_new_chat(t_chat *new_chat) {
         t_client *client = get_client_by_name(users->data);
 
         if (client) {
-            printf("chat sended to %s\n", client->login);
             char msg[512 + 32] = {0};
             sprintf(msg, "%s", "<add chat>");
             send_all(client->cl_socket, msg, 512 + 32);

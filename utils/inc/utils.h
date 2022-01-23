@@ -44,6 +44,7 @@ typedef struct s_client {
 
     int id_cur_chat; // id чата в бд
     t_chat cur_chat;
+    bool sender_new_chat;
 }              t_client;
 
 void send_image(int socket, char *file);
