@@ -156,24 +156,30 @@ void *client_work(void *param) {
             clear_message(message, MAX_LEN + NAME_LEN);
             continue;
         }
-        else if (mx_strncmp(message,"<add chat>",10) == 0) {
+        else if (mx_strncmp(message,"<add chat, name=",16) == 0) {
             // работа со строкой, будет всё переделано под гтк
-            char *trim = message + 10;
-
+            printf("%s\n", message);
+            char *temp = message + 16;
+            int len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            char *name = mx_strndup(message + 16, len);
             char **arr = NULL;
-            arr = mx_strsplit(trim, ' ');
+            arr = mx_strsplit(mx_strchr(message, '>') + 1, ' ');
             t_chat *new_chat = (t_chat *)malloc(sizeof(t_chat));
             new_chat->users=NULL;
             
-            mx_strcpy(new_chat->name, arr[0]);
+            mx_strcpy(new_chat->name, name);
+            mx_strdel(&name);
             int i;
             mx_push_back(&new_chat->users, mx_strdup(cur->login));
-            for (i = 1; arr[i]; i++) {
+            for (i = 0; arr[i]; i++) {
                 printf("arr %s\n", arr[i]);
                 mx_push_back(&new_chat->users, mx_strdup(arr[i]));
             } 
             new_chat->messages = NULL;
-            new_chat->count_users = i;
+            new_chat->count_users = i + 1;
             
             //ADD TO TABLES CHAT AND MEMBERS
             char *query = NULL;

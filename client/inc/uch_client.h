@@ -36,6 +36,7 @@ struct
     GtkWidget *scrolled_window_right;
 
     t_list *search_users_list;
+    t_list *check_buttons_user_list;
 }   t_main;
 
 struct

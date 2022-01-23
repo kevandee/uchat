@@ -72,8 +72,13 @@ void *rec_func(void *param) {
                     clear_message(buf, 32);
                 }
                 mx_push_back(&cur_client.chats, new_chat);
-
-                add_chat_node(new_chat);
+                if (!cur_client.sender_new_chat){
+                    add_chat_node(new_chat);
+                }
+                else {
+                    cur_client.sender_new_chat = false;
+                }
+                cur_client.chat_count++;
                 printf("chat added\n");
                 /*
                 Дим, тут данные о новом чате приняты на клиент, добавляй на локальную бд

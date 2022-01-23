@@ -65,10 +65,18 @@ headerbar{
 }
 
 /* Add chat container */
+#create_chat_group_name_text {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #C0C0C0;
+  margin-top: 20px;
+  margin-bottom: 8px;
+}
 
-
-
-
+scrolledwindow {
+  background: transparent;
+}
 
 #right_panel{
   color: white;
@@ -79,4 +87,3 @@ headerbar{
 #left_scroll{
   background-color: red;
 }
-
