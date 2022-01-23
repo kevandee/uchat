@@ -74,7 +74,7 @@ void *rec_func(void *param) {
                 mx_push_back(&cur_client.chats, new_chat);
 
                 add_chat_node(new_chat);
-
+                printf("chat added\n");
                 /*
                 Дим, тут данные о новом чате приняты на клиент, добавляй на локальную бд
                 */
@@ -99,8 +99,28 @@ void *rec_func(void *param) {
                 pthread_mutex_unlock(&cl_mutex);
 
             }
-            else{
-                printf("%s\n", message);
+            else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0){
+                char *temp = message + 14;
+                int len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *c_id = mx_strndup(temp, len);
+                printf("%s\n", c_id);
+                int chat_id = mx_atoi(c_id);                        // ид чата, в который надо вставить сообщение
+                (void)chat_id; // избавляюсь от unused variable
+                mx_strdel(&c_id);
+                temp = mx_strstr(message, "from=") + 5;
+                len = 0;
+                while (*(temp + len) != '>') {
+                    len++;
+                }
+                char *sender = mx_strndup(temp, len);              // отправитель
+                printf("%s\n", sender);
+                char *total_msg = mx_strchr(message, '>') + 1;     // сообщение
+                                                                   // время надо получить локально на клиенте
+                
+                printf("%s\n", total_msg);
                 printf("> ");
                 fflush(stdout);
             }

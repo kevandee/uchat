@@ -9,9 +9,9 @@ void send_new_chat(t_chat *new_chat) {
 
         if (client) {
             printf("chat sended to %s\n", client->login);
-            char msg[512] = {0};
-            sprintf(msg, "%s", "add chat");
-            send_all(client->cl_socket, msg, 512);
+            char msg[512 + 32] = {0};
+            sprintf(msg, "%s", "<add chat>");
+            send_all(client->cl_socket, msg, 512 + 32);
             char buf[256] = {0};
             sprintf(buf, "%s",(new_chat)->name);
             printf("name: %s\n", (new_chat)->name);

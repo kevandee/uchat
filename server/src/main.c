@@ -156,9 +156,9 @@ void *client_work(void *param) {
             clear_message(message, MAX_LEN + NAME_LEN);
             continue;
         }
-        else if (mx_strncmp(message,"add chat",8) == 0) {
+        else if (mx_strncmp(message,"<add chat>",10) == 0) {
             // работа со строкой, будет всё переделано под гтк
-            char *trim = message + 9;
+            char *trim = message + 10;
 
             char **arr = NULL;
             arr = mx_strsplit(trim, ' ');
@@ -183,7 +183,6 @@ void *client_work(void *param) {
             int *data = sqlite3_exec_db(query, 2);
             int c_id = data[0];
             new_chat->id = c_id;
-            printf("c_id: %i\n", c_id);
             t_list *temp_list = new_chat->users;
             int admin = 1;
             while (temp_list) {
@@ -221,11 +220,11 @@ void *client_work(void *param) {
             char *query = NULL;
             char *sql_pattern = NULL;
             t_list *list = NULL;
-            sql_pattern = "SELECT EXISTS (SELECT id FROM chats WHERE name=('%s'));";
+            sql_pattern = "SELECT EXISTS (SELECT name FROM chats WHERE id=('%d'));";
             asprintf(&query, sql_pattern, trim);
             list = sqlite3_exec_db(query, 1);
             if (strcmp(list->data, "1") == 0) {
-                sql_pattern = "SELECT name FROM chats WHERE name=('%s');";
+                sql_pattern = "SELECT name FROM chats WHERE id=('%s');";
                 asprintf(&query, sql_pattern, trim);
                 list = sqlite3_exec_db(query, 1);
                 char *c_name = mx_strdup(list->data);
@@ -254,6 +253,24 @@ void *client_work(void *param) {
                 //NO SUCH CHAT
             }
         } 
+        else if (mx_strncmp(message, "<msg, chat_id=", 13) == 0) {
+            char *temp = message + 15;
+            int len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            char *c_id = mx_strndup(temp, len);
+            printf("%s\n", c_id);
+            int chat_id = mx_atoi(c_id);
+            mx_strdel(&c_id);
+            if (chat_id != cur->cur_chat.id) {
+                printf("change chat\n");
+                change_chat_by_id(chat_id, cur);
+            }
+
+            send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat);
+            clear_message(message, MAX_LEN + NAME_LEN);
+        }
         else if (mes_stat > 0) {
             printf("Message Received from %s | %s |\n", login, message);
 		    if(cur->cur_chat.id != 0){

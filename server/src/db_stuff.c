@@ -125,6 +125,7 @@ t_list *get_chat_users(int c_id) {
 
 t_chat *chat_info (int c_id) {
     t_chat *chat = (t_chat *)malloc(sizeof(t_chat));
+    chat->id = c_id;
     char *query = NULL;
     char *sql_pattern = "SELECT name, members FROM chats WHERE id = (%d);";
     asprintf(&query, sql_pattern, c_id);

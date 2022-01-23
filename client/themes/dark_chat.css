@@ -1,0 +1,54 @@
+headerbar{
+  min-height: 26px;
+  padding-left: 8px;
+  background: transparent;
+  border-color: transparent;
+  background-image: linear-gradient(to right, blue 38%, rgb(22, 33, 44) 25%, rgb(22, 33, 44) 75%);
+  /* Name of the window */
+  color: transparent;
+  font-size: 13px;
+  font-family: 'Helvetica Neue';
+}
+
+#close{
+  -gtk-icon-size: 12px;
+}
+#minimize{
+  -gtk-icon-size: 12px;
+}
+#maximize{
+  -gtk-icon-size: 12px;
+}
+
+/*MAIN WINDOW*/
+.AUTH_window
+{
+  font-family: cursive;
+  background-image: linear-gradient(to right, blue 38%, rgb(22, 33, 44) 25%, rgb(22, 33, 44) 75%);
+  border-radius: 10px;
+  border-color: #ffffff;
+  opacity: 1;
+}
+
+#search_field{
+  background: grey;
+  border-radius: 50px;
+}
+#left_panel{
+  border-color: transparent;
+  background: transparent;
+  padding-right: 8px;
+  padding-left: 8px;
+  padding-top: 8px;
+}
+#right_panel{
+  color: white;
+  font-size: 20px;
+  font-family: 'Bradley Hand';
+}
+
+#left_scroll{
+  background-color: red;
+}
+
+

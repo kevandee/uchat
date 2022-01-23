@@ -16,6 +16,7 @@ void send_all_user_data(t_client *client) {
         printf("name: %s\n", (chat)->name);
         send_all(client->cl_socket, (chat)->name, 256);
         send(client->cl_socket, &(chat)->id, sizeof(int), 0);
+        printf("id: %d\n", (chat)->id); 
         printf("count users: %d\n", (chat)->count_users);
         send(client->cl_socket, &(chat)->count_users, sizeof(int), 0);
         t_list *temp_l = (chat)->users;

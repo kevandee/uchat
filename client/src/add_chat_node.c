@@ -18,5 +18,8 @@ void add_chat_node(t_chat *chat) {
     gtk_box_append (GTK_BOX(chat_info), chat_name);
 
     gtk_button_set_child(GTK_BUTTON (child_widget), chat_info);
-    gtk_box_append(GTK_BOX(t_main.scroll_box), child_widget);
+    //переход в историю чатов, в файле мейн скрин
+
+    g_signal_connect(child_widget, "clicked", G_CALLBACK(show_chat_history), chat);
+    gtk_box_append(GTK_BOX(t_main.scroll_box_left), child_widget);
 }

@@ -29,6 +29,7 @@ void send_all_user_data(t_client *client);
 void send_message(char *mes, char *sender, t_chat *chat);
 void clear_message(char *mes, const int size);
 void send_new_chat(t_chat *new_chat);
+void change_chat_by_id(int id, t_client *cur);
 
 void free_client(t_client **client, t_list **users_list);
 t_client *get_client_by_name(char *name);
