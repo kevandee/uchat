@@ -8,7 +8,7 @@ static void draw_circle(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpoin
     cairo_surface_t *image = (cairo_surface_t *)data;
     cairo_set_source_surface (cr, image, 0, 0); 
     
-    cairo_arc(cr, 30, 30, 30, 0, 2 * M_PI);
+    cairo_arc(cr, w/2, h/2, w/2, 0, 2 * M_PI);
     cairo_clip(cr);
     cairo_paint(cr);
 }
@@ -31,6 +31,27 @@ GtkWidget *get_circle_widget_from_png(const char *filename) {
     gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle, scaled_image, NULL);
 
     return GTK_WIDGET (darea);
+}
+
+GtkWidget *get_circle_widget_from_png_custom(const char *filename, gint width, gint height){
+    GtkWidget *darea = NULL;
+    gint org_width, org_height;
+
+    cairo_surface_t *image = cairo_image_surface_create_from_png(filename);
+    org_width = cairo_image_surface_get_width(image);
+    org_height = cairo_image_surface_get_height(image);
+    
+    cairo_surface_t *scaled_image = scale_to_half(image, org_width, org_height, width, height);
+    org_width = cairo_image_surface_get_width(scaled_image);
+    org_height = cairo_image_surface_get_height(scaled_image);
+
+    darea = gtk_drawing_area_new();
+    gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), width);
+    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), height);
+    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle, scaled_image, NULL);
+
+    return GTK_WIDGET (darea);
+
 }
 
 cairo_surface_t *get_surface_from_jpg(const char *filename) {

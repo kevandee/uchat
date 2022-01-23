@@ -3,7 +3,7 @@ headerbar{
   padding-left: 8px;
   background: transparent;
   border-color: transparent;
-  background-image: linear-gradient(to right, blue 38%, rgb(22, 33, 44) 25%, rgb(22, 33, 44) 75%);
+  background-image: transparent;
   /* Name of the window */
   color: transparent;
   font-size: 13px;
@@ -24,23 +24,52 @@ headerbar{
 .AUTH_window
 {
   font-family: cursive;
-  background-image: linear-gradient(to right, blue 38%, rgb(22, 33, 44) 25%, rgb(22, 33, 44) 75%);
+  background-image: linear-gradient(to right, #212D38 27.5%, rgb(22, 33, 44) 25%, rgb(22, 33, 44) 75%);
   border-radius: 10px;
   border-color: #ffffff;
   opacity: 1;
 }
 
-#search_field{
-  background: grey;
-  border-radius: 50px;
+/*Container with user avatar left-side main window*/
+#search_field {
+  background: #BEBEBE;
+  border:none;
+  border-radius: 20px;
+  margin-left: 10px;
+  min-height: 22px;
 }
-#left_panel{
+
+#home_icon {
+  -gtk-icon-size: 22px;
+  margin-left: 12px;
+}
+
+#settings_icon{
+  -gtk-icon-size: 22px;
+  margin-left: 12px;
+}
+
+#recent_text {
+  font-family: Arial, asns-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+}
+
+#left_panel {
   border-color: transparent;
   background: transparent;
   padding-right: 8px;
   padding-left: 8px;
   padding-top: 8px;
 }
+
+/* Add chat container */
+
+
+
+
+
 #right_panel{
   color: white;
   font-size: 20px;
@@ -50,5 +79,4 @@ headerbar{
 #left_scroll{
   background-color: red;
 }
-
 

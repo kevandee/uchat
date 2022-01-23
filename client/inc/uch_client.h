@@ -68,6 +68,7 @@ cairo_surface_t *get_surface_from_jpg(const char *filename);
 cairo_surface_t *scale_to_half(cairo_surface_t *s, int orig_width, int orig_height, int scaled_width, int scaled_height);
 
 GtkWidget *get_circle_widget_from_png(const char *filename);
+GtkWidget *get_circle_widget_from_png_custom(const char *filename, gint width, gint height);
 
 void create_user_db(char *login, char *password);
 

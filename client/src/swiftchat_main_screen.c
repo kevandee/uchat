@@ -36,6 +36,8 @@ static void add_chat_dialog(GtkWidget *widget, gpointer data) {
     gtk_widget_set_size_request(add_chat_box, 300, 20);
 
     GtkWidget *add_chat_label = gtk_label_new("New Chat");
+    /*gtk_widget_set_name(GTK_WIDGET(add_chat_label), "New");
+    load_css_main(t_screen.provider, Settings);*/
     
     GtkWidget *chat_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 30);
     gtk_widget_set_halign(GTK_WIDGET(chat_name_box), GTK_ALIGN_CENTER);
@@ -178,24 +180,27 @@ void chat_show_main_screen(GtkWidget *window)
     gtk_widget_set_size_request(GTK_WIDGET(t_main.right_panel), 720, 100);
     gtk_widget_set_name(GTK_WIDGET(t_main.right_panel), "right_panel");
     load_css_main(t_screen.provider, t_main.right_panel);
-    gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 18);
+    gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 20);
     GtkWidget *choose_friend = gtk_label_new("Choose someone to write...");
     gtk_box_append(GTK_BOX(t_main.right_panel), choose_friend);
-//-----------------------------------------------SearcPanel---------------------------------------------------------------
+//-----------------------------------------------SearchPanel---------------------------------------------------------------
     GtkWidget *SearchBox, *Logo, *SearchField, *Home, *Settings;
     t_main.search_panel = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(t_main.search_panel), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(t_main.search_panel), GTK_ALIGN_CENTER);
-    gtk_widget_set_margin_bottom(GTK_WIDGET(t_main.search_panel), 40);
+    //gtk_widget_set_margin_bottom(GTK_WIDGET(t_main.search_panel), 27);
+    gtk_widget_set_margin_top(GTK_WIDGET(t_main.search_panel), 15);
     SearchBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(SearchBox), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(SearchBox), GTK_ALIGN_CENTER);
-    Logo = get_circle_widget_from_png("test_circle.png");
+    Logo = get_circle_widget_from_png_custom("test_circle.png", 45, 45);
+    gtk_widget_set_name(GTK_WIDGET(Logo), "account_avatar");
+    load_css_main(t_screen.provider, Logo);
     gtk_widget_set_size_request(GTK_WIDGET(Logo), 10, 10);
     SearchField = gtk_entry_new();
     gtk_widget_set_name(GTK_WIDGET(SearchField), "search_field");
     gtk_entry_buffer_set_max_length(GTK_ENTRY_BUFFER (gtk_entry_get_buffer(GTK_ENTRY(SearchField))), 20);
-    gtk_widget_set_size_request(SearchField, 310, 36);
+    gtk_widget_set_size_request(SearchField, 150, 30);
     gtk_entry_set_placeholder_text(GTK_ENTRY(SearchField), "Search");
     load_css_main(t_screen.provider, SearchField);
     gtk_box_append(GTK_BOX(SearchBox), GTK_WIDGET(SearchField));
@@ -203,28 +208,35 @@ void chat_show_main_screen(GtkWidget *window)
     GIcon *icon = g_file_icon_new(path);
     gtk_entry_set_icon_from_gicon(GTK_ENTRY(SearchField),GTK_ENTRY_ICON_SECONDARY, icon);
     Home = gtk_image_new_from_file("client/media/home.png");
+    gtk_widget_set_name(GTK_WIDGET(Home), "home_icon");
+    load_css_main(t_screen.provider, Home);
     gtk_widget_set_size_request(GTK_WIDGET(Home), 10, 10);
     Settings = gtk_image_new_from_file("client/media/settings.png");
+    gtk_widget_set_name(GTK_WIDGET(Settings), "settings_icon");
+    load_css_main(t_screen.provider, Settings);
     gtk_widget_set_size_request(GTK_WIDGET(Settings), 10, 10);
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(Logo));
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(SearchBox));
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(Home));
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(Settings));
-    gtk_box_set_spacing (GTK_BOX(t_main.search_panel), 8);
+    gtk_box_set_spacing (GTK_BOX(t_main.search_panel), 0);
 //------------------------------------------------------------------------------------------------------------------------
     
     GtkWidget *recent_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(recent_box, GTK_ALIGN_START);
     gtk_widget_set_valign(recent_box, GTK_ALIGN_CENTER);
-    gtk_widget_set_margin_bottom(recent_box, 40);
+    gtk_widget_set_margin_start(recent_box, 0);
+    gtk_widget_set_margin_top(recent_box, 20);
 
     GtkWidget *recent_label = gtk_label_new("Recent");
-    gtk_widget_set_size_request(recent_label, 300, 0);
+    gtk_widget_set_name(GTK_WIDGET(recent_label), "recent_text");
+    load_css_main(t_screen.provider, recent_label);
+    //gtk_widget_set_size_request(recent_label, 20, 0);
     gtk_widget_set_halign(recent_label, GTK_ALIGN_START);
     gtk_widget_set_valign(recent_label, GTK_ALIGN_CENTER);
 
     GtkWidget *add_chat_button = gtk_button_new_with_label("+");
-    gtk_widget_set_margin_start(GTK_WIDGET(add_chat_button), 80);
+    gtk_widget_set_margin_start(GTK_WIDGET(add_chat_button), 188);
     gtk_widget_set_halign(add_chat_button, GTK_ALIGN_END);
     gtk_widget_set_valign(add_chat_button, GTK_ALIGN_CENTER);
 
