@@ -8,7 +8,6 @@ static void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
 }
 
 static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
-    int count_chats = cur_client.chat_count;
     char *users = NULL;
     t_chat *chat = (t_chat *)data;
     t_list *temp = chat->users;
@@ -19,11 +18,13 @@ static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
         temp=temp->next;
     }
 
+    t_main.loaded = false;
     char buf[512 + 32] = {0};
+    cur_client.sender_new_chat = true;
     sprintf(buf, "<add chat, name=.dialog>%s", users);
     send_all(cur_client.serv_fd, buf, 512+32);
-    while (count_chats == cur_client.chat_count) {
-        usleep(100);
+    while (!t_main.loaded) {
+        usleep(50);
     }
     temp = cur_client.chats;
     while (temp->next) {

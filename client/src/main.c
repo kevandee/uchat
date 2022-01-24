@@ -79,6 +79,7 @@ void *rec_func(void *param) {
                     cur_client.sender_new_chat = false;
                 }
                 cur_client.chat_count++;
+                t_main.loaded = true;
                 printf("chat added\n");
                 /*
                 Дим, тут данные о новом чате приняты на клиент, добавляй на локальную бд
@@ -102,6 +103,7 @@ void *rec_func(void *param) {
                 }
                 t_main.search_users_list = users_list;
                 pthread_mutex_unlock(&cl_mutex);
+                t_main.loaded = true;
 
             }
             else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0){

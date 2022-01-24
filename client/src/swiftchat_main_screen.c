@@ -41,10 +41,9 @@ void return_to_chatlist(GtkWidget *widget, gpointer data) {
 
 static void send_chat(GtkWidget *widget, gpointer data) {
     (void)widget;
-
-    GtkWidget *name_entry = GTK_WIDGET (data);
+    GtkWidget **swapped = data;
+    GtkWidget *name_entry = GTK_WIDGET (swapped[3]);
     cur_client.sender_new_chat = true;
-    int count_chats = cur_client.chat_count;
     const char *name = gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY(name_entry)));
 
     t_list *temp = t_main.check_buttons_user_list;
@@ -67,13 +66,14 @@ static void send_chat(GtkWidget *widget, gpointer data) {
         temp=temp->next;
     }
 
+    t_main.loaded = false;
     char buf[512 + 32] = {0};
     sprintf(buf, "<add chat, name=%s>%s", name, users);
     send_all(cur_client.serv_fd, buf, 512+32);
-    while (count_chats == cur_client.chat_count) {
-        usleep(100);
+    while (!t_main.loaded) {
+        usleep(50);
     }
-    return_to_chatlist(NULL, NULL);
+    return_to_chatlist(widget, swapped);
     //return_to_chatlist(NULL, сюда передать первые 3 элемента gpointer data, так как 4 не нужен);
 
 }
@@ -96,11 +96,12 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
 
     mx_clear_list(&t_main.search_users_list);
     t_main.search_users_list = NULL;
+    t_main.loaded = false;
     char message[512+32] = {0};
     sprintf(message, "<users list>");
     send(cur_client.serv_fd, message, 512+32, 0);
-    while (!t_main.search_users_list)
-        usleep(100);
+    while (!t_main.loaded)
+        usleep(50);
     printf("gets search list\n");
     //gtk_widget_hide(t_main.scroll_box);
     GtkWidget *add_chat_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
@@ -152,7 +153,6 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
 
     //gtk_entry_set_placeholder_text(GTK_ENTRY(user_search_entry), "Who would you like to add?");
 
-
     //------users list-------
     
     GtkWidget *users_list_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -186,6 +186,8 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
     }
     
     pthread_mutex_unlock(&cl_mutex);
+
+   
     
     GtkWidget *scrolled_tree = gtk_scrolled_window_new();
     gtk_widget_set_name(GTK_WIDGET(scrolled_tree), "add_member_scrolled");
@@ -195,6 +197,7 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
     gtk_widget_set_size_request(scrolled_tree, 300, 350);
     gtk_box_append(GTK_BOX(users_list_box), scrolled_tree);
     //-----------------------
+    g_signal_connect(add_member_input, "notify::text", G_CALLBACK (text_changed_add_chat), scrolled_tree);
 
     GtkWidget *buttons_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(buttons_box), GTK_ALIGN_CENTER);
@@ -204,7 +207,8 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
     gtk_widget_set_name(button_success, "submit_button");
     load_css_main(t_screen.provider, button_success);
     gtk_widget_set_size_request(button_success, 15, 15);
-    g_signal_connect(button_success, "clicked", G_CALLBACK(send_chat), chat_name_entry);
+    swapped[3] = chat_name_entry;
+    g_signal_connect(button_success, "clicked", G_CALLBACK(send_chat), swapped);
     gtk_box_append(GTK_BOX (buttons_box), button_success);
 
     gtk_box_append(GTK_BOX (add_chat_box), chat_name_box);
@@ -267,77 +271,13 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
 }
 
-
-static void text_changed(GObject *object,
-              GParamSpec *pspec,
-              gpointer data) {
-    (void)data;
-    (void)pspec;
-    
-    GtkEntry *entry = GTK_ENTRY (object);
-    gboolean has_text;
-
-    has_text = gtk_entry_get_text_length (entry) > 0;
-    if (gtk_entry_get_text_length (entry) == 1) {
-        char message[512+32] = {0};
-        sprintf(message, "<users list>");
-        send(cur_client.serv_fd, message, 512+32, 0);
-        while (!t_main.search_users_list)
-            usleep(100);
-    }
-    if(has_text) {
-        //printf("%s\n", gtk_entry_buffer_get_text(gtk_entry_get_buffer(entry)));
-        t_main.scroll_box_left = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-        gtk_widget_set_size_request(GTK_WIDGET(t_main.scroll_box_left), 310, 0);
-        gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_left), 310, 590);
-        const char *entry_text = gtk_entry_buffer_get_text(gtk_entry_get_buffer(entry));
-        t_list *res = NULL;
-        t_list *search = t_main.search_users_list;
-        while (search) {
-            if (mx_strncmp(entry_text, search->data, mx_strlen(entry_text)) == 0) {
-                mx_push_back(&res, search->data);
-            }
-
-            search = search -> next;
-        }
-
-        t_list *chats = res;
-        while (chats) {
-            t_chat *new_c = (t_chat *)malloc(sizeof (t_chat));
-            new_c->count_users = 1;
-            new_c->messages = NULL;
-            new_c->users = NULL;
-            mx_strcpy(new_c->name,".new_dialog");
-            mx_push_back(&new_c->users, mx_strdup(chats->data));
-            add_chat_node(new_c);
-
-            chats = chats->next;
-        }
-
-        mx_clear_list(&res);
-        res = NULL;
-        search = cur_client.chats;
-        while (search) {
-            if (mx_strncmp(entry_text, ((t_chat *)(search->data))->name, mx_strlen(entry_text)) == 0){
-                 mx_push_front(&res, search->data);
-            }
-
-            search = search->next;
-        }
-
-
-    chats = res;
-    while (chats) {
-        add_chat_node(chats->data);
-        chats = chats->next;
-    }
-    
-    
-    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left),t_main.scroll_box_left);
-    }
-    else {
-        return_to_chatlist(NULL, NULL);
-    }
+static void get_list_users() {
+    t_main.loaded = false;
+    char message[512+32] = {0};
+    sprintf(message, "<users list>");
+    send(cur_client.serv_fd, message, 512+32, 0);
+    while (!t_main.loaded)
+        usleep(50);
 }
 
 void chat_show_main_screen(GtkWidget *window) 
@@ -380,8 +320,11 @@ void chat_show_main_screen(GtkWidget *window)
     
     ///////////
 
-    //g_signal_connect (SearchField, "activate", G_CALLBACK (get_list_users), NULL);
-    g_signal_connect (SearchField, "notify::text", G_CALLBACK (text_changed), NULL);
+    GtkGesture *click_search_field = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_search_field, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_search_field, "pressed", G_CALLBACK(get_list_users), t_auth.LOGIN_menu);
+    gtk_widget_add_controller(SearchField, GTK_EVENT_CONTROLLER(click_search_field));
+    g_signal_connect (SearchField, "notify::text", G_CALLBACK (text_changed_main_screen), NULL);
 
     ///////////
 
@@ -426,7 +369,7 @@ void chat_show_main_screen(GtkWidget *window)
     gtk_box_append(GTK_BOX(recent_box), GTK_WIDGET(recent_label));
     gtk_box_append(GTK_BOX(recent_box), GTK_WIDGET(add_chat_button));
 
-    GtkWidget **swapped = (GtkWidget **)malloc(3 * sizeof(GtkWidget *));
+    GtkWidget **swapped = (GtkWidget **)malloc(4 * sizeof(GtkWidget *));
     swapped[0] = recent_label;
     swapped[1] = add_chat_button;
     swapped[2] = recent_box;

@@ -36,6 +36,7 @@ struct
     GtkWidget *scrolled_window_right;
 
     t_list *search_users_list;
+    bool loaded;
     t_list *check_buttons_user_list;
 }   t_main;
 
@@ -62,20 +63,19 @@ void return_to_chatlist(GtkWidget *widget, gpointer data);
 void add_chat_dialog(GtkWidget *widget, gpointer data);
 
 void send_login(GtkWidget *widget, gpointer data);
-
 void chat_show_main_screen(GtkWidget *window);
 void add_chat_node(t_chat *chat);
-
 int check_auth_input(const char *str);
+
+void text_changed_main_screen(GObject *object, GParamSpec *pspec, gpointer data);
+void text_changed_add_chat(GObject *object, GParamSpec *pspec, gpointer data);
 
 cairo_surface_t *get_surface_from_jpg(const char *filename);
 cairo_surface_t *scale_to_half(cairo_surface_t *s, int orig_width, int orig_height, int scaled_width, int scaled_height);
-
 GtkWidget *get_circle_widget_from_png(const char *filename);
 GtkWidget *get_circle_widget_from_png_custom(const char *filename, gint width, gint height);
 
 void create_user_db(char *login, char *password);
-
 void get_all_user_data();
 
 #endif
