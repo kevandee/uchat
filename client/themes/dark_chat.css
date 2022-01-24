@@ -69,8 +69,19 @@ headerbar{
   font-size: 16px;
   font-weight: 600;
   color: #C0C0C0;
-  margin-top: 20px;
-  margin-bottom: 8px;
+  margin-top: 10px;
+}
+
+#add_member_text{
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #C0C0C0;
+  margin-top: 5px; 
+}
+
+#input_field_add_group{
+  border-radius: 10px;
 }
 
 scrolledwindow {
@@ -90,11 +101,10 @@ scrolledwindow {
 }
 
 #add_chat{
-  background: transparent;
-  padding-left: 25px;
   font-size: 30px;
-  font-family: Arial, sans-serif;
   font-weight: 700;
+  padding: 1px 1px 1px 1px;
+  background: #212D38;
   color: white;
   border-color: transparent;
 }
@@ -114,30 +124,8 @@ scrolledwindow {
   background:rgb(237, 168, 74);
 }
 
-#add_member_scrolled {
-  margin-top: 29px;
-  margin-left: 10px;
-  margin-right: 10px;
-  color: #fff;
-  font-family: 'Arial', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  background-color: transparent;
+#chat_box{
+  margin-left: -5px;
 }
 
-#user_list_box {
-  padding-top: 50px;
-}
 
-#scroll_window_chats {
-  background-color: transparent;
-}
-
-#scroll_box_left {
-  background-color: transparent;
-}
-
-#scroll_buttons {
-  background-color: transparent;
-  padding-right: 300px;
-}
