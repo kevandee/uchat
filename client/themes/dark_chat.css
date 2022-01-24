@@ -128,4 +128,9 @@ scrolledwindow {
   margin-left: -5px;
 }
 
-
+#change_data_right_box
+{
+  background: red;
+  padding: 15px 10px 20px;
+  border-radius: 10px;
+}

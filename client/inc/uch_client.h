@@ -58,6 +58,7 @@ struct
 void chat_show_reg_screen();
 void chat_show_auth_screen();
 void chat_decorate_headerbar();
+void show_settings();
 void show_chat_history(GtkWidget *widget, gpointer data);
 void return_to_chatlist(GtkWidget *widget, gpointer data);
 void add_chat_dialog(GtkWidget *widget, gpointer data);

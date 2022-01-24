@@ -280,6 +280,192 @@ static void get_list_users() {
         usleep(50);
 }
 
+void show_settings()
+{
+    gtk_grid_remove(GTK_GRID(t_main.grid), t_main.right_panel);
+    t_main.right_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
+    gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 18);
+
+    GtkWidget *acc_sett_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);//<----------
+    gtk_widget_set_halign(GTK_WIDGET(acc_sett_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(acc_sett_box), GTK_ALIGN_START);
+    gtk_widget_set_margin_bottom(acc_sett_box, 20);
+    GtkWidget *acc_sett_label = gtk_label_new("Account settings");
+    gtk_box_append(GTK_BOX(acc_sett_box), acc_sett_label);
+
+    GtkWidget *сhange_data_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);//<---------
+    gtk_box_set_spacing(GTK_BOX(сhange_data_box), 100);
+    gtk_widget_set_halign(GTK_WIDGET(сhange_data_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(сhange_data_box), GTK_ALIGN_START);
+
+    GtkWidget *change_data_left_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(change_data_left_box), 10);
+    gtk_widget_set_halign(GTK_WIDGET(change_data_left_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(change_data_left_box), GTK_ALIGN_START);
+    GtkWidget *photo_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(photo_box), 5);
+    gtk_widget_set_halign(GTK_WIDGET(photo_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(photo_box), GTK_ALIGN_START);
+    GtkWidget *photo_label_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(photo_label_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(photo_label_box), GTK_ALIGN_START);
+    GtkWidget *photo_label = gtk_label_new("PHOTO");
+    gtk_box_append(GTK_BOX(photo_label_box), photo_label);
+    GtkWidget *photo_buttons_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(photo_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(photo_box), GTK_ALIGN_START);
+    GtkWidget *change_photo = gtk_button_new_with_label("Change photo");
+    gtk_box_append(GTK_BOX(photo_buttons_box), change_photo);
+    GtkWidget *delete = gtk_button_new_with_label("Delete");
+    gtk_box_append(GTK_BOX(photo_buttons_box), delete);
+
+    gtk_box_append(GTK_BOX(photo_box), photo_label_box);
+    gtk_box_append(GTK_BOX(photo_box), photo_buttons_box);
+
+    gtk_box_append(GTK_BOX(change_data_left_box), photo_box);
+
+
+    GtkWidget *name_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(name_box), 5);
+    gtk_widget_set_halign(GTK_WIDGET(name_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(name_box), GTK_ALIGN_START);
+    GtkWidget *name_label_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(name_label_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(name_label_box), GTK_ALIGN_START);
+    GtkWidget *name_label = gtk_label_new("NAME");
+    gtk_box_append(GTK_BOX(name_label_box), name_label);
+    GtkWidget *name_entry_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(name_entry_box), 3);
+    gtk_widget_set_halign(GTK_WIDGET(name_entry_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(name_entry_box), GTK_ALIGN_START);
+    GtkWidget *entry_field_name = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_field_name), "First name");
+    gtk_widget_set_size_request(entry_field_name, 300, 20);
+    gtk_box_append(GTK_BOX(name_entry_box), entry_field_name);
+    GtkWidget *entry_field_surname = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_field_surname), "Second Name");
+    gtk_widget_set_size_request(entry_field_surname, 300, 20);
+    gtk_box_append(GTK_BOX(name_entry_box), entry_field_surname);
+
+    gtk_box_append(GTK_BOX(name_box), name_label_box);
+    gtk_box_append(GTK_BOX(name_box), name_entry_box);
+
+    gtk_box_append(GTK_BOX(change_data_left_box), name_box);
+
+    GtkWidget *bio_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(bio_box), 5);
+    gtk_widget_set_halign(GTK_WIDGET(bio_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(bio_box), GTK_ALIGN_START);
+    GtkWidget *bio_label_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(bio_label_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(bio_label_box), GTK_ALIGN_START);
+    GtkWidget *bio_label = gtk_label_new("BIO");
+    gtk_box_append(GTK_BOX(bio_label_box), bio_label);
+    GtkWidget *bio_entry_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(bio_entry_box), 3);
+    gtk_widget_set_halign(GTK_WIDGET(bio_entry_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(bio_entry_box), GTK_ALIGN_START);
+    GtkWidget *entry_field = gtk_text_view_new();
+    gtk_text_view_set_left_margin(GTK_TEXT_VIEW(entry_field), 10);
+    gtk_text_view_set_top_margin(GTK_TEXT_VIEW(entry_field), 10);
+    gtk_text_view_set_right_margin(GTK_TEXT_VIEW(entry_field), 10);
+    gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(entry_field), 10);
+
+    gtk_widget_set_size_request(entry_field, 300, 100);
+    gtk_box_append(GTK_BOX(bio_entry_box), entry_field);
+    GtkWidget *apply_button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(apply_button_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(apply_button_box), GTK_ALIGN_CENTER);
+    GtkWidget *apply_button = gtk_button_new_with_label("Apply");
+    gtk_widget_set_size_request(apply_button, 180, 20);
+    gtk_widget_set_margin_start(apply_button, 5);
+    gtk_box_append(GTK_BOX(apply_button_box), apply_button);
+
+    gtk_box_append(GTK_BOX(bio_box), bio_label_box);
+    gtk_box_append(GTK_BOX(bio_box), bio_entry_box);
+    gtk_box_append(GTK_BOX(bio_box), apply_button_box);
+
+    gtk_box_append(GTK_BOX(change_data_left_box), bio_box);
+
+
+    GtkWidget *change_data_right_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_name(change_data_right_box, "change_data_right_box");
+    load_css_main(t_screen.provider, change_data_right_box);
+    gtk_box_set_spacing(GTK_BOX(change_data_right_box), 10);
+    gtk_widget_set_halign(GTK_WIDGET(change_data_right_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(change_data_right_box), GTK_ALIGN_CENTER);
+    GtkWidget *user_image_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(user_image_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(user_image_box), GTK_ALIGN_CENTER);
+    GtkWidget *user_image = get_circle_widget_from_png_custom("test_circle.png", 120, 120);
+    gtk_box_append(GTK_BOX(user_image_box), user_image);
+    GtkWidget *user_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(user_name_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(user_name_box), GTK_ALIGN_CENTER);
+    GtkWidget *user_name = gtk_label_new("Name Surname or username");
+    gtk_box_append(GTK_BOX(user_name_box), user_name);
+    GtkWidget *user_bio_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(user_bio_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(user_bio_box), GTK_ALIGN_CENTER);
+    GtkWidget *user_bio = gtk_label_new("User bio vjifdjvifdjvidfjvidfojvdfovjdfo");
+    gtk_box_append(GTK_BOX(user_bio_box), user_bio);
+
+    gtk_box_append(GTK_BOX(change_data_right_box), user_image_box);
+    gtk_box_append(GTK_BOX(change_data_right_box), user_name_box);
+    gtk_box_append(GTK_BOX(change_data_right_box), user_bio_box);
+
+    gtk_box_append(GTK_BOX(сhange_data_box), change_data_left_box);
+    gtk_box_append(GTK_BOX(сhange_data_box), change_data_right_box);
+
+    gtk_widget_set_margin_bottom(сhange_data_box, 50);
+
+    GtkWidget *themes_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(themes_box), 20);
+    gtk_widget_set_halign(GTK_WIDGET(themes_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(themes_box), GTK_ALIGN_START);
+    GtkWidget *themes_label_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(themes_label_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(themes_label_box), GTK_ALIGN_START);
+    GtkWidget *themes_label = gtk_label_new("THEMES");
+    gtk_box_append(GTK_BOX(themes_label_box), themes_label);
+    GtkWidget *radio_buttons_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(radio_buttons_box), 6);
+    gtk_widget_set_halign(GTK_WIDGET(radio_buttons_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(radio_buttons_box), GTK_ALIGN_START);
+    GtkWidget *radio_button_dark = gtk_check_button_new_with_label("Dark");
+    gtk_box_append(GTK_BOX(radio_buttons_box), radio_button_dark);
+    GtkWidget *radio_button_light = gtk_check_button_new_with_label("Light");
+    gtk_box_append(GTK_BOX(radio_buttons_box), radio_button_light);
+    gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_button_dark), GTK_CHECK_BUTTON(radio_button_light));
+    GtkWidget *delete_box_and_exit = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_box_set_spacing(GTK_BOX(delete_box_and_exit), 10);
+    gtk_widget_set_halign(GTK_WIDGET(delete_box_and_exit), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(delete_box_and_exit), GTK_ALIGN_CENTER);
+    GtkWidget *delete_button = gtk_button_new_with_label("Delete account");
+    gtk_box_append(GTK_BOX(delete_box_and_exit), delete_button);
+    GtkWidget *exit_button = gtk_image_new_from_file("client/media/settings.png");
+    GtkGesture *click_exit = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_exit, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_exit, "pressed", G_CALLBACK(gtk_window_destroy), t_screen.main_window);
+    gtk_widget_add_controller(exit_button, GTK_EVENT_CONTROLLER(click_exit));
+    gtk_box_append(GTK_BOX(delete_box_and_exit), exit_button);
+
+    gtk_box_append(GTK_BOX(themes_box), themes_label_box);
+    gtk_box_append(GTK_BOX(themes_box), radio_buttons_box);
+    gtk_box_append(GTK_BOX(themes_box), delete_box_and_exit);
+
+
+    gtk_box_append(GTK_BOX(t_main.right_panel), acc_sett_box);
+    gtk_box_append(GTK_BOX(t_main.right_panel), сhange_data_box);
+    gtk_box_append(GTK_BOX(t_main.right_panel), themes_box);
+
+    gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
+
+}
+
+
 void chat_show_main_screen(GtkWidget *window) 
 {
     gtk_css_provider_load_from_path(t_screen.provider,"client/themes/dark_chat.css");
@@ -339,6 +525,12 @@ void chat_show_main_screen(GtkWidget *window)
     Settings = gtk_image_new_from_file("client/media/settings.png");
     gtk_widget_set_name(GTK_WIDGET(Settings), "settings_icon");
     load_css_main(t_screen.provider, Settings);
+
+    GtkGesture *click_settings = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_settings, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_settings, "pressed", G_CALLBACK(show_settings), NULL);
+    gtk_widget_add_controller(Settings, GTK_EVENT_CONTROLLER(click_settings));
+
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(Logo));
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(SearchBox));
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(Home));
