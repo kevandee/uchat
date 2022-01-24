@@ -69,8 +69,19 @@ headerbar{
   font-size: 16px;
   font-weight: 600;
   color: #C0C0C0;
-  margin-top: 20px;
-  margin-bottom: 8px;
+  margin-top: 10px;
+}
+
+#add_member_text{
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #C0C0C0;
+  margin-top: 5px; 
+}
+
+#input_field_add_group{
+  border-radius: 10px;
 }
 
 scrolledwindow {
@@ -90,8 +101,10 @@ scrolledwindow {
 }
 
 #add_chat{
+  font-size: 30px;
+  font-weight: 700;
+  padding: 1px 1px 1px 1px;
   background: #212D38;
-  font-size: 26px;
   color: white;
   border-color: transparent;
 }
@@ -110,3 +123,9 @@ scrolledwindow {
 #submit_button:hover {
   background:rgb(237, 168, 74);
 }
+
+#chat_box{
+  margin-left: -5px;
+}
+
+
