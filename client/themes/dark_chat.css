@@ -3,7 +3,6 @@ headerbar{
   padding-left: 8px;
   background: transparent;
   border-color: transparent;
-  background-image: transparent;
   /* Name of the window */
   color: transparent;
   font-size: 13px;
@@ -36,7 +35,7 @@ headerbar{
   border:none;
   border-radius: 20px;
   margin-left: 10px;
-  min-height: 22px;
+  min-height: 28px;
 }
 
 #home_icon {
@@ -82,8 +81,32 @@ scrolledwindow {
   color: white;
   font-size: 20px;
   font-family: 'Bradley Hand';
+  min-height: 100px;
+  min-width: 828px;
 }
 
-#left_scroll{
+#right_scroll{
   background-color: red;
+}
+
+#add_chat{
+  background: #212D38;
+  font-size: 26px;
+  color: white;
+  border-color: transparent;
+}
+
+#submit_button {
+  background:rgb(236, 179, 101);
+  font-family: 'Helvetica Neue';
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  border: 10px;
+  border-radius: 10px;
+}
+
+/*MAIN AUTH BUTTON HOVER*/
+#submit_button:hover {
+  background:rgb(237, 168, 74);
 }

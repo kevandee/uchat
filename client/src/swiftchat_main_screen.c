@@ -7,11 +7,28 @@ static void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
 
 }
 
-static void return_to_chatlist() {
+void return_to_chatlist(GtkWidget *widget, gpointer data) {
     //gtk_widget_hide(gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left)));
-    
+    (void)widget;
+    if(data != NULL)
+    {
+        GtkWidget** swapped = data;
+        gtk_label_set_label(GTK_LABEL(swapped[0]), "Recent");
+        gtk_box_remove (GTK_BOX(swapped[2]), swapped[1]);
+        swapped[1] = NULL;
+        GtkWidget *goback = gtk_button_new_with_label("+");
+        gtk_widget_set_name(goback, "add_chat");
+        load_css_main(t_screen.provider, goback);
+        gtk_widget_set_margin_start(GTK_WIDGET(goback), 188);
+        gtk_widget_set_halign(goback, GTK_ALIGN_END);
+        gtk_widget_set_valign(goback, GTK_ALIGN_CENTER);
+        swapped[1] = GTK_WIDGET(goback);
+        gtk_box_append(GTK_BOX(swapped[2]), goback);
+        g_signal_connect(goback, "clicked", G_CALLBACK(add_chat_dialog), (gpointer)swapped);
+    }
     t_main.scroll_box_left = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_size_request(GTK_WIDGET(t_main.scroll_box_left), 323, 0);
+    gtk_widget_set_size_request(GTK_WIDGET(t_main.scroll_box_left), 310, 0);
+    gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_left), 310, 590);
 
     t_list *chats = cur_client.chats;
     while (chats) {
@@ -55,12 +72,25 @@ static void send_chat(GtkWidget *widget, gpointer data) {
     while (count_chats == cur_client.chat_count) {
         usleep(100);
     }
-    return_to_chatlist();
+    return_to_chatlist(NULL, NULL);
 }
 
-static void add_chat_dialog(GtkWidget *widget, gpointer data) {
+void add_chat_dialog(GtkWidget *widget, gpointer data) {
     (void)widget;
-    (void)data;
+    GtkWidget** swapped = data;
+    gtk_label_set_label(GTK_LABEL(swapped[0]), "New Group");
+    gtk_box_remove (GTK_BOX(swapped[2]), swapped[1]);
+    swapped[1] = NULL;
+    GtkWidget *close = gtk_button_new_with_label("×");
+    gtk_widget_set_name(close, "add_chat");
+    load_css_main(t_screen.provider, close);
+    gtk_widget_set_margin_start(GTK_WIDGET(close), 138);
+    gtk_widget_set_halign(close, GTK_ALIGN_END);
+    gtk_widget_set_valign(close, GTK_ALIGN_CENTER);
+    swapped[1] = GTK_WIDGET(close);
+    gtk_box_append(GTK_BOX(swapped[2]), close);
+    g_signal_connect(close, "clicked", G_CALLBACK(return_to_chatlist), (gpointer)swapped);
+
     mx_clear_list(&t_main.search_users_list);
     t_main.search_users_list = NULL;
     char message[512+32] = {0};
@@ -72,6 +102,8 @@ static void add_chat_dialog(GtkWidget *widget, gpointer data) {
     //gtk_widget_hide(t_main.scroll_box);
     GtkWidget *add_chat_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_set_size_request(add_chat_box, 300, 20);
+    gtk_widget_set_halign(add_chat_box, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(add_chat_box, GTK_ALIGN_CENTER);
 
     //GtkWidget *add_chat_label = gtk_label_new("New Chat");
     /*gtk_widget_set_name(GTK_WIDGET(add_chat_label), "n");
@@ -99,11 +131,6 @@ static void add_chat_dialog(GtkWidget *widget, gpointer data) {
     gtk_widget_set_halign(GTK_WIDGET(add_member_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(add_member_box), GTK_ALIGN_CENTER);
     gtk_widget_set_size_request(add_member_box, 300, 20);
-
-    GtkWidget *add_members_label = gtk_label_new("ADD MEMBERS");
-    gtk_widget_set_name(GTK_WIDGET(add_members_label), "add_members_text");
-    load_css_main(t_screen.provider, add_members_label);
-    gtk_box_append(GTK_BOX (chat_name_box), add_members_label);
 
     GtkWidget *add_member_input = gtk_entry_new();
     gtk_widget_set_name(GTK_WIDGET(add_member_input), "add_member_input");
@@ -147,25 +174,22 @@ static void add_chat_dialog(GtkWidget *widget, gpointer data) {
     //-----------------------
 
     GtkWidget *buttons_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 50);
-    gtk_widget_set_size_request(buttons_box, 150, 20);
     gtk_widget_set_halign(GTK_WIDGET(buttons_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(buttons_box), GTK_ALIGN_CENTER);    
     
-    GtkWidget *button_exit = gtk_button_new_with_label("exit");
-    g_signal_connect(button_exit, "clicked", G_CALLBACK(return_to_chatlist), NULL);
-    GtkWidget *button_success = gtk_button_new_with_label("add chat");
-
+    GtkWidget *button_success = gtk_button_new_with_label("Submit");
+    gtk_widget_set_name(button_success, "submit_button");
+    load_css_main(t_screen.provider, button_success);
+    gtk_widget_set_size_request(button_success, 210, 20);
     g_signal_connect(button_success, "clicked", G_CALLBACK(send_chat), chat_name_entry);
-
-    gtk_box_append(GTK_BOX (buttons_box), button_exit);
     gtk_box_append(GTK_BOX (buttons_box), button_success);
 
-    gtk_box_append(GTK_BOX (add_chat_box), chat_name_label);
-    gtk_box_append(GTK_BOX(add_chat_box), chat_name_box);
+    gtk_box_append(GTK_BOX (add_chat_box), chat_name_box);
+    //gtk_box_append(GTK_BOX(add_chat_box), chat_name_label);
     gtk_box_append(GTK_BOX(add_chat_box), add_member_input);
     gtk_box_append(GTK_BOX(add_chat_box), users_list_box);
     gtk_box_append(GTK_BOX(add_chat_box), buttons_box);
-    gtk_widget_show(add_chat_box);
+    //gtk_widget_show(add_chat_box);
 
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left), add_chat_box);
 }
@@ -199,16 +223,16 @@ void show_chat_history(GtkWidget *widget, gpointer data)
 
     t_main.scroll_box_right = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     t_main.scrolled_window_right = gtk_scrolled_window_new ();
-    gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 730, 680);
+    gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 828, 680);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_right), t_main.scroll_box_right);
-    gtk_widget_set_name(GTK_WIDGET(t_main.scrolled_window_right), "left_scroll");
+    gtk_widget_set_name(GTK_WIDGET(t_main.scrolled_window_right), "right_scroll");
     load_css_main(t_screen.provider, t_main.scrolled_window_right);
 
     GtkWidget *write_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(write_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(write_box), GTK_ALIGN_CENTER);
     GtkWidget *write_message = gtk_entry_new();
-    gtk_widget_set_size_request(write_message, 700, 36);
+    gtk_widget_set_size_request(write_message, 800, 36);
     gtk_entry_set_placeholder_text(GTK_ENTRY(write_message),"Write a message...");
     gtk_box_append(GTK_BOX(write_box), write_message);
 
@@ -234,12 +258,13 @@ void chat_show_main_screen(GtkWidget *window)
     t_main.right_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_CENTER);
-    gtk_widget_set_size_request(GTK_WIDGET(t_main.right_panel), 720, 100);
+    //gtk_widget_set_size_request(GTK_WIDGET(t_main.right_panel), 720, 100);
     gtk_widget_set_name(GTK_WIDGET(t_main.right_panel), "right_panel");
     load_css_main(t_screen.provider, t_main.right_panel);
     gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 20);
     GtkWidget *choose_friend = gtk_label_new("Choose someone to write...");
     gtk_box_append(GTK_BOX(t_main.right_panel), choose_friend);
+    gtk_widget_set_margin_top(choose_friend, 40);
 //-----------------------------------------------SearchPanel---------------------------------------------------------------
     GtkWidget *SearchBox, *Logo, *SearchField, *Home, *Settings;
     t_main.search_panel = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -253,11 +278,9 @@ void chat_show_main_screen(GtkWidget *window)
     Logo = get_circle_widget_from_png_custom("test_circle.png", 45, 45);
     gtk_widget_set_name(GTK_WIDGET(Logo), "account_avatar");
     load_css_main(t_screen.provider, Logo);
-    gtk_widget_set_size_request(GTK_WIDGET(Logo), 10, 10);
     SearchField = gtk_entry_new();
     gtk_widget_set_name(GTK_WIDGET(SearchField), "search_field");
     gtk_entry_buffer_set_max_length(GTK_ENTRY_BUFFER (gtk_entry_get_buffer(GTK_ENTRY(SearchField))), 20);
-    gtk_widget_set_size_request(SearchField, 150, 30);
     gtk_entry_set_placeholder_text(GTK_ENTRY(SearchField), "Search");
     load_css_main(t_screen.provider, SearchField);
     gtk_box_append(GTK_BOX(SearchBox), GTK_WIDGET(SearchField));
@@ -267,11 +290,9 @@ void chat_show_main_screen(GtkWidget *window)
     Home = gtk_image_new_from_file("client/media/home.png");
     gtk_widget_set_name(GTK_WIDGET(Home), "home_icon");
     load_css_main(t_screen.provider, Home);
-    gtk_widget_set_size_request(GTK_WIDGET(Home), 10, 10);
     Settings = gtk_image_new_from_file("client/media/settings.png");
     gtk_widget_set_name(GTK_WIDGET(Settings), "settings_icon");
     load_css_main(t_screen.provider, Settings);
-    gtk_widget_set_size_request(GTK_WIDGET(Settings), 10, 10);
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(Logo));
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(SearchBox));
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(Home));
@@ -293,14 +314,20 @@ void chat_show_main_screen(GtkWidget *window)
     gtk_widget_set_valign(recent_label, GTK_ALIGN_CENTER);
 
     GtkWidget *add_chat_button = gtk_button_new_with_label("+");
+    gtk_widget_set_name(add_chat_button, "add_chat");
+    load_css_main(t_screen.provider, add_chat_button);
     gtk_widget_set_margin_start(GTK_WIDGET(add_chat_button), 188);
     gtk_widget_set_halign(add_chat_button, GTK_ALIGN_END);
     gtk_widget_set_valign(add_chat_button, GTK_ALIGN_CENTER);
 
-    g_signal_connect(add_chat_button, "clicked", G_CALLBACK (add_chat_dialog), NULL);
-
     gtk_box_append(GTK_BOX(recent_box), GTK_WIDGET(recent_label));
     gtk_box_append(GTK_BOX(recent_box), GTK_WIDGET(add_chat_button));
+
+    GtkWidget **swapped = (GtkWidget **)malloc(3 * sizeof(GtkWidget *));
+    swapped[0] = recent_label;
+    swapped[1] = add_chat_button;
+    swapped[2] = recent_box;
+    g_signal_connect(add_chat_button, "clicked", G_CALLBACK (add_chat_dialog), (gpointer)swapped);
 
 //------------------------------------------------------------------------------------------------------------------------
 

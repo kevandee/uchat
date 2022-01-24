@@ -2,6 +2,7 @@
 
 void add_chat_node(t_chat *chat) {
     GtkWidget *child_widget = gtk_button_new ();
+    gtk_widget_set_size_request(child_widget, 300, 50);
     GtkWidget *chat_info = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
     GtkWidget *chat_image = get_circle_widget_from_png_custom("test_circle.png", 57, 57);
