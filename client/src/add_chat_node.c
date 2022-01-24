@@ -7,6 +7,32 @@ static void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
 
 }
 
+static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
+    int count_chats = cur_client.chat_count;
+    char *users = NULL;
+    t_chat *chat = (t_chat *)data;
+    t_list *temp = chat->users;
+    while (temp) {
+        users = mx_strrejoin(users, temp->data);
+        users = mx_strrejoin(users, " ");
+
+        temp=temp->next;
+    }
+
+    char buf[512 + 32] = {0};
+    sprintf(buf, "<add chat, name=.dialog>%s", users);
+    send_all(cur_client.serv_fd, buf, 512+32);
+    while (count_chats == cur_client.chat_count) {
+        usleep(100);
+    }
+    temp = cur_client.chats;
+    while (temp->next) {
+        temp = temp->next;
+    }
+
+    show_chat_history(widget, temp->data);
+}
+
 void add_chat_node(t_chat *chat) {
     GtkWidget *child_widget = gtk_button_new ();
     gtk_widget_set_size_request(child_widget, 246, 54);
@@ -20,7 +46,25 @@ void add_chat_node(t_chat *chat) {
     gtk_widget_set_valign(GTK_WIDGET(chat_image), GTK_ALIGN_CENTER);
     gtk_box_append (GTK_BOX(chat_info), chat_image);
 
-    GtkWidget *chat_name = gtk_label_new(chat->name);
+    GtkWidget *chat_name = NULL;
+
+    if (mx_strcmp(chat->name, ".new_dialog") == 0){
+        chat_name = gtk_label_new(chat->users->data);
+    }
+    else if (mx_strcmp(chat->name, ".dialog") == 0) {
+        t_list *logins = chat->users;
+        while (logins) {
+            if (mx_strcmp(logins->data, cur_client.login) != 0) {
+                chat_name = gtk_label_new(logins->data);
+                break;
+            }
+            logins = logins->next;
+        }
+    }
+    else {
+        chat_name = gtk_label_new(chat->name);
+    }
+
     gtk_widget_set_size_request(GTK_WIDGET(chat_name), 0, 0);
     gtk_widget_set_halign(GTK_WIDGET(chat_name), GTK_ALIGN_FILL);
     gtk_widget_set_valign(GTK_WIDGET(chat_name), GTK_ALIGN_CENTER);
@@ -29,7 +73,11 @@ void add_chat_node(t_chat *chat) {
 
     gtk_button_set_child(GTK_BUTTON (child_widget), chat_info);
     //переход в историю чатов, в файле мейн скрин
-
-    g_signal_connect(child_widget, "clicked", G_CALLBACK(show_chat_history), chat);
+    if (mx_strcmp(chat->name, ".new_dialog") == 0) {
+        g_signal_connect(child_widget, "clicked", G_CALLBACK(send_and_choice_new_dialog), chat);
+    }
+    else { 
+        g_signal_connect(child_widget, "clicked", G_CALLBACK(show_chat_history), chat);
+    }
     gtk_box_append(GTK_BOX(t_main.scroll_box_left), child_widget);
 }

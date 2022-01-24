@@ -226,7 +226,6 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left), add_chat_box);
 }
 
-
 static void key_press(GtkWidget *entry) {
     GtkEntryBuffer *buf = gtk_entry_get_buffer(GTK_ENTRY (entry));
     const char *entry_text = gtk_entry_buffer_get_text (buf);
@@ -277,6 +276,79 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
 }
 
+
+static void text_changed(GObject *object,
+              GParamSpec *pspec,
+              gpointer data) {
+    (void)data;
+    (void)pspec;
+    
+    GtkEntry *entry = GTK_ENTRY (object);
+    gboolean has_text;
+
+    has_text = gtk_entry_get_text_length (entry) > 0;
+    if (gtk_entry_get_text_length (entry) == 1) {
+        char message[512+32] = {0};
+        sprintf(message, "<users list>");
+        send(cur_client.serv_fd, message, 512+32, 0);
+        while (!t_main.search_users_list)
+            usleep(100);
+    }
+    if(has_text) {
+        //printf("%s\n", gtk_entry_buffer_get_text(gtk_entry_get_buffer(entry)));
+        t_main.scroll_box_left = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        gtk_widget_set_size_request(GTK_WIDGET(t_main.scroll_box_left), 310, 0);
+        gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_left), 310, 590);
+        const char *entry_text = gtk_entry_buffer_get_text(gtk_entry_get_buffer(entry));
+        t_list *res = NULL;
+        t_list *search = t_main.search_users_list;
+        while (search) {
+            if (mx_strncmp(entry_text, search->data, mx_strlen(entry_text)) == 0) {
+                mx_push_back(&res, search->data);
+            }
+
+            search = search -> next;
+        }
+
+        t_list *chats = res;
+        while (chats) {
+            t_chat *new_c = (t_chat *)malloc(sizeof (t_chat));
+            new_c->count_users = 1;
+            new_c->messages = NULL;
+            new_c->users = NULL;
+            mx_strcpy(new_c->name,".new_dialog");
+            mx_push_back(&new_c->users, mx_strdup(chats->data));
+            add_chat_node(new_c);
+
+            chats = chats->next;
+        }
+
+        mx_clear_list(&res);
+        res = NULL;
+        search = cur_client.chats;
+        while (search) {
+            if (mx_strncmp(entry_text, ((t_chat *)(search->data))->name, mx_strlen(entry_text)) == 0){
+                 mx_push_front(&res, search->data);
+            }
+
+            search = search->next;
+        }
+
+
+    chats = res;
+    while (chats) {
+        add_chat_node(chats->data);
+        chats = chats->next;
+    }
+    
+    
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left),t_main.scroll_box_left);
+    }
+    else {
+        return_to_chatlist(NULL, NULL);
+    }
+}
+
 void chat_show_main_screen(GtkWidget *window) 
 {
     gtk_css_provider_load_from_path(t_screen.provider,"client/themes/dark_chat.css");
@@ -314,6 +386,14 @@ void chat_show_main_screen(GtkWidget *window)
     gtk_widget_set_name(GTK_WIDGET(SearchField), "search_field");
     gtk_entry_buffer_set_max_length(GTK_ENTRY_BUFFER (gtk_entry_get_buffer(GTK_ENTRY(SearchField))), 20);
     gtk_entry_set_placeholder_text(GTK_ENTRY(SearchField), "Search");
+    
+    ///////////
+
+    //g_signal_connect (SearchField, "activate", G_CALLBACK (get_list_users), NULL);
+    g_signal_connect (SearchField, "notify::text", G_CALLBACK (text_changed), NULL);
+
+    ///////////
+
     load_css_main(t_screen.provider, SearchField);
     gtk_box_append(GTK_BOX(SearchBox), GTK_WIDGET(SearchField));
     GFile *path = g_file_new_for_path("client/media/search_ico.png"); 

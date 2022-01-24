@@ -14,6 +14,8 @@
 #include <string.h>
 #include "../../libmx/inc/libmx.h"
 
+
+
 typedef struct s_chat {
     int id;
     char name[256];

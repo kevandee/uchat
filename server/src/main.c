@@ -165,6 +165,10 @@ void *client_work(void *param) {
                 len++;
             }
             char *name = mx_strndup(message + 16, len);
+            if (mx_strcmp(name, ".new_dialog") == 0) {
+                mx_strdel(&name);
+                name = mx_strdup(".dialog");
+            }
             char **arr = NULL;
             arr = mx_strsplit(mx_strchr(message, '>') + 1, ' ');
             t_chat *new_chat = (t_chat *)malloc(sizeof(t_chat));
