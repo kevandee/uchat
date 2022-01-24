@@ -1,9 +1,18 @@
 #include "../inc/uch_client.h"
 
+static void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
+{
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+}
+
 void add_chat_node(t_chat *chat) {
     GtkWidget *child_widget = gtk_button_new ();
-    gtk_widget_set_size_request(child_widget, 300, 50);
+    gtk_widget_set_size_request(child_widget, 246, 54);
     GtkWidget *chat_info = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(chat_info), "scroll_buttons");
+    load_css_main(t_screen.provider, chat_info);
 
     GtkWidget *chat_image = get_circle_widget_from_png_custom("test_circle.png", 57, 57);
     gtk_widget_set_size_request(GTK_WIDGET(chat_image),  57, 0);

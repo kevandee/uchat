@@ -90,8 +90,11 @@ scrolledwindow {
 }
 
 #add_chat{
-  background: #212D38;
-  font-size: 26px;
+  background: transparent;
+  padding-left: 25px;
+  font-size: 30px;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
   color: white;
   border-color: transparent;
 }
@@ -109,4 +112,32 @@ scrolledwindow {
 /*MAIN AUTH BUTTON HOVER*/
 #submit_button:hover {
   background:rgb(237, 168, 74);
+}
+
+#add_member_scrolled {
+  margin-top: 29px;
+  margin-left: 10px;
+  margin-right: 10px;
+  color: #fff;
+  font-family: 'Arial', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  background-color: transparent;
+}
+
+#user_list_box {
+  padding-top: 50px;
+}
+
+#scroll_window_chats {
+  background-color: transparent;
+}
+
+#scroll_box_left {
+  background-color: transparent;
+}
+
+#scroll_buttons {
+  background-color: transparent;
+  padding-right: 300px;
 }
