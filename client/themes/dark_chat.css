@@ -134,3 +134,170 @@ scrolledwindow {
   padding: 15px 10px 20px;
   border-radius: 10px;
 }
+
+/*------------------------- SETTINGS PANEL -------------------------*/
+
+/* Heading */
+#account_sett_text {
+  font-family: Arial, sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  color: #fff;
+  padding-top: 28px;
+}
+
+/* Change Photo Section */
+#photo_label {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #B6B6B6;
+}
+
+#change_photo_btn {
+  background:rgb(236, 179, 101);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  border-radius: 5px;
+  border: none;
+}
+
+#delete_btn {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: transparent;
+  border-radius: 5px;
+  border: none;
+}
+
+/* Change Name Section */
+#name_label {
+  margin-top: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #B6B6B6;
+}
+
+#entry_field_name {
+  border: none;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #9d9d9d;
+}
+
+#entry_field_surname {
+  border: none;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #9d9d9d;
+}
+
+/* BIO Section */
+#bio_label {
+  margin-top: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #B6B6B6;
+}
+
+#entry_field_bio {
+  border: none;
+  border-radius: 10px;
+}
+
+#apply_btn {
+  background:rgb(236, 179, 101);
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  border-radius: 5px;
+  border: none;
+}
+
+/*------------------------- THEMES HEADING -------------------------*/
+#themes_label {
+  font-family: Arial, sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  color: #fff;
+}
+
+#radio_button_dark {
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  padding: 8px 179px 8px 9px;
+  border-radius: 10px;
+}
+
+#radio_button_dark:checked {
+  background-color: #121b24;
+}
+
+#radio_button_light {
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  padding: 8px 179px 8px 9px;
+  border-radius: 10px;
+}
+
+#radio_button_light:checked {
+  background-color: #121b24;
+}
+
+/*------------------------- DELETE ACCOUNT -------------------------*/
+#delete_account_btn {
+  background: transparent;
+  border: solid 1px #ff2c2c;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  border-radius: 10px;
+  color: #ff2c2c;
+}
+
+/*------------------------- LOG OUT FROM ACCOUNT -------------------------*/
+
+#logOut_btn {
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  background: transparent;
+  border-radius: 5px;
+  border: none;
+}
+
+/*------------------------- PREVIEW BOX -------------------------*/
+
+#change_data_right_box {
+  background-color: #141b22;
+}
+
+#user_name {
+  font-family: Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+}
+
+#user_bio {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #8e8e8e;
+}
