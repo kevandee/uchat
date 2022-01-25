@@ -16,7 +16,7 @@ void sqlite3_create_db() {
         sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL);");
         sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER PRIMARY KEY, name TEXT NOT NULL, members INTEGER NOT NULL);");
         sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, admin BOOLEAN NOT NULL DEFAULT FALSE);");
-        sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, date DATETIME NOT NULL, text TEXT DEFAULT NULL);");
+        sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, text TEXT DEFAULT NULL, type TEXT DEFAULT text);");
         sql = mx_strrejoin(sql, "INSERT INTO users (login, password) VALUES ('Dima123', 'Dimapassword');");
         sql = mx_strrejoin(sql, "INSERT INTO users (login, password) VALUES ('Fibbs123', 'Mafilirkan');");
         rc = sqlite3_exec(db, sql, 0, 0, &err_msg);

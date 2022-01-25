@@ -8,6 +8,7 @@ void send_message(char *mes, char *sender, t_chat *chat) {
     if (mx_list_size(users_list) == 1) {
         return;
     }
+
     char buf[512 + 32] = {0};
     if (chat)
         sprintf(buf, "<msg, chat_id=%d, from=%s>%s", chat->id, sender, mes);

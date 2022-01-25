@@ -61,7 +61,7 @@ void *client_work(void *param) {
                 // 0 = ne nachol
                 asprintf(&query, sql_pattern, cur->login);
                 list = sqlite3_exec_db(query, 1);
-                printf("list head = '%s' \n", list->data);
+                //printf("list head = '%s' \n", list->data);
                 if (strcmp(list->data, "0") == 0) {
                     //REGESTRATION TO DB
                     sql_pattern = "INSERT INTO users (login, password) VALUES ('%s', '%s');";
@@ -222,10 +222,6 @@ void *client_work(void *param) {
             clear_message(message, MAX_LEN + NAME_LEN);
         }
         else if (mx_strncmp(message, "change chat", 11) == 0) {
-            /*
-            Дим, а тут нужно поиск данных по чату достать из бд и заполнить структуру,
-            пока что тут идёт поиск по линкед листу, но надо из бд всё взять
-            */
             char *trim = message + 12;
             char *query = NULL;
             char *sql_pattern = NULL;
@@ -243,17 +239,16 @@ void *client_work(void *param) {
                 sql_pattern = "SELECT EXISTS (SELECT id FROM members WHERE chat_id=(%d) AND user_id=(%d));";
                 asprintf(&query, sql_pattern, c_id, u_id);
                 list = sqlite3_exec_db(query, 1);
-                printf("check %s\n", list->data);
                 if (strcmp(list->data, "1") == 0) {
                     //
                     mx_strcpy(cur->cur_chat.name, c_name);
                     cur->cur_chat.id = c_id;
                     cur->cur_chat.count_users = get_chat_members(cur->cur_chat.id);
                     cur->cur_chat.users = get_chat_users(cur->cur_chat.id);
-                    //
-                    printf("cur name: %s\n", cur->cur_chat.name);
+                    
+                    /*printf("cur name: %s\n", cur->cur_chat.name);
                     printf("1 user: %s\n", cur->cur_chat.users->data);
-                    printf("2 user: %s\n", cur->cur_chat.users->next->data);
+                    printf("2 user: %s\n", cur->cur_chat.users->next->data);*/
                 }
                 else {
                     //NOT CHAT MEMBER
@@ -277,6 +272,14 @@ void *client_work(void *param) {
                 printf("change chat\n");
                 change_chat_by_id(chat_id, cur);
             }
+
+            printf("ya toot\n");
+            int u_id = get_user_id(cur->login);
+            char *query = NULL;
+            char *sql_pattern = NULL;
+            sql_pattern = "INSERT INTO messages (chat_id, user_id, text) VALUES (%d, %d, '%s');";
+            asprintf(&query, sql_pattern, cur->cur_chat.id, u_id, mx_strchr(message, '>') + 1);
+            sqlite3_exec_db(query, 2);
 
             send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat);
             clear_message(message, MAX_LEN + NAME_LEN);

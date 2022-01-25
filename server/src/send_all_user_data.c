@@ -1,11 +1,9 @@
 #include "../inc/uch_server.h"
 
 void send_all_user_data(t_client *client) {
-    printf("1\n");
     t_client *send_cl = get_user_info(client->id);
-    printf("1\n");
 
-    send (client->cl_socket, &send_cl->chat_count, sizeof(int), 0);
+    send(client->cl_socket, &send_cl->chat_count, sizeof(int), 0);
 
     t_list *temp = send_cl->chats;
 
