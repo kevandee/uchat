@@ -7,6 +7,10 @@ static void load_css_headerbar(GtkWidget *headerbar)
 
 }
 
+static void on_mouse() {
+    printf("bebra\n");
+}
+
 void chat_decorate_headerbar()
 {
     GtkGesture *click_close = gtk_gesture_click_new();
@@ -35,6 +39,9 @@ void chat_decorate_headerbar()
     load_css_headerbar(headerbar_button3);
     gtk_window_set_titlebar (GTK_WINDOW(t_screen.main_window), t_screen.headerbar);
 
-    //gtk_header_bar_set_title_widget();
+    GtkEventController *ev = gtk_event_controller_motion_new();
+    g_signal_connect(ev, "enter", G_CALLBACK(on_mouse), NULL); // "leave" когда курсор покидает область виджета
+    gtk_widget_add_controller(headerbar_button1,  GTK_EVENT_CONTROLLER(ev));
+    gtk_widget_add_controller(headerbar_button2,  GTK_EVENT_CONTROLLER(ev));
 }
 
