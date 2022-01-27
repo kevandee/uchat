@@ -339,9 +339,9 @@ void show_settings()
     gtk_text_view_set_top_margin(GTK_TEXT_VIEW(entry_field), 10);
     gtk_text_view_set_right_margin(GTK_TEXT_VIEW(entry_field), 10);
     gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(entry_field), 10);
-
     gtk_widget_set_size_request(entry_field, 240, 120);
     gtk_box_append(GTK_BOX(bio_entry_box), entry_field);
+    
     GtkWidget *apply_button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(apply_button_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(apply_button_box), GTK_ALIGN_CENTER);

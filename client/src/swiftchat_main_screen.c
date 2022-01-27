@@ -220,19 +220,62 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
 
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left), add_chat_box);
 }
+static void return_controll_func(GtkEventControllerKey *controller, guint keyval, guint keycode, GdkModifierType state, gpointer user_data) {
+    (void)controller;
+    (void)keycode;
+    (void)state;
 
-static void key_press(GtkWidget *entry) {
-    GtkEntryBuffer *buf = gtk_entry_get_buffer(GTK_ENTRY (entry));
-    const char *entry_text = gtk_entry_buffer_get_text (buf);
-    if (!entry_text) {
-        return;
+    if (keyval == GDK_KEY_Return) {
+        GtkWidget *entry = user_data;
+        GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(entry));
+
+        GtkTextIter start, end;
+        gtk_text_buffer_get_start_iter(buffer, &start);
+        gtk_text_buffer_get_end_iter(buffer, &end);
+        const char *buf_str = gtk_text_buffer_get_text(buffer, &start, &end, true);
+
+        if (!buf_str) {
+            return;
+        }
+        char message[512 + 32] = {0};
+        sprintf(message, "<msg, chat_id= %d>%s", cur_client.cur_chat.id, buf_str);
+
+        GtkWidget *my_msg_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_START);
+        gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_START);
+        gtk_widget_set_margin_end(my_msg_box, 5);
+        gtk_widget_set_margin_bottom(my_msg_box, 5);
+        GtkWidget* my_msg = gtk_text_view_new();
+        gtk_text_view_set_left_margin(GTK_TEXT_VIEW(my_msg), 10);
+        gtk_text_view_set_top_margin(GTK_TEXT_VIEW(my_msg), 10);
+        gtk_text_view_set_right_margin(GTK_TEXT_VIEW(my_msg), 10);
+        gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(my_msg), 10);
+        gtk_text_view_set_editable(GTK_TEXT_VIEW(my_msg), false);
+        gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW(my_msg), false);
+        gtk_widget_set_size_request(my_msg, 300, 50);
+        gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW(my_msg), GTK_WRAP_WORD_CHAR);
+        gtk_text_buffer_set_text (gtk_text_view_get_buffer(GTK_TEXT_VIEW(my_msg)), buf_str, -1);
+
+        gtk_box_append(GTK_BOX(my_msg_box), my_msg);
+        gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
+
+        send(cur_client.serv_fd, message, 512+32, 0);
+        gtk_text_buffer_set_text (buffer, "", 0);
     }
-    char message[512 + 32] = {0};
+}
 
-    sprintf(message, "<msg, chat_id= %d>%s", cur_client.cur_chat.id, entry_text);
-
-    send(cur_client.serv_fd, message, 512+32, 0);
-    gtk_entry_buffer_set_text(buf, "", 0);
+static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
+{
+    static int i=1;
+    gint count=gtk_text_buffer_get_char_count(buffer);
+    g_print("%i Chars %i\n", i++, count);
+    if(count>512) {
+        GtkTextIter offset, end;
+        gtk_text_buffer_get_iter_at_offset(buffer, &offset, 256);
+        gtk_text_buffer_get_end_iter(buffer, &end);
+        gtk_text_buffer_delete(buffer, &offset, &end);
+        gtk_text_iter_assign(location, &offset);
+    }
 }
 
 void show_chat_history(GtkWidget *widget, gpointer data)
@@ -248,6 +291,8 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 18);
 
     t_main.scroll_box_right = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(t_main.scroll_box_right), GTK_ALIGN_END);
+    gtk_widget_set_valign(GTK_WIDGET(t_main.scroll_box_right), GTK_ALIGN_END);
     t_main.scrolled_window_right = gtk_scrolled_window_new ();
     gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 828, 680);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_right), t_main.scroll_box_right);
@@ -257,12 +302,17 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     GtkWidget *write_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(write_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(write_box), GTK_ALIGN_CENTER);
-    GtkWidget *write_message = gtk_entry_new();
+    GtkWidget *write_message = gtk_text_view_new();
+    GtkTextBuffer *bio_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (write_message));
+    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(write_message), GTK_WRAP_WORD_CHAR);
     gtk_widget_set_size_request(write_message, 800, 36);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(write_message),"Write a message...");
+    g_signal_connect_after(bio_buffer, "insert-text", G_CALLBACK(insert_text_bio), NULL);
+
+    GtkEventController *return_controller = gtk_event_controller_key_new();
+    g_signal_connect_after(return_controller, "key-released", G_CALLBACK(return_controll_func), write_message);
+    gtk_widget_add_controller(write_message,  GTK_EVENT_CONTROLLER(return_controller));
     gtk_box_append(GTK_BOX(write_box), write_message);
 
-    g_signal_connect(write_message, "activate", G_CALLBACK(key_press), NULL);
 
     gtk_box_append(GTK_BOX(t_main.right_panel), t_main.scrolled_window_right);
     gtk_box_append(GTK_BOX(t_main.right_panel), write_box);
