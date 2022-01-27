@@ -258,7 +258,66 @@ void *client_work(void *param) {
                 //NO SUCH CHAT
             }
         } 
-        else if (mx_strncmp(message, "<msg, chat_id=", 13) == 0) {
+        else if(mx_strncmp(message, "<setting avatar>", 16) == 0){
+            char buf[512 + 32] = {0};
+            t_avatar recv_avatar;
+            recv_all(cur->cl_socket, buf, 512 + 32);
+            recv_avatar.name = mx_strdup(buf);
+            clear_message(buf, 512 + 32);
+
+            sprintf(buf, "data/avatars/%s/%s", cur->login, recv_avatar.name);
+            recv_avatar.path = mx_strdup(buf);
+            recv_image(cur->cl_socket, recv_avatar.name);
+            printf("bebra\n");
+            recv (cur->cl_socket, &recv_avatar.scaled_w, sizeof(double), 0);
+            recv (cur->cl_socket, &recv_avatar.scaled_h, sizeof(double), 0);
+            printf("bebra\n");
+            recv (cur->cl_socket, &recv_avatar.x, sizeof(double), 0);
+            recv (cur->cl_socket, &recv_avatar.y, sizeof(double), 0);
+            printf("bebra\n");
+            clear_message(buf, 512 + 32);
+            sprintf(buf, "<setting avatar>");
+            send_all(cur->cl_socket, buf, 512+32);
+            send_image(cur->cl_socket, recv_avatar.name);
+
+        }
+        else if (mx_strcmp(mx_strtrim(message), "<setting, name=") == 0) {
+            char *name = NULL;
+            char *surname = NULL;
+            char *bio = NULL;
+        
+            char *temp = mx_strstr(message, "name=") + 5;
+            int len = 0;
+            while (*(temp + len) != ',') {
+                len++;
+            }
+
+            name = mx_strndup(temp, len);
+            temp = mx_strstr(message, "surname=") + 8;
+            len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            surname = mx_strndup(temp, len);
+
+            bio = mx_strdup(mx_strchr(message, '>')+1);
+
+            if (mx_strcmp(name, ".not_changed") != 0) {
+                mx_strcpy(cur->name, name);
+                // изменяешь name
+            }
+            if (mx_strcmp(surname, ".not_changed") != 0) {
+                mx_strcpy(cur->surname, surname);
+            
+                // изменяешь surname
+            }
+            if (mx_strcmp(bio, ".not_changed") != 0) {
+                mx_strcpy(cur->bio, bio);
+
+                // изменяешь bio
+            }
+        }
+        else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0) {
             char *temp = message + 15;
             int len = 0;
             while (*(temp + len) != '>') {

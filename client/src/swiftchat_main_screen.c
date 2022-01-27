@@ -381,6 +381,7 @@ void chat_show_main_screen(GtkWidget *window)
     swapped[1] = add_chat_button;
     swapped[2] = recent_box;
     g_signal_connect(add_chat_button, "clicked", G_CALLBACK (add_chat_dialog), (gpointer)swapped);
+    
 
 //------------------------------------------------------------------------------------------------------------------------
 
@@ -393,6 +394,7 @@ void chat_show_main_screen(GtkWidget *window)
     t_list *chats = cur_client.chats;
     while (chats) {
         add_chat_node(chats->data);
+        
         chats = chats->next;
     }
     

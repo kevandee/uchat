@@ -25,15 +25,15 @@ static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
 static void show_circle_range(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpointer data);
 
 
-double koef = 0;
-double x = 0, y = 0;
-double prev_x, prev_y;
-
 gboolean user_function (GtkEventControllerScroll *controller, double dx, double dy,gpointer user_data) {
     (void)controller;
     (void)dx;
-    printf ("dx %f, dy %f\n", dx, dy);
-    koef += 10*dy;
+
+    double scaled_w = cur_client.avatar.orig_w+(cur_client.avatar.d_width + 5*dy);
+    double scaled_h = cur_client.avatar.orig_h+(cur_client.avatar.d_width + 5*dy) * (cur_client.avatar.orig_h/cur_client.avatar.orig_w);
+    if (cur_client.avatar.x + scaled_w > 500 && cur_client.avatar.y + scaled_h > 500) {
+        cur_client.avatar.d_width += 5*dy;
+    }
     gtk_widget_queue_draw(GTK_WIDGET (user_data));
     return TRUE;
 }
@@ -41,31 +41,12 @@ gboolean user_function (GtkEventControllerScroll *controller, double dx, double 
 GtkWidget *circle_range (cairo_surface_t *file) {
     GtkWidget *darea = NULL;
 
-
     darea = gtk_drawing_area_new();
-    gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 300);
-    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 300);
+    gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 700);
+    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 700);
     gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), show_circle_range, file, NULL);
 
     return GTK_WIDGET (darea);
-}
-
-
-cairo_surface_t *scale_to_half_test(cairo_surface_t *s, double orig_width, double orig_height, double scaled_width, double scaled_height) { 
-    if (orig_height == scaled_height && orig_width == scaled_width)
-        return s;
-    double param1 = (double)(orig_width)/((double)scaled_width);
-
-    double param2 = (double)orig_height/((double)scaled_height);
-
-    cairo_surface_t *result = cairo_surface_create_similar(s, cairo_surface_get_content(s), orig_width * (1/param1), orig_height*(1/param2)); 
-    cairo_t *cr = cairo_create(result); 
-    cairo_scale(cr, 1/param1, 1/param2); 
-    cairo_set_source_surface(cr, s, 0, 0); 
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE); 
-    cairo_paint(cr); 
-    cairo_destroy(cr); 
-    return result; 
 }
 
 static void show_circle_range(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpointer data) {
@@ -74,33 +55,36 @@ static void show_circle_range(GtkDrawingArea *widget, cairo_t *cr, int w, int h,
     (void)h;
     (void)data;
     cairo_surface_t *image = data;
-
     gdouble org_width, org_height;
-
     org_width = cairo_image_surface_get_width(image);
     org_height = cairo_image_surface_get_height(image);
     
-    cairo_surface_t *scaled_image = scale_to_half_test(image, org_width, org_height, org_width+koef, org_width+koef);
+    cur_client.avatar.orig_w = org_width;
+    cur_client.avatar.orig_h = org_height;
+
+    cairo_surface_t *scaled_image = scale_to_half(image, org_width, org_height, org_width+ cur_client.avatar.d_width, org_height+cur_client.avatar.d_width * (org_height/org_width));
     org_width = cairo_image_surface_get_width(scaled_image);
     org_height = cairo_image_surface_get_height(scaled_image);
+    cur_client.avatar.scaled_w = org_width;
+    cur_client.avatar.scaled_h = org_height;
 
-    cairo_set_source_surface (cr, scaled_image, x, y); 
+    cairo_set_source_surface (cr, scaled_image, cur_client.avatar.x, cur_client.avatar.y); 
     
     cairo_paint(cr);
 
     cairo_set_operator(cr, CAIRO_OPERATOR_DARKEN);
 
-    cairo_rectangle (cr, x, y, cairo_image_surface_get_width(scaled_image), cairo_image_surface_get_height(scaled_image));
+    cairo_rectangle (cr, cur_client.avatar.x, cur_client.avatar.y, cairo_image_surface_get_width(scaled_image), cairo_image_surface_get_height(scaled_image));
     cairo_set_source_rgba (cr, 0.0, 0, 0, 0.8);
     cairo_fill (cr);
 
     org_width = cairo_image_surface_get_width(image);
     org_height = cairo_image_surface_get_height(image);
 
-    cairo_set_source_surface (cr, scaled_image, x, y); 
+    cairo_set_source_surface (cr, scaled_image, cur_client.avatar.x, cur_client.avatar.y); 
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
 
-    cairo_arc(cr, 250, 250, 150, 0, 2 * M_PI);
+    cairo_arc(cr, w/2, h/2, 150, 0, 2 * M_PI);
     
     cairo_clip(cr);
     
@@ -108,49 +92,100 @@ static void show_circle_range(GtkDrawingArea *widget, cairo_t *cr, int w, int h,
     cairo_fill(cr);
 }
 
-static void begin_move_image() {
-    prev_x = x; prev_y = y;
+static void begin_move_image(GtkWidget *widget, gpointer data) {
+    (void)widget;
+    t_list *list = data;
+
+    *((double *)list->next->data) = cur_client.avatar.x; 
+    *((double *)list->next->next->data) = cur_client.avatar.y;
 }
 
 static void move_image (GtkGestureDrag *gesture, double offset_x, double offset_y, gpointer data) {
     (void)gesture;
+    t_list *list = data;
+    GtkWidget *darea = GTK_WIDGET (list->data);
+    double prev_x = *((double *)(list->next->data));
+    double prev_y = *((double *)(list->next->next->data));
 
-    GtkWidget *darea = data;
+    if (prev_x + offset_x < 200 && prev_x + offset_x + cur_client.avatar.scaled_w > 500) {
+        cur_client.avatar.x=prev_x + offset_x;
+    }
+    if (prev_y + offset_y < 200 && prev_y + offset_y + cur_client.avatar.scaled_h > 500) {
+        cur_client.avatar.y=prev_y + offset_y;
+    }
+    gtk_widget_queue_draw(darea);   
 
-    x=prev_x + offset_x;
-    y=prev_y + offset_y;
+}
 
-    gtk_widget_queue_draw(darea);
+static void send_avatar() {
+    char buf[512 + 32] = {0};
+    sprintf(buf, "%s", "<setting avatar>");
+    send_all(cur_client.serv_fd, buf, 512 + 32);
+    clear_message(buf, 512 + 32);
+    
+    sprintf(buf, "%s", cur_client.avatar.name);
+    send_all(cur_client.serv_fd, buf, 512 + 32);
+    clear_message(buf, 512 + 32);
+    t_main.loaded = false;
+    send_image(cur_client.serv_fd, cur_client.avatar.path);
+    
+    while (!t_main.loaded) {
+        usleep(50);
+    }
+
+    send (cur_client.serv_fd, &cur_client.avatar.scaled_w, sizeof(double), 0);
+    send (cur_client.serv_fd, &cur_client.avatar.scaled_h, sizeof(double), 0);
+
+    send (cur_client.serv_fd, &cur_client.avatar.x, sizeof(double), 0);
+    send (cur_client.serv_fd, &cur_client.avatar.y, sizeof(double), 0);
+
+    t_main.loaded = false;
+    while (!t_main.loaded) {
+        usleep(50);
+    }
+    
+    show_settings();
 }
 
 static void avatar_range(GFile *file) {
     cairo_surface_t *image = get_surface_from_jpg(g_file_get_path(file));
 
     GtkWidget *darea = circle_range(image);
-    gtk_widget_set_size_request(darea , 500, 500);
+    gtk_widget_set_size_request(darea , 700, 700);
+    
     gtk_grid_remove(GTK_GRID(t_main.grid), t_main.right_panel);
     t_main.right_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-
+    gtk_widget_set_size_request(t_main.right_panel, 1000,700);
     gtk_widget_set_halign(GTK_WIDGET( t_main.right_panel), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET( t_main.right_panel), GTK_ALIGN_CENTER);
 
     gtk_widget_set_halign(GTK_WIDGET(darea), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(darea), GTK_ALIGN_CENTER);
     
+    GtkWidget *apply_button = gtk_button_new_with_label("Apply");
+    gtk_widget_set_size_request(GTK_WIDGET (apply_button), 200, 0);
+    gtk_widget_set_halign(GTK_WIDGET(apply_button), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(apply_button), GTK_ALIGN_CENTER);
+
+    g_signal_connect(apply_button, "clicked", G_CALLBACK(send_avatar), NULL);
 
     gtk_box_append(GTK_BOX (t_main.right_panel), darea);
-
+    gtk_box_append(GTK_BOX (t_main.right_panel), apply_button);
+    
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
 
     GtkEventController *scroll_controller = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_VERTICAL);
     g_signal_connect(scroll_controller, "scroll", G_CALLBACK(user_function), darea);
-
     gtk_widget_add_controller(t_main.right_panel, GTK_EVENT_CONTROLLER (scroll_controller));
 
     GtkGesture *drag_controller = gtk_gesture_drag_new();
-    g_signal_connect(drag_controller, "drag-update", G_CALLBACK(move_image), darea);
-    g_signal_connect(drag_controller, "drag-begin", G_CALLBACK(begin_move_image), NULL);
-
+    double *prev_x = (double *)malloc(sizeof(double)), *prev_y = (double *)malloc(sizeof(double));
+    t_list *data = NULL;
+    mx_push_back(&data, darea);
+    mx_push_back(&data, prev_x);
+    mx_push_back(&data, prev_y);
+    g_signal_connect(drag_controller, "drag-update", G_CALLBACK(move_image), data);
+    g_signal_connect(drag_controller, "drag-begin", G_CALLBACK(begin_move_image), data);
     gtk_widget_add_controller(darea, GTK_EVENT_CONTROLLER(drag_controller));
 }
 
@@ -162,8 +197,8 @@ static void on_open_response (GtkDialog *dialog, int response)
 
         GFile *file = gtk_file_chooser_get_file (chooser);
         
-        printf("%s\n", g_file_get_basename(file));
-        //open_file (file);
+        cur_client.avatar.name = mx_strdup(g_file_get_basename(file));
+        cur_client.avatar.path = mx_strdup(g_file_get_path(file));
     
         avatar_range(file);
     }
@@ -334,19 +369,36 @@ void show_settings()
     GtkWidget *user_image_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(user_image_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(user_image_box), GTK_ALIGN_CENTER);
-    GtkWidget *user_image = get_circle_widget_from_png_custom("test_circle.png", 120, 120);
+    GtkWidget *user_image = get_circle_widget_from_png_avatar(cur_client.avatar.path, 120, 120);
     gtk_box_append(GTK_BOX(user_image_box), user_image);
     GtkWidget *user_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(user_name_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(user_name_box), GTK_ALIGN_CENTER);
-    GtkWidget *user_name = gtk_label_new("Name Surname");
+    char *name_surname = NULL;
+    if (mx_strcmp(cur_client.name, ".clear") != 0) {
+        name_surname = mx_strrejoin(name_surname, cur_client.name);
+    }
+    if (mx_strcmp(cur_client.surname, ".clear") != 0) {
+        name_surname = mx_strrejoin(name_surname, cur_client.surname);
+    }
+    GtkWidget *user_name = gtk_label_new(name_surname);
+    mx_strdel(&name_surname);
+    gtk_label_set_wrap(GTK_LABEL(user_name), true);
+    gtk_label_set_wrap_mode(GTK_LABEL(user_name), PANGO_WRAP_WORD);
     gtk_widget_set_name(user_name, "user_name");
     load_css_main(t_screen.provider, user_name);
     gtk_box_append(GTK_BOX(user_name_box), user_name);
     GtkWidget *user_bio_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(user_bio_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(user_bio_box), GTK_ALIGN_CENTER);
-    GtkWidget *user_bio = gtk_label_new("User bio vjifdjvifdjvidfjvidfojvdfovjdfo");
+    char *bio_str = NULL;
+    if (mx_strcmp(cur_client.bio, ".clear") != 0) {
+        bio_str = mx_strdup(cur_client.bio);
+    }
+    GtkWidget *user_bio = gtk_label_new(bio_str);
+    mx_strdel(&bio_str);
+    gtk_label_set_wrap(GTK_LABEL(user_bio), true);
+    gtk_label_set_wrap_mode(GTK_LABEL(user_bio), PANGO_WRAP_WORD_CHAR);
     gtk_widget_set_name(user_bio, "user_bio");
     load_css_main(t_screen.provider, user_bio);
     gtk_box_append(GTK_BOX(user_bio_box), user_bio);

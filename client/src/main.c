@@ -54,6 +54,7 @@ void *rec_func(void *param) {
                     receive = recv_all(fd, buf_name, 256);
                 }
                 mx_strcpy(new_chat->name, buf_name);
+                printf("recv chatname %s\n", new_chat->name);
                 receive = recv(fd, &new_chat->id, sizeof(int), 0);
                 while (receive < 0) {
                     receive = recv(fd, &new_chat->id, sizeof(int), 0);
@@ -130,8 +131,22 @@ void *rec_func(void *param) {
                 printf("%s\n", total_msg);
                 printf("> ");
                 fflush(stdout);
+            }else if(mx_strcmp(mx_strtrim(message), "<setting avatar>") == 0) {
+                printf("a\n");
+                char buf[544] = {0};
+                sprintf(buf, "client_data/%s", cur_client.avatar.name);
+                recv_image(cur_client.serv_fd, buf);
+                mx_strdel(&cur_client.avatar.path);
+                cur_client.avatar.path = mx_strdup(buf);
+
+                t_main.loaded = true;
             }
-        } else if (receive == 0) {
+            else if(mx_strcmp(mx_strtrim(message), "<image loaded>") == 0) {
+
+                t_main.loaded = true;
+            }
+        }  
+        if (receive == 0) {
             break;
         } else {
                 // -1
@@ -219,8 +234,8 @@ static void load_css() {
     get_all_user_data();
     //printf("chat_name = %s\n", ((t_chat *)(cur_client.chats->data))->name);
 
-    create_user_db(cur_client.login);
-    insert_user_db(cur_client);
+    //create_user_db(cur_client.login);
+    //insert_user_db(cur_client);
 
     GtkWidget *child = gtk_window_get_child(GTK_WINDOW (t_screen.main_window));
     
@@ -253,10 +268,11 @@ int main(int argc, char *argv[]) {
         .login = NULL,
         .passwd = NULL,
         .chat_count = 0,
-        .chats = NULL
+        .chats = NULL,
+        .avatar = {0}
     };
     cur_client = cur;
-    
+    cur_client.avatar.path = mx_strdup("test_circle.png");
     // Подключение к серверу, тут ничего менять не надо
     cur_client.serv_fd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in adr = {0};

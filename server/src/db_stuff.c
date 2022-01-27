@@ -13,7 +13,7 @@ void sqlite3_create_db() {
             exit(EXIT_FAILURE);
         }
         sql = mx_strrejoin(sql, "PRAGMA encoding = \"UTF-8\";");
-        sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL);");
+        sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, name TEXT DEFAULT \".clear\", surname TEXT DEFAULT \".clear\", bio TEXT DEFAULT \".clear\");");
         sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER PRIMARY KEY, name TEXT NOT NULL, members INTEGER NOT NULL);");
         sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, admin BOOLEAN NOT NULL DEFAULT FALSE);");
         sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, text TEXT DEFAULT NULL, type TEXT DEFAULT text);");
@@ -80,9 +80,26 @@ int get_user_id(char *login) {
     return u_id;
 }
 
+t_list  *get_user_names(int id) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT name, surname FROM users WHERE id = (%d);";
+    asprintf(&query, sql_pattern, id);
+    t_list *list = sqlite3_exec_db(query, 1);
+    return list;
+}
+
 char  *get_user_login(int id) {
     char *query = NULL;
     char *sql_pattern = "SELECT login FROM users WHERE id = (%d);";
+    asprintf(&query, sql_pattern, id);
+    t_list *list = sqlite3_exec_db(query, 1);
+    char *login = list->data;
+    return login;
+}
+
+char  *get_user_bio(int id) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT bio FROM users WHERE id = (%d);";
     asprintf(&query, sql_pattern, id);
     t_list *list = sqlite3_exec_db(query, 1);
     char *login = list->data;
@@ -140,6 +157,26 @@ t_chat *chat_info (int c_id) {
 t_client *get_user_info(int id) {
     t_client *user = (t_client *)malloc(sizeof(t_client));
     user->login = get_user_login(id);
+    t_list *names = get_user_names(id);
+    char *bio = get_user_bio(id);
+    if (names){
+        mx_strcpy(user->name, names->data);
+    }
+    else {
+        mx_strcpy(user->name, ".clear");
+    }
+    if (names->next) {
+        mx_strcpy(user->surname, names->next->data);
+    }
+    else {
+        mx_strcpy(user->surname, ".clear");
+    }
+    if (!bio) {
+        mx_strcpy(user->bio, ".clear");
+    }
+    else {
+        mx_strcpy(user->bio, bio);
+    }
     t_list *chats_id = get_chats_id(id);
     t_list *chats_info = NULL;
     int i = 0;
