@@ -206,7 +206,7 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
     GtkWidget *button_success = gtk_button_new_with_label("Submit");
     gtk_widget_set_name(button_success, "submit_button");
     load_css_main(t_screen.provider, button_success);
-    gtk_widget_set_size_request(button_success, 15, 15);
+    gtk_widget_set_size_request(button_success, 180, 26);
     swapped[3] = chat_name_entry;
     g_signal_connect(button_success, "clicked", G_CALLBACK(send_chat), swapped);
     gtk_box_append(GTK_BOX (buttons_box), button_success);
