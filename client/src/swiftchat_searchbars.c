@@ -4,7 +4,7 @@ static bool is_dialog(char *name) {
     t_list *temp = cur_client.chats;
     while (temp) {
         t_chat *chat = ((t_chat *)(temp->data));
-        if (mx_strcmp(".dialog", chat->name) == 0 
+        if (mx_strncmp(".dialog", chat->name, 7) == 0 
         && mx_list_size(chat->users) == 2
         && (mx_strcmp(chat->users->data, name) == 0 
         || mx_strcmp(chat->users->next->data, name) == 0 )) {
@@ -35,7 +35,8 @@ void text_changed_main_screen(GObject *object, GParamSpec *pspec, gpointer data)
         t_list *search = t_main.search_users_list;
         while (search) {
             if (mx_strncmp(entry_text, search->data, mx_strlen(entry_text)) == 0 && !is_dialog(search->data)) {
-                mx_push_back(&res, search->data);
+                if (mx_strcmp(search->data, cur_client.login) != 0)
+                    mx_push_back(&res, search->data);
             }
 
             search = search -> next;
@@ -61,7 +62,7 @@ void text_changed_main_screen(GObject *object, GParamSpec *pspec, gpointer data)
             if (mx_strncmp(entry_text, ((t_chat *)(search->data))->name, mx_strlen(entry_text)) == 0){
                  mx_push_front(&res, search->data);
             }
-            else if (mx_strcmp(".dialog", ((t_chat *)(search->data))->name) == 0){
+            else if (mx_strncmp(".dialog", ((t_chat *)(search->data))->name, 7) == 0){
                 if (mx_strncmp(entry_text, ((t_chat *)(search->data))->users->data, mx_strlen(entry_text)) == 0
                 || mx_strncmp(entry_text, ((t_chat *)(search->data))->users->next->data, mx_strlen(entry_text)) == 0)
                     mx_push_front(&res, search->data);

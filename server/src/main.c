@@ -175,13 +175,19 @@ void *client_work(void *param) {
             new_chat->users=NULL;
             
             mx_strcpy(new_chat->name, name);
-            mx_strdel(&name);
+            
             int i;
             mx_push_back(&new_chat->users, mx_strdup(cur->login));
             for (i = 0; arr[i]; i++) {
                 printf("arr %s\n", arr[i]);
                 mx_push_back(&new_chat->users, mx_strdup(arr[i]));
             } 
+            if (mx_strcmp(name, ".dialog") == 0) {
+                name = mx_strrejoin(name, " ");
+                name = mx_strrejoin(name, new_chat->users->next->data);
+                name = mx_strrejoin(name, " ");
+                name = mx_strrejoin(name, cur->login);
+            }
             new_chat->messages = NULL;
             new_chat->count_users = i + 1;
             
@@ -189,7 +195,8 @@ void *client_work(void *param) {
             char *query = NULL;
             char *sql_pattern = NULL;
             sql_pattern = "INSERT INTO chats (name, members) VALUES ('%s', %d);";
-            asprintf(&query, sql_pattern, new_chat->name, new_chat->count_users);
+            asprintf(&query, sql_pattern, name, new_chat->count_users);
+            mx_strdel(&name);
             int *data = sqlite3_exec_db(query, 2);
             int c_id = data[0];
             new_chat->id = c_id;

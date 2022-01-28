@@ -54,7 +54,7 @@ void add_chat_node(t_chat *chat) {
     if (mx_strcmp(chat->name, ".new_dialog") == 0){
         chat_name = gtk_label_new(chat->users->data);
     }
-    else if (mx_strcmp(chat->name, ".dialog") == 0) {
+    else if (mx_strncmp(chat->name, ".dialog", 7) == 0) {
         t_list *logins = chat->users;
         
 

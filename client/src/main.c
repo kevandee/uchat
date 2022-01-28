@@ -119,6 +119,7 @@ void *rec_func(void *param) {
                 pthread_mutex_lock(&cl_mutex);
                 t_list *users_list = NULL;
                 int count_users;
+                printf("reseive\n");
                 recv(cur_client.serv_fd, &count_users, sizeof(int), 0);
                 for (int i = 0; i < count_users; i++) {
                     printf("reseive\n");
