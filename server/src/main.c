@@ -261,17 +261,16 @@ void *client_work(void *param) {
             recv_all(cur->cl_socket, buf, 512 + 32);
             recv_avatar.name = mx_strdup(buf);
             clear_message(buf, 512 + 32);
-
+            char *path = mx_strjoin("data/avatars/", cur->login);
             sprintf(buf, "data/avatars/%s/%s", cur->login, recv_avatar.name);
+            struct stat st = {0};
+            if (stat(path, &st) == -1) {
+                mkdir(path, 0777);
+            }
+            mx_strdel(&path);
             recv_avatar.path = mx_strdup(buf);
 
-            char *query = NULL;
-            char *sql_pattern = NULL;
-            sql_pattern = "UPDATE users SET avatar = '%s' WHERE id = %d;";
-            asprintf(&query, sql_pattern, recv_avatar.path, cur->id);
-            sqlite3_exec_db(query, 2);
-
-            recv_image(cur->cl_socket, recv_avatar.name);
+            recv_image(cur->cl_socket, recv_avatar.path);
         
             sprintf(buf, "<image loaded>");
             send_all(cur->cl_socket, buf, 512 + 32); 
@@ -288,6 +287,14 @@ void *client_work(void *param) {
             sprintf(buf, "<setting avatar>");
             send_all(cur->cl_socket, buf, 512+32);
             send_image(cur->cl_socket, recv_avatar.name);
+
+            sprintf(buf, "path=%s scaled_w=%f scaled_h=%f x=%f y=%f ", recv_avatar.path,recv_avatar.scaled_w, recv_avatar.scaled_h,recv_avatar.x, recv_avatar.y);
+
+            char *query = NULL;
+            char *sql_pattern = NULL;
+            sql_pattern = "UPDATE users SET avatar = '%s' WHERE id = %d;";
+            asprintf(&query, sql_pattern, buf, cur->id);
+            sqlite3_exec_db(query, 2);
 
         }
         else if (mx_strncmp(mx_strtrim(message), "<setting, name=", 15) == 0) {
@@ -335,7 +342,7 @@ void *client_work(void *param) {
             }
             if (mx_strcmp(bio, ".not_changed") != 0) {
                 mx_strcpy(cur->bio, bio);
-
+                printf("receive bio: %s\n", bio);
                 char *query = NULL;
                 char *sql_pattern = NULL;
                 sql_pattern = "UPDATE users SET bio = '%s' WHERE id = %d;";

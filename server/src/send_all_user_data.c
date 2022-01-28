@@ -9,10 +9,29 @@ void send_all_user_data(t_client *client) {
 
     sprintf(buf_name, "%s", send_cl->surname);
     send_all(client->cl_socket, buf_name, 32);
+    clear_message(buf_name, 32);
     char buf[256] = {0};
-    sprintf(buf, "%s",client->bio);
+    sprintf(buf, "%s",send_cl->bio);
+
     send_all(client->cl_socket, buf, 256);
     clear_message(buf, 256);
+
+    char *temp_str = send_cl->avatar.path;
+    while (mx_strchr(temp_str,'/')) {
+        temp_str = mx_strchr(temp_str,'/') + 1;
+    }
+
+    sprintf(buf_name, "%s", temp_str);
+    send_all(client->cl_socket, buf_name, 32);
+    clear_message(buf_name, 32);
+    if (mx_strcmp(send_cl->avatar.path, "default") != 0){
+        send_image(client->cl_socket, send_cl->avatar.path);
+        recv_all(client->cl_socket, buf_name, 14);
+        send(client->cl_socket, &send_cl->avatar.scaled_w, sizeof(double), 0);
+        send(client->cl_socket, &send_cl->avatar.scaled_h, sizeof(double), 0);
+        send(client->cl_socket, &send_cl->avatar.x, sizeof(double), 0);
+        send(client->cl_socket, &send_cl->avatar.y, sizeof(double), 0);
+    }
 
     send(client->cl_socket, &send_cl->chat_count, sizeof(int), 0);
 

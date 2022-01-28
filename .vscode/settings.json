@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "gfile.h": "c",
-        "uch_client.h": "c"
+        "uch_client.h": "c",
+        "__locale": "c",
+        "locale": "c"
     }
 }
