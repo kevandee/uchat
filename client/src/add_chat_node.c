@@ -37,6 +37,8 @@ static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
 void add_chat_node(t_chat *chat) {
     GtkWidget *child_widget = gtk_button_new ();
     gtk_widget_set_size_request(child_widget, 200, 54);
+    gtk_widget_set_name(GTK_WIDGET(child_widget), "scroll_buttons_border");
+    load_css_main(t_screen.provider, child_widget);
     GtkWidget *chat_info = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(GTK_WIDGET(chat_info), "scroll_buttons");
     load_css_main(t_screen.provider, chat_info);
@@ -59,6 +61,8 @@ void add_chat_node(t_chat *chat) {
         while (logins) {
             if (mx_strcmp(logins->data, cur_client.login) != 0) {
                 chat_name = gtk_label_new(logins->data);
+                gtk_widget_set_name(GTK_WIDGET(chat_name), "chat_name");
+                load_css_main(t_screen.provider, chat_name);
                 break;
             }
             logins = logins->next;

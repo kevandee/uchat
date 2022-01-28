@@ -39,7 +39,7 @@ void chat_decorate_headerbar()
     t_screen.headerbar = gtk_header_bar_new();
     gtk_header_bar_set_show_title_buttons (GTK_HEADER_BAR( t_screen.headerbar), FALSE);
 
-    GtkWidget *buttons_box_enter = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    GtkWidget *buttons_box_enter = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 7);
 
     GtkWidget *headerbar_button1 = gtk_image_new_from_file("client/media/close.png");
     gtk_widget_set_name(GTK_WIDGET(headerbar_button1), "close");
@@ -56,7 +56,7 @@ void chat_decorate_headerbar()
     //gtk_header_bar_pack_start (GTK_HEADER_BAR( t_screen.headerbar), headerbar_button3);
     gtk_box_append(GTK_BOX(buttons_box_enter), headerbar_button3);
 
-    GtkWidget *buttons_box_leave = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    GtkWidget *buttons_box_leave = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 7);
 
     GtkWidget *headerbar_button_leave1 = gtk_image_new_from_file("client/media/close_hover.png");
     gtk_widget_set_name(GTK_WIDGET(headerbar_button_leave1), "close");
