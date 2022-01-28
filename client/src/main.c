@@ -31,8 +31,32 @@ void *sender_func(void *param) {
     return NULL;
 }
 
+gboolean add_msg(gpointer data) {
+    char *total_msg = data;
+    GtkWidget *incoming_msg_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_size_request(incoming_msg_box, 300, 50);
+    gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
+    gtk_widget_set_margin_start(incoming_msg_box, 5);
+    gtk_widget_set_margin_bottom(incoming_msg_box, 5);
+    GtkWidget* incoming_msg = gtk_text_view_new();
+    gtk_text_view_set_left_margin(GTK_TEXT_VIEW(incoming_msg), 10);
+    gtk_text_view_set_top_margin(GTK_TEXT_VIEW(incoming_msg), 10);
+    gtk_text_view_set_right_margin(GTK_TEXT_VIEW(incoming_msg), 10);
+    gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(incoming_msg), 10);
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(incoming_msg), false);
+    gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW(incoming_msg), false);
+    gtk_widget_set_size_request(incoming_msg, 300, 50);
+    gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW(incoming_msg), GTK_WRAP_WORD_CHAR);
+    gtk_text_buffer_set_text (gtk_text_view_get_buffer(GTK_TEXT_VIEW(incoming_msg)), total_msg, mx_strlen(total_msg));
+
+    gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
+    gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
+    return FALSE;
+}
+
 void *rec_func(void *param) {
-    while(!cur_client.login) {
+    while(!t_main.loaded) {
         sleep(1);
     }
     int fd = cur_client.serv_fd;
@@ -125,13 +149,19 @@ void *rec_func(void *param) {
                 }
                 char *sender = mx_strndup(temp, len);              // отправитель
                 printf("%s\n", sender);
-                char *total_msg = mx_strchr(message, '>') + 1;     // сообщение
+                char *total_msg = mx_strdup(mx_strchr(message, '>') + 1);     // сообщение
                                                                    // время надо получить локально на клиенте
+                printf("%s\n", total_msg);
+                if (cur_client.cur_chat.id == chat_id) {
+                    g_idle_add(add_msg, total_msg);
+                }
+                
                 
                 printf("%s\n", total_msg);
                 printf("> ");
                 fflush(stdout);
-            }else if(mx_strcmp(mx_strtrim(message), "<setting avatar>") == 0) {
+            }
+            else if(mx_strcmp(mx_strtrim(message), "<setting avatar>") == 0) {
                 printf("a\n");
                 char buf[544] = {0};
                 sprintf(buf, "client_data/%s", cur_client.avatar.name);
@@ -278,7 +308,7 @@ int main(int argc, char *argv[]) {
             .name = "default_user.png", 
             .x = 200,
             .y = 200
-        }
+        },
     };
     cur_client = cur;;
     // Подключение к серверу, тут ничего менять не надо
@@ -290,6 +320,7 @@ int main(int argc, char *argv[]) {
     inet_pton(AF_INET, argv[1], &adr.sin_addr); //"127.0.0.1"
     cur_client.adr = adr;
     // Запуск потоков для приёма и отправки сообщений, будем смотреть. Может, придётся переделать под события из гтк
+    t_main.loaded = false;
     pthread_t sender_th;
     pthread_t rec_th;
     pthread_mutex_init(&cl_mutex, NULL);

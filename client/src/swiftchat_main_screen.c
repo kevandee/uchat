@@ -241,8 +241,8 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         sprintf(message, "<msg, chat_id= %d>%s", cur_client.cur_chat.id, buf_str);
 
         GtkWidget *my_msg_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-        gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_START);
-        gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_START);
+        gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
+        gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
         gtk_widget_set_margin_end(my_msg_box, 5);
         gtk_widget_set_margin_bottom(my_msg_box, 5);
         GtkWidget* my_msg = gtk_text_view_new();
@@ -291,8 +291,8 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 18);
 
     t_main.scroll_box_right = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_halign(GTK_WIDGET(t_main.scroll_box_right), GTK_ALIGN_END);
     gtk_widget_set_valign(GTK_WIDGET(t_main.scroll_box_right), GTK_ALIGN_END);
+    
     t_main.scrolled_window_right = gtk_scrolled_window_new ();
     gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 828, 680);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_right), t_main.scroll_box_right);

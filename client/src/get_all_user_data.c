@@ -41,4 +41,6 @@ void get_all_user_data() {
         }
         mx_push_back(&cur_client.chats, new_chat);
     }
+
+    t_main.loaded = true;
 }
