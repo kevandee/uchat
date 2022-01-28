@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "gfile.h": "c"
+        "gfile.h": "c",
+        "uch_client.h": "c"
     }
 }
