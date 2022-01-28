@@ -269,10 +269,18 @@ int main(int argc, char *argv[]) {
         .passwd = NULL,
         .chat_count = 0,
         .chats = NULL,
-        .avatar = {0}
+        .avatar = {
+            .orig_w = 512,
+            .orig_h = 512,
+            .scaled_w = 300,
+            .scaled_h = 300,
+            .path = "client/media/default_user.png",
+            .name = "default_user.png", 
+            .x = 200,
+            .y = 200
+        }
     };
-    cur_client = cur;
-    cur_client.avatar.path = mx_strdup("test_circle.png");
+    cur_client = cur;;
     // Подключение к серверу, тут ничего менять не надо
     cur_client.serv_fd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in adr = {0};

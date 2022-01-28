@@ -281,7 +281,7 @@ void *client_work(void *param) {
             send_image(cur->cl_socket, recv_avatar.name);
 
         }
-        else if (mx_strcmp(mx_strtrim(message), "<setting, name=") == 0) {
+        else if (mx_strncmp(mx_strtrim(message), "<setting, name=", 15) == 0) {
             char *name = NULL;
             char *surname = NULL;
             char *bio = NULL;

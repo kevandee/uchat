@@ -10,17 +10,28 @@ static void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
 
 static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
 {
-    static int i=1;
     gint count=gtk_text_buffer_get_char_count(buffer);
-    g_print("%i Chars %i\n", i++, count);
+
+    GtkTextIter start, end, offset;
+    gtk_text_buffer_get_start_iter(buffer, &start);
+    gtk_text_buffer_get_end_iter(buffer, &end);
+    const char *buf_str = gtk_text_buffer_get_text(buffer, &start, &end, true);
+    if(buf_str[count-1] == '\n' && count > 1) {
+        gtk_text_buffer_get_iter_at_offset(buffer, &offset, count - 1);
+        gtk_text_buffer_delete(buffer, &offset, &end);
+        gtk_text_iter_assign(location, &offset);
+        return;
+    }
+
     if(count>256) {
-        GtkTextIter offset, end;
         gtk_text_buffer_get_iter_at_offset(buffer, &offset, 256);
         gtk_text_buffer_get_end_iter(buffer, &end);
         gtk_text_buffer_delete(buffer, &offset, &end);
         gtk_text_iter_assign(location, &offset);
     }
 }
+
+
 
 static void show_circle_range(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpointer data);
 
@@ -222,8 +233,60 @@ static void choise_photo_file() {
     g_signal_connect (dialog, "response", G_CALLBACK (on_open_response), NULL);
 }
 
-void show_settings()
-{
+static void send_settings(GtkWidget *widget, gpointer data) {
+    (void)widget;
+    GtkWidget ** entry_arr = data;
+
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (entry_arr[2]));
+    GtkTextIter start, end;
+    gtk_text_buffer_get_start_iter(buffer, &start);
+    gtk_text_buffer_get_end_iter(buffer, &end);
+
+    const char *tmp_name = gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY (entry_arr[0])));
+    const char *tmp_surname = gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY (entry_arr[1])));
+    const char *tmp_bio = gtk_text_buffer_get_text(buffer, &start, &end, true);;
+
+    if (mx_strcmp(tmp_name, cur_client.name) != 0) {
+        clear_message(cur_client.name, 32);
+        mx_strcpy(cur_client.name, tmp_name);
+        if (mx_strlen(cur_client.name) == 0) {
+            tmp_name = ".clear";
+            mx_strcpy(cur_client.name, tmp_name);
+        }
+    }
+    else {
+        tmp_name = ".not_changed";
+    }
+    if (mx_strcmp(tmp_surname, cur_client.surname) != 0) {
+        clear_message(cur_client.surname, 32);
+        mx_strcpy(cur_client.surname, tmp_surname);
+        if (mx_strlen(cur_client.surname) == 0) {
+            tmp_surname = ".clear";
+            mx_strcpy(cur_client.surname, tmp_surname);
+        }
+    }
+    else {
+        tmp_surname = ".not_changed";
+    }
+    if (mx_strcmp(tmp_bio, cur_client.bio) != 0) {
+        clear_message(cur_client.bio, 256);
+        mx_strcpy(cur_client.bio, tmp_bio);
+        if (mx_strlen(cur_client.bio) == 0) {
+            tmp_bio = ".clear";
+            mx_strcpy(cur_client.bio, tmp_bio);
+        }        
+    }
+    else {
+        tmp_bio = ".not_changed";
+    }
+
+    char buf[544] = {0};
+    sprintf(buf, "<setting, name=%s, surname=%s>%s", tmp_name, tmp_surname, tmp_bio);
+    send_all(cur_client.serv_fd, buf, 544);
+    show_settings();
+}
+
+void show_settings() {
     gtk_grid_remove(GTK_GRID(t_main.grid), t_main.right_panel);
     t_main.right_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
@@ -277,7 +340,6 @@ void show_settings()
 
     gtk_box_append(GTK_BOX(change_data_left_box), photo_box);
 
-
     GtkWidget *name_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_box_set_spacing(GTK_BOX(name_box), 8);
     gtk_widget_set_halign(GTK_WIDGET(name_box), GTK_ALIGN_START);
@@ -294,6 +356,8 @@ void show_settings()
     gtk_widget_set_halign(GTK_WIDGET(name_entry_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(name_entry_box), GTK_ALIGN_START);
     GtkWidget *entry_field_name = gtk_entry_new();
+    if (mx_strcmp(cur_client.name, ".clear") != 0)
+        gtk_entry_buffer_set_text(gtk_entry_get_buffer(GTK_ENTRY (entry_field_name)), cur_client.name, mx_strlen(cur_client.name));
     gtk_entry_set_max_length(GTK_ENTRY(entry_field_name), 32);
     gtk_widget_set_name(GTK_WIDGET(entry_field_name), "entry_field_name");
     load_css_main(t_screen.provider, entry_field_name);
@@ -301,18 +365,17 @@ void show_settings()
     gtk_widget_set_size_request(entry_field_name, 240, 30);
     gtk_box_append(GTK_BOX(name_entry_box), entry_field_name);
     GtkWidget *entry_field_surname = gtk_entry_new();
+    if (mx_strcmp(cur_client.surname, ".clear") != 0)
+        gtk_entry_buffer_set_text(gtk_entry_get_buffer(GTK_ENTRY (entry_field_surname)), cur_client.surname, mx_strlen(cur_client.surname));
     gtk_entry_set_max_length(GTK_ENTRY(entry_field_surname), 32);
     gtk_widget_set_name(GTK_WIDGET(entry_field_surname), "entry_field_surname");
     load_css_main(t_screen.provider, entry_field_surname);
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry_field_surname), "Second Name");
     gtk_widget_set_size_request(entry_field_surname, 240, 30);
     gtk_box_append(GTK_BOX(name_entry_box), entry_field_surname);
-
     gtk_box_append(GTK_BOX(name_box), name_label_box);
     gtk_box_append(GTK_BOX(name_box), name_entry_box);
-
     gtk_box_append(GTK_BOX(change_data_left_box), name_box);
-
 
     GtkWidget *bio_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_box_set_spacing(GTK_BOX(bio_box), 13);
@@ -331,6 +394,8 @@ void show_settings()
     gtk_widget_set_valign(GTK_WIDGET(bio_entry_box), GTK_ALIGN_START);
     GtkWidget *entry_field = gtk_text_view_new();
     GtkTextBuffer *bio_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (entry_field));
+    if (mx_strcmp(cur_client.bio, ".clear") != 0)
+        gtk_text_buffer_set_text(bio_buffer, cur_client.bio, mx_strlen(cur_client.bio));
     g_signal_connect_after(bio_buffer, "insert-text", G_CALLBACK(insert_text_bio), NULL);
     gtk_widget_set_name(GTK_WIDGET(entry_field), "entry_field_bio");
     load_css_main(t_screen.provider, entry_field);
@@ -351,6 +416,13 @@ void show_settings()
     gtk_widget_set_size_request(apply_button, 160, 30);
     gtk_widget_set_margin_start(apply_button, 0);
     gtk_box_append(GTK_BOX(apply_button_box), apply_button);
+
+    GtkWidget **entry_arr = (GtkWidget **)malloc(3 * sizeof(GtkWidget *));
+    entry_arr[0] = entry_field_name;
+    entry_arr[1] = entry_field_surname;
+    entry_arr[2] = entry_field;
+
+    g_signal_connect(apply_button, "clicked", G_CALLBACK(send_settings), entry_arr);
 
     gtk_box_append(GTK_BOX(bio_box), bio_label_box);
     gtk_box_append(GTK_BOX(bio_box), bio_entry_box);
@@ -375,20 +447,34 @@ void show_settings()
     gtk_widget_set_halign(GTK_WIDGET(user_name_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(user_name_box), GTK_ALIGN_CENTER);
     char *name_surname = NULL;
-    if (mx_strcmp(cur_client.name, ".clear") != 0) {
-        name_surname = mx_strrejoin(name_surname, cur_client.name);
+    char *name = NULL;
+    char *surname = NULL;
+    if (mx_strcmp(cur_client.name, ".clear") == 0 && mx_strcmp(cur_client.surname, ".clear") == 0) {
+        name_surname = mx_strdup(cur_client.login);
     }
-    if (mx_strcmp(cur_client.surname, ".clear") != 0) {
-        name_surname = mx_strrejoin(name_surname, cur_client.surname);
+    else {
+        if (mx_strcmp(cur_client.name, ".clear") != 0) {
+            name = cur_client.name;
+        }
+        if (mx_strcmp(cur_client.surname, ".clear") != 0) {
+            surname = cur_client.surname;
+        }
+        name_surname = mx_strrejoin(name_surname, name);
+        name_surname = mx_strrejoin(name_surname, " ");
+        name_surname = mx_strrejoin(name_surname, surname);
     }
+
     GtkWidget *user_name = gtk_label_new(name_surname);
+    gtk_widget_set_size_request(user_name, 230, 0);
     mx_strdel(&name_surname);
+    gtk_label_set_max_width_chars(GTK_LABEL (user_name), 32);
     gtk_label_set_wrap(GTK_LABEL(user_name), true);
     gtk_label_set_wrap_mode(GTK_LABEL(user_name), PANGO_WRAP_WORD);
     gtk_widget_set_name(user_name, "user_name");
     load_css_main(t_screen.provider, user_name);
     gtk_box_append(GTK_BOX(user_name_box), user_name);
     GtkWidget *user_bio_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_size_request(user_bio_box, 230, 0);
     gtk_widget_set_halign(GTK_WIDGET(user_bio_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(user_bio_box), GTK_ALIGN_CENTER);
     char *bio_str = NULL;
@@ -396,9 +482,11 @@ void show_settings()
         bio_str = mx_strdup(cur_client.bio);
     }
     GtkWidget *user_bio = gtk_label_new(bio_str);
+    gtk_widget_set_size_request(user_bio, 100, 0);
     mx_strdel(&bio_str);
     gtk_label_set_wrap(GTK_LABEL(user_bio), true);
     gtk_label_set_wrap_mode(GTK_LABEL(user_bio), PANGO_WRAP_WORD_CHAR);
+    gtk_label_set_max_width_chars(GTK_LABEL (user_bio), 30);
     gtk_widget_set_name(user_bio, "user_bio");
     load_css_main(t_screen.provider, user_bio);
     gtk_box_append(GTK_BOX(user_bio_box), user_bio);
