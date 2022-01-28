@@ -61,8 +61,6 @@ void add_chat_node(t_chat *chat) {
         while (logins) {
             if (mx_strcmp(logins->data, cur_client.login) != 0) {
                 chat_name = gtk_label_new(logins->data);
-                gtk_widget_set_name(GTK_WIDGET(chat_name), "chat_name");
-                load_css_main(t_screen.provider, chat_name);
                 break;
             }
             logins = logins->next;
@@ -71,6 +69,9 @@ void add_chat_node(t_chat *chat) {
     else {
         chat_name = gtk_label_new(chat->name);
     }
+
+    gtk_widget_set_name(GTK_WIDGET(chat_name), "chat_name");
+    load_css_main(t_screen.provider, chat_name);
 
     gtk_widget_set_size_request(GTK_WIDGET(chat_name), 0, 0);
     gtk_widget_set_halign(GTK_WIDGET(chat_name), GTK_ALIGN_FILL);

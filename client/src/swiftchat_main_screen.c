@@ -122,7 +122,7 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
     gtk_widget_set_halign(chat_name_entry_box, GTK_ALIGN_START);
     gtk_widget_set_valign(chat_name_entry_box, GTK_ALIGN_START);
     GtkWidget *chat_name_entry = gtk_entry_new();
-    gtk_widget_set_size_request(chat_name_entry, 300,20);
+    gtk_widget_set_size_request(chat_name_entry, 308,20);
     gtk_widget_set_name(GTK_WIDGET(chat_name_entry), "input_field_add_group");
     load_css_main(t_screen.provider, chat_name_entry);
     //gtk_box_append(GTK_BOX(chat_name_entry_box), chat_name_entry);
@@ -141,7 +141,7 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
     gtk_widget_set_halign(add_member_input_box, GTK_ALIGN_START);
     gtk_widget_set_valign(add_member_input_box, GTK_ALIGN_START);
     GtkWidget *add_member_input = gtk_entry_new();
-    gtk_widget_set_size_request(add_member_input, 300,20);
+    gtk_widget_set_size_request(add_member_input, 308,20);
     gtk_widget_set_name(GTK_WIDGET(add_member_input), "input_field_add_group");
     load_css_main(t_screen.provider, add_member_input);
     GFile *path = g_file_new_for_path("client/media/search_ico_grey.png"); 
@@ -246,6 +246,8 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         gtk_widget_set_margin_end(my_msg_box, 5);
         gtk_widget_set_margin_bottom(my_msg_box, 5);
         GtkWidget* my_msg = gtk_text_view_new();
+        gtk_widget_set_name(my_msg, "my_msg");
+        load_css_main(t_screen.provider, my_msg);
         gtk_text_view_set_left_margin(GTK_TEXT_VIEW(my_msg), 10);
         gtk_text_view_set_top_margin(GTK_TEXT_VIEW(my_msg), 10);
         gtk_text_view_set_right_margin(GTK_TEXT_VIEW(my_msg), 10);
@@ -296,13 +298,17 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     t_main.scrolled_window_right = gtk_scrolled_window_new ();
     gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 828, 680);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_right), t_main.scroll_box_right);
-    gtk_widget_set_name(GTK_WIDGET(t_main.scrolled_window_right), "right_scroll");
+    gtk_widget_set_name(GTK_WIDGET(t_main.scrolled_window_right), "message_scroll");
     load_css_main(t_screen.provider, t_main.scrolled_window_right);
 
     GtkWidget *write_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(write_box), "write_message_box");
+    load_css_main(t_screen.provider, write_box);
     gtk_widget_set_halign(GTK_WIDGET(write_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(write_box), GTK_ALIGN_CENTER);
     GtkWidget *write_message = gtk_text_view_new();
+    gtk_widget_set_name(GTK_WIDGET(write_message), "write_message");
+    load_css_main(t_screen.provider, write_message);
     GtkTextBuffer *bio_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (write_message));
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(write_message), GTK_WRAP_WORD_CHAR);
     gtk_widget_set_size_request(write_message, 800, 36);
