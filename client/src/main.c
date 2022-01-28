@@ -3,6 +3,13 @@
 t_client cur_client;
 pthread_mutex_t cl_mutex;
 
+static void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
+{
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+}
+
 void *sender_func(void *param) {
     (void)param;
     char *message = (char *)malloc(512);
@@ -31,8 +38,34 @@ void *sender_func(void *param) {
     return NULL;
 }
 
+gboolean add_msg(gpointer data) {
+    char *total_msg = data;
+    GtkWidget *incoming_msg_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_size_request(incoming_msg_box, 300, 50);
+    gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
+    gtk_widget_set_margin_start(incoming_msg_box, 5);
+    gtk_widget_set_margin_bottom(incoming_msg_box, 5);
+    
+    GtkWidget* incoming_msg = gtk_text_view_new();
+    gtk_text_view_set_left_margin(GTK_TEXT_VIEW(incoming_msg), 10);
+    gtk_text_view_set_top_margin(GTK_TEXT_VIEW(incoming_msg), 10);
+    gtk_text_view_set_right_margin(GTK_TEXT_VIEW(incoming_msg), 10);
+    gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(incoming_msg), 10);
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(incoming_msg), false);
+    gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW(incoming_msg), false);
+    gtk_widget_set_size_request(incoming_msg, 300, 50);
+    gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW(incoming_msg), GTK_WRAP_WORD_CHAR);
+    gtk_text_buffer_set_text (gtk_text_view_get_buffer(GTK_TEXT_VIEW(incoming_msg)), total_msg, mx_strlen(total_msg));
+    gtk_widget_set_name(incoming_msg, "my_msg");
+        load_css_main(t_screen.provider, incoming_msg);
+    gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
+    gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
+    return FALSE;
+}
+
 void *rec_func(void *param) {
-    while(!cur_client.login) {
+    while(!t_main.loaded) {
         sleep(1);
     }
     int fd = cur_client.serv_fd;
@@ -54,6 +87,7 @@ void *rec_func(void *param) {
                     receive = recv_all(fd, buf_name, 256);
                 }
                 mx_strcpy(new_chat->name, buf_name);
+                printf("recv chatname %s\n", new_chat->name);
                 receive = recv(fd, &new_chat->id, sizeof(int), 0);
                 while (receive < 0) {
                     receive = recv(fd, &new_chat->id, sizeof(int), 0);
@@ -124,14 +158,34 @@ void *rec_func(void *param) {
                 }
                 char *sender = mx_strndup(temp, len);              // отправитель
                 printf("%s\n", sender);
-                char *total_msg = mx_strchr(message, '>') + 1;     // сообщение
+                char *total_msg = mx_strdup(mx_strchr(message, '>') + 1);     // сообщение
                                                                    // время надо получить локально на клиенте
+                printf("%s\n", total_msg);
+                if (cur_client.cur_chat.id == chat_id) {
+                    g_idle_add(add_msg, total_msg);
+                }
+                
                 
                 printf("%s\n", total_msg);
                 printf("> ");
                 fflush(stdout);
             }
-        } else if (receive == 0) {
+            else if(mx_strcmp(mx_strtrim(message), "<setting avatar>") == 0) {
+                printf("a\n");
+                char buf[544] = {0};
+                sprintf(buf, "client_data/%s", cur_client.avatar.name);
+                recv_image(cur_client.serv_fd, buf);
+                mx_strdel(&cur_client.avatar.path);
+                cur_client.avatar.path = mx_strdup(buf);
+
+                t_main.loaded = true;
+            }
+            else if(mx_strcmp(mx_strtrim(message), "<image loaded>") == 0) {
+
+                t_main.loaded = true;
+            }
+        }  
+        if (receive == 0) {
             break;
         } else {
                 // -1
@@ -219,8 +273,8 @@ static void load_css() {
     get_all_user_data();
     //printf("chat_name = %s\n", ((t_chat *)(cur_client.chats->data))->name);
 
-    create_user_db(cur_client.login);
-    insert_user_db(cur_client);
+    //create_user_db(cur_client.login);
+    //insert_user_db(cur_client);
 
     GtkWidget *child = gtk_window_get_child(GTK_WINDOW (t_screen.main_window));
     
@@ -253,10 +307,19 @@ int main(int argc, char *argv[]) {
         .login = NULL,
         .passwd = NULL,
         .chat_count = 0,
-        .chats = NULL
+        .chats = NULL,
+        .avatar = {
+            .orig_w = 512,
+            .orig_h = 512,
+            .scaled_w = 300,
+            .scaled_h = 300,
+            .path = "client/media/default_user.png",
+            .name = "default_user.png", 
+            .x = 200,
+            .y = 200
+        },
     };
-    cur_client = cur;
-    
+    cur_client = cur;;
     // Подключение к серверу, тут ничего менять не надо
     cur_client.serv_fd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in adr = {0};
@@ -266,6 +329,7 @@ int main(int argc, char *argv[]) {
     inet_pton(AF_INET, argv[1], &adr.sin_addr); //"127.0.0.1"
     cur_client.adr = adr;
     // Запуск потоков для приёма и отправки сообщений, будем смотреть. Может, придётся переделать под события из гтк
+    t_main.loaded = false;
     pthread_t sender_th;
     pthread_t rec_th;
     pthread_mutex_init(&cl_mutex, NULL);

@@ -246,9 +246,6 @@ void *client_work(void *param) {
                     cur->cur_chat.count_users = get_chat_members(cur->cur_chat.id);
                     cur->cur_chat.users = get_chat_users(cur->cur_chat.id);
                     
-                    /*printf("cur name: %s\n", cur->cur_chat.name);
-                    printf("1 user: %s\n", cur->cur_chat.users->data);
-                    printf("2 user: %s\n", cur->cur_chat.users->next->data);*/
                 }
                 else {
                     //NOT CHAT MEMBER
@@ -258,7 +255,71 @@ void *client_work(void *param) {
                 //NO SUCH CHAT
             }
         } 
-        else if (mx_strncmp(message, "<msg, chat_id=", 13) == 0) {
+        else if(mx_strncmp(message, "<setting avatar>", 16) == 0){
+            char buf[512 + 32] = {0};
+            t_avatar recv_avatar;
+            recv_all(cur->cl_socket, buf, 512 + 32);
+            recv_avatar.name = mx_strdup(buf);
+            clear_message(buf, 512 + 32);
+
+            sprintf(buf, "data/avatars/%s/%s", cur->login, recv_avatar.name);
+            recv_avatar.path = mx_strdup(buf);
+            recv_image(cur->cl_socket, recv_avatar.name);
+        
+            sprintf(buf, "<image loaded>");
+            send_all(cur->cl_socket, buf, 512 + 32); 
+            clear_message(buf, 512 + 32);
+            printf("a\n");
+            
+            recv (cur->cl_socket, &recv_avatar.scaled_w, sizeof(double), 0);
+            recv (cur->cl_socket, &recv_avatar.scaled_h, sizeof(double), 0);
+
+            recv (cur->cl_socket, &recv_avatar.x, sizeof(double), 0);
+            recv (cur->cl_socket, &recv_avatar.y, sizeof(double), 0);
+
+            clear_message(buf, 512 + 32);
+            sprintf(buf, "<setting avatar>");
+            send_all(cur->cl_socket, buf, 512+32);
+            send_image(cur->cl_socket, recv_avatar.name);
+
+        }
+        else if (mx_strncmp(mx_strtrim(message), "<setting, name=", 15) == 0) {
+            char *name = NULL;
+            char *surname = NULL;
+            char *bio = NULL;
+        
+            char *temp = mx_strstr(message, "name=") + 5;
+            int len = 0;
+            while (*(temp + len) != ',') {
+                len++;
+            }
+
+            name = mx_strndup(temp, len);
+            temp = mx_strstr(message, "surname=") + 8;
+            len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            surname = mx_strndup(temp, len);
+
+            bio = mx_strdup(mx_strchr(message, '>')+1);
+
+            if (mx_strcmp(name, ".not_changed") != 0) {
+                mx_strcpy(cur->name, name);
+                // изменяешь name
+            }
+            if (mx_strcmp(surname, ".not_changed") != 0) {
+                mx_strcpy(cur->surname, surname);
+            
+                // изменяешь surname
+            }
+            if (mx_strcmp(bio, ".not_changed") != 0) {
+                mx_strcpy(cur->bio, bio);
+
+                // изменяешь bio
+            }
+        }
+        else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0) {
             char *temp = message + 15;
             int len = 0;
             while (*(temp + len) != '>') {
@@ -333,8 +394,8 @@ int main(int argc, char *argv[]) {
     users_list = NULL;
     pthread_mutex_init(&send_mutex, NULL);
 
-    //char *weather = get_weather("Kharkov");
-    //printf("%s\n", weather);
+    char *weather = get_weather("Kharkov");
+    printf("%s\n", weather);
     int client_id = 0;
     while(1) {
         client_fd = accept(serv_fd, (struct sockaddr *) &adr, &adrlen);

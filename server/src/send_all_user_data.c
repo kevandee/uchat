@@ -2,6 +2,17 @@
 
 void send_all_user_data(t_client *client) {
     t_client *send_cl = get_user_info(client->id);
+    char buf_name[32] = {0};
+    sprintf(buf_name, "%s", send_cl->name);
+    send_all(client->cl_socket, buf_name, 32);
+    clear_message(buf_name, 32);
+
+    sprintf(buf_name, "%s", send_cl->surname);
+    send_all(client->cl_socket, buf_name, 32);
+    char buf[256] = {0};
+    sprintf(buf, "%s",client->bio);
+    send_all(client->cl_socket, buf, 256);
+    clear_message(buf, 256);
 
     send(client->cl_socket, &send_cl->chat_count, sizeof(int), 0);
 
@@ -9,7 +20,7 @@ void send_all_user_data(t_client *client) {
 
     while(temp) {
         t_chat *chat = (t_chat *)temp->data;
-        char buf[256] = {0};
+        
         sprintf(buf, "%s",(chat)->name);
         printf("name: %s\n", (chat)->name);
         send_all(client->cl_socket, (chat)->name, 256);

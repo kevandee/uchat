@@ -3,6 +3,11 @@
 t_client cur_client;
 
 void get_all_user_data() {
+
+    recv_all(cur_client.serv_fd, cur_client.name, 32);
+    recv_all(cur_client.serv_fd, cur_client.surname, 32);
+    recv_all(cur_client.serv_fd, cur_client.bio, 256);
+
     recv(cur_client.serv_fd, &cur_client.chat_count, sizeof(int), 0);
 
     for (int i = 0; i < cur_client.chat_count; i++) {
@@ -36,4 +41,6 @@ void get_all_user_data() {
         }
         mx_push_back(&cur_client.chats, new_chat);
     }
+
+    t_main.loaded = true;
 }

@@ -1,5 +1,21 @@
 #include "../inc/uch_client.h"
 
+static void draw_circle_avatar(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpointer data) {
+    (void)widget;
+    (void)w;
+    (void)h;
+
+    cairo_surface_t *image = (cairo_surface_t *)data;
+    double width = cairo_image_surface_get_width(image);
+    double height = cairo_image_surface_get_height(image);
+
+    cairo_set_source_surface (cr, image, (cur_client.avatar.x - 200)* width/cur_client.avatar.scaled_w , (cur_client.avatar.y - 200)* height/cur_client.avatar.scaled_h); 
+    
+    cairo_arc(cr, w/2, h/2, w/2, 0, 2 * M_PI);
+    cairo_clip(cr);
+    cairo_paint(cr);
+}
+
 static void draw_circle(GtkDrawingArea *widget, cairo_t *cr, int w, int h, gpointer data) {
     (void)widget;
     (void)w;
@@ -31,6 +47,27 @@ GtkWidget *get_circle_widget_from_png(const char *filename) {
     gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle, scaled_image, NULL);
 
     return GTK_WIDGET (darea);
+}
+
+GtkWidget *get_circle_widget_from_png_avatar(const char *filename, gint width, gint height){
+    GtkWidget *darea = NULL;
+    gint org_width, org_height;
+
+    cairo_surface_t *image = get_surface_from_jpg(filename);
+    org_width = cairo_image_surface_get_width(image);
+    org_height = cairo_image_surface_get_height(image);
+    
+    cairo_surface_t *scaled_image = scale_to_half(image, org_width, org_height, cur_client.avatar.scaled_w * width/300, cur_client.avatar.scaled_h * height/300);
+    org_width = cairo_image_surface_get_width(scaled_image);
+    org_height = cairo_image_surface_get_height(scaled_image);
+
+    darea = gtk_drawing_area_new();
+    gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), width);
+    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), height);
+    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle_avatar, scaled_image, NULL);
+
+    return GTK_WIDGET (darea);
+
 }
 
 GtkWidget *get_circle_widget_from_png_custom(const char *filename, gint width, gint height){
@@ -80,16 +117,13 @@ cairo_surface_t *get_surface_from_jpg(const char *filename) {
 }
 
 cairo_surface_t *scale_to_half(cairo_surface_t *s, int orig_width, int orig_height, int scaled_width, int scaled_height) { 
-    double param1 = orig_width/scaled_width * orig_width/orig_height;
-    if (param1 == 1) {
-        param1 = orig_width/scaled_width;
-    }
-    //printf("param %f\n", param1);
-    double param2 = orig_height/scaled_height * orig_width/orig_height;
-    if (param2 == 1) {
-        param2 = orig_height/scaled_height;
-    }
-    cairo_surface_t *result = cairo_surface_create_similar(s, cairo_surface_get_content(s), orig_width/param1, orig_height/param2); 
+    if (orig_height == scaled_height && orig_width == scaled_width)
+        return s;
+    double param1 = (double)(orig_width)/((double)scaled_width);
+
+    double param2 = (double)orig_height/((double)scaled_height);
+
+    cairo_surface_t *result = cairo_surface_create_similar(s, cairo_surface_get_content(s), orig_width * (1/param1), orig_height*(1/param2)); 
     cairo_t *cr = cairo_create(result); 
     cairo_scale(cr, 1/param1, 1/param2); 
     cairo_set_source_surface(cr, s, 0, 0); 

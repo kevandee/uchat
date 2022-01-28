@@ -91,14 +91,14 @@ void insert_user_db(t_client cur_client) {
         sql_pattern = "INSERT INTO chats (name, members) VALUES ('%s', %d);";
         asprintf(&query, sql_pattern, chat_name, ((t_chat *)(temp->data))->count_users);
         user_exec_db(cur_client.login, query, 2);
-
-        while(((t_chat *)(temp->data))->users != NULL && ((t_chat *)(temp->data))->users->data != NULL) {
+        t_list *users = ((t_chat *)(temp->data))->users;
+        while(users != NULL && users->data != NULL) {
             
             sql_pattern = "INSERT INTO members (chat_name, user_name) VALUES ('%s', '%s');";
-            asprintf(&query, sql_pattern, chat_name, ((t_chat *)(temp->data))->users->data);
+            asprintf(&query, sql_pattern, chat_name, users->data);
             user_exec_db(cur_client.login, query, 2);
 
-            ((t_chat *)(temp->data))->users = ((t_chat *)(temp->data))->users->next;
+            users = users->next;
         }
 
         temp = temp->next;

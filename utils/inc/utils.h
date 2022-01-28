@@ -14,7 +14,21 @@
 #include <string.h>
 #include "../../libmx/inc/libmx.h"
 
+typedef struct s_avatar {
+    double d_width;
 
+    double orig_w;
+    double orig_h;
+
+    double scaled_w;
+    double scaled_h;
+    
+    double x;
+    double y;
+
+    char *name;
+    char *path;
+} t_avatar;
 
 typedef struct s_chat {
     int id;
@@ -40,6 +54,11 @@ typedef struct s_client {
     int id;
     char *login;
     char *passwd;
+
+    t_avatar avatar;
+    char name[32];
+    char surname[32];
+    char bio[256];
 
     int chat_count;
     t_list *chats;
