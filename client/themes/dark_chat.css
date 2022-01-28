@@ -314,7 +314,9 @@ scrolledwindow {
 #chat_name {
   color:#fff;
 }
-
+#users_check_boxes{
+  color: white;
+}
 #check_button {
   color:white;
   font-family: Arial, sans-serif;
