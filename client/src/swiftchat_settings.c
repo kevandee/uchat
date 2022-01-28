@@ -144,6 +144,7 @@ static void send_avatar() {
         usleep(50);
     }
 
+
     send (cur_client.serv_fd, &cur_client.avatar.scaled_w, sizeof(double), 0);
     send (cur_client.serv_fd, &cur_client.avatar.scaled_h, sizeof(double), 0);
 
@@ -154,7 +155,7 @@ static void send_avatar() {
     while (!t_main.loaded) {
         usleep(50);
     }
-    
+
     show_settings();
 }
 

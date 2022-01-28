@@ -39,7 +39,7 @@ headerbar{
 }
 
 #home_icon {
-  -gtk-icon-size: 22px;
+  -gtk-icon-size: 20px;
   margin-left: 12px;
 }
 
@@ -189,7 +189,6 @@ scrolledwindow {
   font-family: Arial, sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: #9d9d9d;
 }
 
 #entry_field_surname {
@@ -198,7 +197,6 @@ scrolledwindow {
   font-family: Arial, sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: #9d9d9d;
 }
 
 /* BIO Section */
@@ -313,11 +311,43 @@ scrolledwindow {
 
 #chat_name {
   color:#fff;
+  margin-left: 14px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 700;
 }
-
+#users_check_boxes{
+  color: white;
+}
 #check_button {
   color:white;
   font-family: Arial, sans-serif;
   font-size: 16px;
   font-weight: 700;
+}
+
+#message_scroll {
+  background: transparent;
+}
+
+#write_message {
+  border-radius: 13px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  font-size: 16px; 
+  padding-top: 9px;
+  padding-left: 12px;
+}
+
+#my_msg {
+  border-radius: 10px;
+  background: #ECB365;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px; 
+}
+
+#my_msg text {
+  background-color: #ECB365;
 }

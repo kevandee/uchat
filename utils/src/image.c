@@ -79,9 +79,7 @@ int recv_image(int socket, char *path) {
     fclose(image);
     
     printf("Image successfully Received!\n");
-    char buf[512 + 32] = {0};
-    sprintf(buf, "<image loaded>");
-    printf("%d", send_all(socket, buf, 512 + 32)); 
+    
     
     return 1;
 }

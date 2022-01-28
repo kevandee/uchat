@@ -253,9 +253,6 @@ void *client_work(void *param) {
                     cur->cur_chat.count_users = get_chat_members(cur->cur_chat.id);
                     cur->cur_chat.users = get_chat_users(cur->cur_chat.id);
                     
-                    /*printf("cur name: %s\n", cur->cur_chat.name);
-                    printf("1 user: %s\n", cur->cur_chat.users->data);
-                    printf("2 user: %s\n", cur->cur_chat.users->next->data);*/
                 }
                 else {
                     //NOT CHAT MEMBER
@@ -271,21 +268,40 @@ void *client_work(void *param) {
             recv_all(cur->cl_socket, buf, 512 + 32);
             recv_avatar.name = mx_strdup(buf);
             clear_message(buf, 512 + 32);
-
+            char *path = mx_strjoin("data/avatars/", cur->login);
             sprintf(buf, "data/avatars/%s/%s", cur->login, recv_avatar.name);
+            struct stat st = {0};
+            if (stat(path, &st) == -1) {
+                mkdir(path, 0777);
+            }
+            mx_strdel(&path);
             recv_avatar.path = mx_strdup(buf);
-            recv_image(cur->cl_socket, recv_avatar.name);
-            printf("bebra\n");
+
+            recv_image(cur->cl_socket, recv_avatar.path);
+        
+            sprintf(buf, "<image loaded>");
+            send_all(cur->cl_socket, buf, 512 + 32); 
+            clear_message(buf, 512 + 32);
+            printf("a\n");
+            
             recv (cur->cl_socket, &recv_avatar.scaled_w, sizeof(double), 0);
             recv (cur->cl_socket, &recv_avatar.scaled_h, sizeof(double), 0);
-            printf("bebra\n");
+
             recv (cur->cl_socket, &recv_avatar.x, sizeof(double), 0);
             recv (cur->cl_socket, &recv_avatar.y, sizeof(double), 0);
-            printf("bebra\n");
+
             clear_message(buf, 512 + 32);
             sprintf(buf, "<setting avatar>");
             send_all(cur->cl_socket, buf, 512+32);
             send_image(cur->cl_socket, recv_avatar.name);
+
+            sprintf(buf, "path=%s scaled_w=%f scaled_h=%f x=%f y=%f ", recv_avatar.path,recv_avatar.scaled_w, recv_avatar.scaled_h,recv_avatar.x, recv_avatar.y);
+
+            char *query = NULL;
+            char *sql_pattern = NULL;
+            sql_pattern = "UPDATE users SET avatar = '%s' WHERE id = %d;";
+            asprintf(&query, sql_pattern, buf, cur->id);
+            sqlite3_exec_db(query, 2);
 
         }
         else if (mx_strncmp(mx_strtrim(message), "<setting, name=", 15) == 0) {
@@ -311,15 +327,34 @@ void *client_work(void *param) {
 
             if (mx_strcmp(name, ".not_changed") != 0) {
                 mx_strcpy(cur->name, name);
+                
+                char *query = NULL;
+                char *sql_pattern = NULL;
+                sql_pattern = "UPDATE users SET name = '%s' WHERE id = %d;";
+                asprintf(&query, sql_pattern, cur->name, cur->id);
+                sqlite3_exec_db(query, 2);
+
                 // изменяешь name
             }
             if (mx_strcmp(surname, ".not_changed") != 0) {
                 mx_strcpy(cur->surname, surname);
-            
+
+                char *query = NULL;
+                char *sql_pattern = NULL;
+                sql_pattern = "UPDATE users SET surname = '%s' WHERE id = %d;";
+                asprintf(&query, sql_pattern, cur->surname, cur->id);
+                sqlite3_exec_db(query, 2);
+
                 // изменяешь surname
             }
             if (mx_strcmp(bio, ".not_changed") != 0) {
                 mx_strcpy(cur->bio, bio);
+                printf("receive bio: %s\n", bio);
+                char *query = NULL;
+                char *sql_pattern = NULL;
+                sql_pattern = "UPDATE users SET bio = '%s' WHERE id = %d;";
+                asprintf(&query, sql_pattern, cur->bio, cur->id);
+                sqlite3_exec_db(query, 2);
 
                 // изменяешь bio
             }
@@ -339,12 +374,10 @@ void *client_work(void *param) {
                 change_chat_by_id(chat_id, cur);
             }
 
-            printf("ya toot\n");
-            int u_id = get_user_id(cur->login);
             char *query = NULL;
             char *sql_pattern = NULL;
             sql_pattern = "INSERT INTO messages (chat_id, user_id, text) VALUES (%d, %d, '%s');";
-            asprintf(&query, sql_pattern, cur->cur_chat.id, u_id, mx_strchr(message, '>') + 1);
+            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, mx_strchr(message, '>') + 1);
             sqlite3_exec_db(query, 2);
 
             send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat);
@@ -399,8 +432,8 @@ int main(int argc, char *argv[]) {
     users_list = NULL;
     pthread_mutex_init(&send_mutex, NULL);
 
-    //char *weather = get_weather("Kharkov");
-    //printf("%s\n", weather);
+    char *weather = get_weather("Kharkov");
+    printf("%s\n", weather);
     int client_id = 0;
     while(1) {
         client_fd = accept(serv_fd, (struct sockaddr *) &adr, &adrlen);

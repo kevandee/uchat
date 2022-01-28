@@ -3,6 +3,13 @@
 t_client cur_client;
 pthread_mutex_t cl_mutex;
 
+static void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
+{
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+}
+
 void *sender_func(void *param) {
     (void)param;
     char *message = (char *)malloc(512);
@@ -39,6 +46,7 @@ gboolean add_msg(gpointer data) {
     gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
     gtk_widget_set_margin_start(incoming_msg_box, 5);
     gtk_widget_set_margin_bottom(incoming_msg_box, 5);
+    
     GtkWidget* incoming_msg = gtk_text_view_new();
     gtk_text_view_set_left_margin(GTK_TEXT_VIEW(incoming_msg), 10);
     gtk_text_view_set_top_margin(GTK_TEXT_VIEW(incoming_msg), 10);
@@ -49,7 +57,8 @@ gboolean add_msg(gpointer data) {
     gtk_widget_set_size_request(incoming_msg, 300, 50);
     gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW(incoming_msg), GTK_WRAP_WORD_CHAR);
     gtk_text_buffer_set_text (gtk_text_view_get_buffer(GTK_TEXT_VIEW(incoming_msg)), total_msg, mx_strlen(total_msg));
-
+    gtk_widget_set_name(incoming_msg, "my_msg");
+        load_css_main(t_screen.provider, incoming_msg);
     gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
     gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
     return FALSE;

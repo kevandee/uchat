@@ -13,7 +13,7 @@ void sqlite3_create_db() {
             exit(EXIT_FAILURE);
         }
         sql = mx_strrejoin(sql, "PRAGMA encoding = \"UTF-8\";");
-        sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, name TEXT DEFAULT \".clear\", surname TEXT DEFAULT \".clear\", bio TEXT DEFAULT \".clear\");");
+        sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, name TEXT DEFAULT \".clear\", surname TEXT DEFAULT \".clear\", bio TEXT DEFAULT \".clear\", avatar TEXT DEFAULT \"default\", theme TEXT DEFAULT dark);");
         sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER PRIMARY KEY, name TEXT NOT NULL, members INTEGER NOT NULL);");
         sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, admin BOOLEAN NOT NULL DEFAULT FALSE);");
         sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, text TEXT DEFAULT NULL, type TEXT DEFAULT text);");
@@ -106,6 +106,15 @@ char  *get_user_bio(int id) {
     return login;
 }
 
+char  *get_user_avatar(int id) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT avatar FROM users WHERE id = (%d);";
+    asprintf(&query, sql_pattern, id);
+    t_list *list = sqlite3_exec_db(query, 1);
+    char *login = list->data;
+    return login;
+}
+
 int get_chat_id(char *name) {
     char *query = NULL;
     char *sql_pattern = "SELECT id FROM chats WHERE name = ('%s');";
@@ -156,6 +165,7 @@ t_chat *chat_info (int c_id) {
 
 t_client *get_user_info(int id) {
     t_client *user = (t_client *)malloc(sizeof(t_client));
+
     user->login = get_user_login(id);
     t_list *names = get_user_names(id);
     char *bio = get_user_bio(id);
@@ -176,6 +186,58 @@ t_client *get_user_info(int id) {
     }
     else {
         mx_strcpy(user->bio, bio);
+    }
+
+    char *avatar_info = get_user_avatar(id);
+    if (mx_strcmp (avatar_info, "default") == 0) {
+        user->avatar.path = mx_strdup(avatar_info);
+    } 
+    else {
+        char *temp = avatar_info + 5;
+        int len = 0;
+        while (*(temp + len) != ' ') {
+            len++;
+        }
+        user->avatar.path = mx_strndup(avatar_info + 5, len);
+        temp = mx_strstr(avatar_info, "scaled_w=") + 9;
+        len = 0;
+        while (*(temp + len) != ' ') {
+            len++;
+        }
+        //char *num = mx_strndup(temp, len);
+        char *end = temp + len;
+        user->avatar.scaled_w = strtod(temp, &end);
+        //mx_strdel(&num);
+
+        temp = mx_strstr(avatar_info, "scaled_h=") + 9;
+        len = 0;
+        while (*(temp + len) != ' ') {
+            len++;
+        }
+        char *num = mx_strndup(temp, len);
+        end = temp + len;
+        user->avatar.scaled_h = strtod(temp, &end);
+        mx_strdel(&num);
+
+        temp = mx_strstr(avatar_info, "x=") + 2;
+        len = 0;
+        while (*(temp + len) != ' ') {
+            len++;
+        }
+        num = mx_strndup(temp, len);
+        end = temp + len;
+        user->avatar.x = strtod(temp, &end);
+        mx_strdel(&num);
+
+        temp = mx_strstr(avatar_info, "y=") + 2;
+        len = 0;
+        while (*(temp + len) != ' ') {
+            len++;
+        }
+        num = mx_strndup(temp, len);
+        end = temp + len;
+        user->avatar.y = strtod(temp, &end);
+        mx_strdel(&num);
     }
     t_list *chats_id = get_chats_id(id);
     t_list *chats_info = NULL;

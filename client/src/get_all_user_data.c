@@ -8,6 +8,21 @@ void get_all_user_data() {
     recv_all(cur_client.serv_fd, cur_client.surname, 32);
     recv_all(cur_client.serv_fd, cur_client.bio, 256);
 
+    char buf[32] = {0};
+    recv_all(cur_client.serv_fd, buf, 32);
+    cur_client.avatar.name = mx_strdup(buf);
+    if (mx_strcmp(cur_client.avatar.name, "default") != 0) {
+        char *pattern = "client_data/%s";
+        asprintf(&cur_client.avatar.path, pattern, cur_client.avatar.name);
+        recv_image(cur_client.serv_fd, cur_client.avatar.path);
+        send_all(cur_client.serv_fd, "<image loaded>", 14); 
+        printf("a\n");
+        recv(cur_client.serv_fd, &cur_client.avatar.scaled_w, sizeof(double), 0);
+        recv(cur_client.serv_fd, &cur_client.avatar.scaled_h, sizeof(double), 0);
+        recv(cur_client.serv_fd, &cur_client.avatar.x, sizeof(double), 0);
+        recv(cur_client.serv_fd, &cur_client.avatar.y, sizeof(double), 0);
+    }
+    
     recv(cur_client.serv_fd, &cur_client.chat_count, sizeof(int), 0);
 
     for (int i = 0; i < cur_client.chat_count; i++) {
