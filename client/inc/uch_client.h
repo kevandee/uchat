@@ -56,6 +56,12 @@ struct
     GtkCssProvider *provider;
 } t_screen;
 
+struct
+{ 
+    GtkWidget *home;
+    GtkWidget *settings;
+} t_actives;
+
 void chat_show_reg_screen();
 void chat_show_auth_screen();
 void chat_decorate_headerbar();
