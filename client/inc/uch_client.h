@@ -29,6 +29,7 @@ struct
     GtkWidget *grid;
     GtkWidget *left_panel;
     GtkWidget *search_panel;
+    GtkWidget *logo;
     GtkWidget *scroll_box_left;
     GtkWidget *scrolled_window_left;
     GtkWidget *right_panel;
