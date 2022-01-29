@@ -258,6 +258,7 @@ void chat_show_reg_screen()
     gtk_window_set_child(GTK_WINDOW(t_screen.main_window), t_auth.REGISTRATION_menu);
     gtk_widget_show(t_auth.REGISTRATION_menu);
 
+
     GtkGesture *click_signin = gtk_gesture_click_new();
     gtk_gesture_set_state(click_signin, GTK_EVENT_SEQUENCE_CLAIMED);
     g_signal_connect_swapped(click_signin, "pressed", G_CALLBACK(register_signin_click), t_auth.REGISTRATION_menu);

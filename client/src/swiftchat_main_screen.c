@@ -266,12 +266,14 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         gtk_text_buffer_get_start_iter(buffer, &start);
         gtk_text_buffer_get_end_iter(buffer, &end);
         const char *buf_str = gtk_text_buffer_get_text(buffer, &start, &end, true);
-
         if (!buf_str) {
             return;
         }
+        
+        char *res_str = mx_strtrim(buf_str);
+        
         char message[512 + 32] = {0};
-        sprintf(message, "<msg, chat_id= %d>%s", cur_client.cur_chat.id, buf_str);
+        sprintf(message, "<msg, chat_id= %d>%s", cur_client.cur_chat.id, res_str);
 
         GtkWidget *my_msg_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
         gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
@@ -287,7 +289,13 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(my_msg), 10);
         gtk_text_view_set_editable(GTK_TEXT_VIEW(my_msg), false);
         gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW(my_msg), false);
-        gtk_widget_set_size_request(my_msg, 300, 50);
+        //gtk_widget_set_size_request(my_msg, 300, 50);
+        if (mx_strlen(res_str) < 34) {
+            gtk_widget_set_size_request(my_msg, mx_strlen(res_str) * 11, 50);
+        }
+        else {
+            gtk_widget_set_size_request(my_msg, 300, 50);
+        }
         gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW(my_msg), GTK_WRAP_WORD_CHAR);
         gtk_text_buffer_set_text (gtk_text_view_get_buffer(GTK_TEXT_VIEW(my_msg)), buf_str, -1);
 
