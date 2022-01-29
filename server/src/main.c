@@ -383,6 +383,45 @@ void *client_work(void *param) {
             send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat);
             clear_message(message, MAX_LEN + NAME_LEN);
         }
+        else if (mx_strncmp(message, "<chat users avatars>", 20) == 0){
+            printf("%s\n", message);
+            char *id_str = message + 20;
+            int chat_id = mx_atoi(id_str);
+            printf ("%s ,chat id %d\n", id_str, chat_id);
+            t_list *users = get_chat_users(chat_id);
+
+            char buf[512+32] = {0};
+            sprintf(buf, "<chat users avatars>");
+            send_all(cur->cl_socket,buf, 512+32);
+            while (users) {
+                printf("%s\n", users->data);
+                if (mx_strcmp(users->data, cur->login) != 0) {
+                    printf("%s\n", users->data);
+                    char *avatar_info = get_user_avatar(get_user_id(users->data));
+                    t_avatar *avatar = parse_avatar_info(avatar_info);
+                    
+                    char *temp_str = avatar->path;
+                    while (mx_strchr(temp_str,'/')) {
+                        temp_str = mx_strchr(temp_str,'/') + 1;
+                    }
+                    char buf_name[32] = {0};
+                    sprintf(buf_name, "%s", temp_str);
+                    send_all(cur->cl_socket, buf_name, 32);
+                    clear_message(buf_name, 32);
+                    if (mx_strcmp(avatar->path, "default") != 0){
+                        send_image(cur->cl_socket, avatar->path);
+                        recv_all(cur->cl_socket, buf_name, 14);
+                        send(cur->cl_socket, &avatar->scaled_w, sizeof(double), 0);
+                        send(cur->cl_socket, &avatar->scaled_h, sizeof(double), 0);
+                        send(cur->cl_socket, &avatar->x, sizeof(double), 0);
+                        send(cur->cl_socket, &avatar->y, sizeof(double), 0);
+                    }
+                }
+
+                users = users->next;
+            }
+            
+        }
         else if (mes_stat > 0) {
             printf("Message Received from %s | %s |\n", login, message);
 		    if(cur->cur_chat.id != 0){

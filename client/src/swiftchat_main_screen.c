@@ -349,9 +349,19 @@ static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
 void show_chat_history(GtkWidget *widget, gpointer data)
 {
     (void)widget;
+
     printf("id of chat %d\n", ((t_chat *)data)->id);
     cur_client.cur_chat = *((t_chat *)data);
 
+    if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
+        char buf[512+32] = {0};
+        sprintf(buf, "<chat users avatars>%d", cur_client.cur_chat.id);
+        send_all(cur_client.serv_fd,buf, 512+32);
+        t_main.loaded = false;
+        while (!t_main.loaded) {
+            usleep(50);
+        }
+    }
     gtk_grid_remove(GTK_GRID(t_main.grid), t_main.right_panel);
     t_main.right_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_CENTER);

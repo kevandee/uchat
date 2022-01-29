@@ -36,6 +36,7 @@ typedef struct s_chat {
     int count_users;
 
     t_list *users;
+    t_list *users_avatars;
     t_list *messages;
 }              t_chat;
 

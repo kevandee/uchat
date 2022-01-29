@@ -185,6 +185,11 @@ void *rec_func(void *param) {
 
                 t_main.loaded = true;
             }
+            else if (mx_strcmp(mx_strtrim(message), "<chat users avatars>") == 0) {
+                printf("tut\n");
+                cur_client.cur_chat.users_avatars = get_chat_users_avatars(&cur_client.cur_chat);
+                t_main.loaded = true;
+            }
         }  
         if (receive == 0) {
             break;
