@@ -278,19 +278,46 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
         gtk_widget_set_margin_end(my_msg_box, 5);
         gtk_widget_set_margin_bottom(my_msg_box, 5);
-        GtkWidget* my_msg = gtk_text_view_new();
+        GtkWidget* my_msg = gtk_label_new(buf_str);
+        int w, h;
+        pango_layout_get_pixel_size (gtk_label_get_layout(GTK_LABEL(my_msg)), &w, &h);
+        int num = mx_strlen(buf_str) % 34 == 0 ? 0 : 1;
+        int count_lines = mx_strlen(buf_str) / 34 + num;
+        if (count_lines != 1) {
+            w = w/(count_lines - num);
+        }
+        else {
+            w +=10;
+        }
+        printf("layout w %d h%d count lines %d %d\n", w, h, count_lines, num);
+        gtk_widget_set_size_request(my_msg_box, w + 20, h*count_lines);
+        gtk_widget_set_size_request(my_msg, w + 20, h*count_lines);
+
         gtk_widget_set_name(my_msg, "my_msg");
         load_css_main(t_screen.provider, my_msg);
-        gtk_text_view_set_left_margin(GTK_TEXT_VIEW(my_msg), 10);
+        
+        ///gtk_label_set_yalign(GTK_LABEL (my_msg), 10.0);
+        gtk_widget_set_halign(GTK_WIDGET(my_msg), GTK_ALIGN_CENTER);
+        gtk_widget_set_valign(GTK_WIDGET(my_msg), GTK_ALIGN_CENTER);
+        //gtk_label_set_justify(GTK_LABEL (my_msg), GTK_JUSTIFY_CENTER);
+        //pango_layout_get_height(gtk_label_get_layout(GTK_LABEL(my_msg)));
+        //gtk_widget_set_margin_start(GTK_WIDGET(my_msg), 10);
+        //gtk_widget_set_margin_end(GTK_WIDGET(my_msg), 10);
+        //gtk_widget_set_margin_top(GTK_WIDGET(my_msg), 10);
+        //gtk_widget_set_margin_bottom(GTK_WIDGET(my_msg), 10);
+
+        /*gtk_text_view_set_left_margin(GTK_TEXT_VIEW(my_msg), 10);
         gtk_text_view_set_top_margin(GTK_TEXT_VIEW(my_msg), 10);
         gtk_text_view_set_right_margin(GTK_TEXT_VIEW(my_msg), 10);
         gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(my_msg), 10);
         gtk_text_view_set_editable(GTK_TEXT_VIEW(my_msg), false);
         gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW(my_msg), false);
-        gtk_widget_set_size_request(my_msg, 300, 50);
-        gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW(my_msg), GTK_WRAP_WORD_CHAR);
-        gtk_text_buffer_set_text (gtk_text_view_get_buffer(GTK_TEXT_VIEW(my_msg)), buf_str, -1);
-
+        *///gtk_widget_set_size_request(my_msg, 0, pango_layout_get_height(gtk_label_get_layout(GTK_LABEL(my_msg))) + 50);
+        gtk_label_set_max_width_chars(GTK_LABEL(my_msg), 34);
+        gtk_label_set_wrap(GTK_LABEL(my_msg), true);
+        gtk_label_set_wrap_mode (GTK_LABEL(my_msg), PANGO_WRAP_CHAR);
+        //gtk_text_buffer_set_text (gtk_text_view_get_buffer(GTK_TEXT_VIEW(my_msg)), buf_str, -1);
+        
         gtk_box_append(GTK_BOX(my_msg_box), my_msg);
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
 
@@ -391,7 +418,7 @@ void chat_show_main_screen(GtkWidget *window)
     gtk_box_append(GTK_BOX(t_main.right_panel), choose_friend);
     gtk_widget_set_margin_top(choose_friend, 40);
 //-----------------------------------------------SearchPanel---------------------------------------------------------------
-    GtkWidget *SearchBox, *Logo, *SearchField, *Home, *Settings;
+    GtkWidget *SearchBox, *SearchField, *Home, *Settings;
     t_main.search_panel = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(t_main.search_panel), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(t_main.search_panel), GTK_ALIGN_CENTER);
@@ -400,9 +427,9 @@ void chat_show_main_screen(GtkWidget *window)
     SearchBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(SearchBox), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(SearchBox), GTK_ALIGN_CENTER);
-    Logo = get_circle_widget_from_png_custom("test_circle.png", 45, 45);
-    gtk_widget_set_name(GTK_WIDGET(Logo), "account_avatar");
-    load_css_main(t_screen.provider, Logo);
+    t_main.logo = get_circle_widget_from_png_avatar(cur_client.avatar.path, 45, 45);
+    gtk_widget_set_name(GTK_WIDGET(t_main.logo), "account_avatar");
+    load_css_main(t_screen.provider, t_main.logo);
     SearchField = gtk_entry_new();
     gtk_widget_set_name(GTK_WIDGET(SearchField), "search_field");
     gtk_entry_buffer_set_max_length(GTK_ENTRY_BUFFER (gtk_entry_get_buffer(GTK_ENTRY(SearchField))), 20);
@@ -435,7 +462,7 @@ void chat_show_main_screen(GtkWidget *window)
     g_signal_connect_swapped(click_settings, "pressed", G_CALLBACK(show_settings), NULL);
     gtk_widget_add_controller(Settings, GTK_EVENT_CONTROLLER(click_settings));
 
-    gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(Logo));
+    gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(t_main.logo));
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(SearchBox));
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(Home));
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(Settings));

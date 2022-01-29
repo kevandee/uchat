@@ -155,7 +155,9 @@ static void send_avatar() {
     while (!t_main.loaded) {
         usleep(50);
     }
-
+    gtk_widget_hide(t_main.logo);
+    t_main.logo = get_circle_widget_from_png_avatar(cur_client.avatar.path, 45, 45);
+    gtk_box_prepend(GTK_BOX (t_main.search_panel), t_main.logo);
     show_settings();
 }
 
