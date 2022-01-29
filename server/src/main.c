@@ -17,7 +17,6 @@ void *client_work(void *param) {
     char choise;
 
     bool err_msg = true;
-    printf("1\n");
 
     while (err_msg) {
         // sign up or sign in
@@ -48,7 +47,6 @@ void *client_work(void *param) {
         } else{
             cur->passwd=mx_strtrim(passwd);
         }
-        //recv_jpeg(cur->cl_socket, "received.jpg");
         //DB SWITH
         printf("%c || %s || %s\n", choise, cur->login, cur->passwd);
         switch(choise) {
@@ -57,11 +55,8 @@ void *client_work(void *param) {
                 char *sql_pattern = NULL;
                 t_list *list = NULL;
                 sql_pattern = "SELECT EXISTS (SELECT id FROM users WHERE login=('%s'));";
-                // 1 = nachol
-                // 0 = ne nachol
                 asprintf(&query, sql_pattern, cur->login);
                 list = sqlite3_exec_db(query, 1);
-                //printf("list head = '%s' \n", list->data);
                 if (strcmp(list->data, "0") == 0) {
                     //REGESTRATION TO DB
                     sql_pattern = "INSERT INTO users (login, password) VALUES ('%s', '%s');";
@@ -74,9 +69,6 @@ void *client_work(void *param) {
                     //LOGIN ALREDAY TAKEN
                     send(cur->cl_socket, &err_msg, sizeof(bool), 0);
                 }
-                /*mx_clear_list(&list);
-                mx_strdel(&query);
-                mx_strdel(&sql_pattern);*/
                 break;
             }
             case 'i': {
@@ -85,27 +77,19 @@ void *client_work(void *param) {
                 t_list *list = NULL;
                 
                 sql_pattern = "SELECT EXISTS (SELECT id FROM users WHERE login=('%s') AND password=('%s'));";
-                // 1 = nachol
-                // 0 = ne nachol
                 asprintf(&query, sql_pattern, cur->login, cur->passwd);
                 list = sqlite3_exec_db(query, 1);
-                printf("list head = '%s' \n", list->data);
                 if (strcmp(list->data, "1") == 0) {
                     //USER FOUND
                     err_msg = false;
-
                     sql_pattern = "SELECT id FROM users WHERE login=('%s') AND password=('%s');";
                     asprintf(&query, sql_pattern, cur->login, cur->passwd);
                     list = sqlite3_exec_db(query, 1);
-                    cur->id = mx_atoi(list->data);
                 }
                 else {
                     //USER NOT FOUND
                     send(cur->cl_socket, &err_msg, sizeof(bool), 0);
                 }
-                /*mx_clear_list(&list);
-                mx_strdel(&query);
-                mx_strdel(&sql_pattern);*/
                 break;
             }
         }
@@ -123,13 +107,13 @@ void *client_work(void *param) {
             break;
     }
     
+    cur->id = get_user_id(cur->login);
     send(cur->cl_socket, &err_msg,sizeof(bool), 0);
     
     send_all_user_data(cur);
     sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
     printf("%s", buff_out);
     sprintf(buff_out, "%s has joined\n", cur->login);
-    //printf("%s", buff_out);
     send_message(buff_out,login, NULL);
     char message[MAX_LEN + NAME_LEN];
     while (is_run) {
@@ -203,9 +187,7 @@ void *client_work(void *param) {
             t_list *temp_list = new_chat->users;
             int admin = 1;
             while (temp_list) {
-                int u_id = get_user_id ((char *)temp_list->data);
-                //printf("User: %s\n", temp_list->data);
-                //printf("User id: %s\n", u_id->data);
+                int u_id = get_user_id(temp_list->data);
                 if (admin == 1) {
                     sql_pattern = "INSERT INTO members (chat_id, user_id, admin) VALUES (%d, %d, TRUE);";
                     admin = 0;
@@ -242,12 +224,10 @@ void *client_work(void *param) {
                 list = sqlite3_exec_db(query, 1);
                 char *c_name = mx_strdup(list->data);
                 int c_id = get_chat_id(c_name);
-                int u_id = get_user_id(cur->login);
                 sql_pattern = "SELECT EXISTS (SELECT id FROM members WHERE chat_id=(%d) AND user_id=(%d));";
-                asprintf(&query, sql_pattern, c_id, u_id);
+                asprintf(&query, sql_pattern, c_id, cur->id);
                 list = sqlite3_exec_db(query, 1);
                 if (strcmp(list->data, "1") == 0) {
-                    //
                     mx_strcpy(cur->cur_chat.name, c_name);
                     cur->cur_chat.id = c_id;
                     cur->cur_chat.count_users = get_chat_members(cur->cur_chat.id);

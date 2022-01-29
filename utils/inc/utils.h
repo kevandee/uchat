@@ -42,7 +42,10 @@ typedef struct s_chat {
 
 typedef struct s_message {
     int id;
-
+    int c_id;
+    
+    char sender[32];
+    char type[32];
     char data[4096];
 }              t_message;
 

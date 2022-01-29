@@ -2,10 +2,10 @@
 
 void sqlite3_create_db() {
     struct stat buffer;
-    int exist = stat("my.db", &buffer);
+    int exist = stat("server.db", &buffer);
     if (exist != 0) {
         sqlite3 *db;
-        int rc = sqlite3_open("my.db", &db);
+        int rc = sqlite3_open("server.db", &db);
         char *sql = NULL, *err_msg = 0;
         if (rc != SQLITE_OK) {
             fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
@@ -50,7 +50,7 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
 
 void *sqlite3_exec_db(char *query, int type) {
     sqlite3 *db;
-    int rc = sqlite3_open("my.db", &db);
+    int rc = sqlite3_open("server.db", &db);
     char *err_msg = 0;
     t_list *list = NULL;
     int auto_inc;
@@ -254,3 +254,29 @@ t_client *get_user_info(int id) {
  }
 
 
+t_list *db_messages_sender(int c_id) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT * FROM messages WHERE chat_id = (%d) ORDER BY id DESC LIMIT 250;";
+    asprintf(&query, sql_pattern, c_id);
+    t_list *list = sqlite3_exec_db(query, 1);
+    t_list *temp = NULL;
+    while (list->data != NULL && list != NULL) {
+        
+        t_message *mess = (t_message *)malloc(sizeof(t_message));
+        mess->id = mx_atoi(list->data);
+        list = list->next;
+        mess->c_id = mx_atoi(list->data);
+        list = list->next;
+        mx_strcpy(mess->sender, get_user_login(mx_atoi(list->data)));
+        list = list->next;
+        mx_strcpy(mess->data, list->data);
+        list = list->next;
+        mx_strcpy(mess->type, list->data);
+        mx_push_back(&temp, mess);
+        if (list->next == NULL) {
+            break;
+        }
+        list = list->next;
+    }
+    return temp;
+}
