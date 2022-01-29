@@ -261,12 +261,16 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
     if (keyval == GDK_KEY_Return) {
         GtkWidget *entry = user_data;
         GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(entry));
-
         GtkTextIter start, end;
         gtk_text_buffer_get_start_iter(buffer, &start);
         gtk_text_buffer_get_end_iter(buffer, &end);
+
+        gint n_chars = gtk_text_buffer_get_char_count (buffer);
         const char *buf_str = gtk_text_buffer_get_text(buffer, &start, &end, true);
-        if (!buf_str) {
+        char *str_temp = mx_strnew(1024);
+        str_temp = mx_strncpy(str_temp, buf_str, mx_strlen(buf_str) - 1);
+
+        if (!buf_str || buf_str[0] == '\n') {
             return;
         }
         
@@ -279,55 +283,35 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
         gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
         gtk_widget_set_margin_end(my_msg_box, 5);
-        gtk_widget_set_margin_bottom(my_msg_box, 5);
-        GtkWidget* my_msg = gtk_label_new(buf_str);
-        int w, h;
-        pango_layout_get_pixel_size (gtk_label_get_layout(GTK_LABEL(my_msg)), &w, &h);
-        int num = mx_strlen(buf_str) % 34 == 0 ? 0 : 1;
-        int count_lines = mx_strlen(buf_str) / 34 + num;
-        if (count_lines != 1) {
-            w = w/(count_lines - num);
-        }
-        else {
-            w +=10;
-        }
-        printf("layout w %d h%d count lines %d %d\n", w, h, count_lines, num);
-        gtk_widget_set_size_request(my_msg_box, w + 20, h*count_lines);
-        gtk_widget_set_size_request(my_msg, w + 20, h*count_lines);
-
+        gtk_widget_set_margin_bottom(my_msg_box, 10);
+        GtkWidget* my_msg = gtk_text_view_new();
         gtk_widget_set_name(my_msg, "my_msg");
         load_css_main(t_screen.provider, my_msg);
-        
-        ///gtk_label_set_yalign(GTK_LABEL (my_msg), 10.0);
-        gtk_widget_set_halign(GTK_WIDGET(my_msg), GTK_ALIGN_CENTER);
-        gtk_widget_set_valign(GTK_WIDGET(my_msg), GTK_ALIGN_CENTER);
-        //gtk_label_set_justify(GTK_LABEL (my_msg), GTK_JUSTIFY_CENTER);
-        //pango_layout_get_height(gtk_label_get_layout(GTK_LABEL(my_msg)));
-        //gtk_widget_set_margin_start(GTK_WIDGET(my_msg), 10);
-        //gtk_widget_set_margin_end(GTK_WIDGET(my_msg), 10);
-        //gtk_widget_set_margin_top(GTK_WIDGET(my_msg), 10);
-        //gtk_widget_set_margin_bottom(GTK_WIDGET(my_msg), 10);
-
-        /*gtk_text_view_set_left_margin(GTK_TEXT_VIEW(my_msg), 10);
+        gtk_text_view_set_left_margin(GTK_TEXT_VIEW(my_msg), 10);
         gtk_text_view_set_top_margin(GTK_TEXT_VIEW(my_msg), 10);
         gtk_text_view_set_right_margin(GTK_TEXT_VIEW(my_msg), 10);
         gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(my_msg), 10);
         gtk_text_view_set_editable(GTK_TEXT_VIEW(my_msg), false);
-        gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW(my_msg), false);*/
-        //gtk_widget_set_size_request(my_msg, 300, 50);
-        if (mx_strlen(res_str) < 34) {
-            gtk_widget_set_size_request(my_msg, mx_strlen(res_str) * 11, 50);
-        }
-        else {
+        gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW(my_msg), false);
+        gtk_widget_set_size_request(my_msg, 300, 50);
+        gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW(my_msg), GTK_WRAP_WORD);
+        gtk_text_buffer_set_text (gtk_text_view_get_buffer(GTK_TEXT_VIEW(my_msg)), str_temp, -1);
+
+        if(n_chars > 50)
+        {
+            //printf("%d\n", count);
             gtk_widget_set_size_request(my_msg, 300, 50);
         }
-        gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW(my_msg), GTK_WRAP_WORD_CHAR);
-        gtk_text_buffer_set_text (gtk_text_view_get_buffer(GTK_TEXT_VIEW(my_msg)), buf_str, -1);
+        else
+        {
+            gtk_widget_set_size_request(my_msg, n_chars*8 + 30, 20);
+            //printf("%d\n", (n_chars*10) + get_coefficient(count));
+        }
 
         gtk_box_append(GTK_BOX(my_msg_box), my_msg);
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
 
-        send_all(cur_client.serv_fd, message, 512+32);
+        send(cur_client.serv_fd, message, 512+32, 0);
         gtk_text_buffer_set_text (buffer, "", 0);
     }
 }
@@ -348,6 +332,17 @@ static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
 
 void show_chat_history(GtkWidget *widget, gpointer data)
 {
+
+    gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.settings);
+    t_actives.settings = gtk_image_new_from_file("client/media/settings.png");
+    gtk_widget_set_name(GTK_WIDGET(t_actives.settings), "settings_icon");
+    load_css_main(t_screen.provider, t_actives.settings);
+    GtkGesture *click_settings = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_settings, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_settings, "pressed", G_CALLBACK(show_settings), NULL);
+    gtk_widget_add_controller(t_actives.settings, GTK_EVENT_CONTROLLER(click_settings));
+    gtk_box_append(GTK_BOX(t_main.search_panel), t_actives.settings);
+
     (void)widget;
 
     printf("id of chat %d\n", ((t_chat *)data)->id);
@@ -370,6 +365,8 @@ void show_chat_history(GtkWidget *widget, gpointer data)
 
     t_main.scroll_box_right = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_valign(GTK_WIDGET(t_main.scroll_box_right), GTK_ALIGN_END);
+    gtk_widget_set_name(GTK_WIDGET(t_main.scroll_box_right), "messagebox_scroll");
+    load_css_main(t_screen.provider, t_main.scroll_box_right);
     
     t_main.scrolled_window_right = gtk_scrolled_window_new ();
     gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 828, 680);
@@ -434,7 +431,7 @@ void chat_show_main_screen(GtkWidget *window)
     gtk_box_append(GTK_BOX(t_main.right_panel), choose_friend);
     gtk_widget_set_margin_top(choose_friend, 40);
 //-----------------------------------------------SearchPanel---------------------------------------------------------------
-    GtkWidget *SearchBox, *SearchField, *Home, *Settings;
+    GtkWidget *SearchBox, *SearchField;
     t_main.search_panel = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(t_main.search_panel), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(t_main.search_panel), GTK_ALIGN_CENTER);
@@ -466,22 +463,22 @@ void chat_show_main_screen(GtkWidget *window)
     GFile *path = g_file_new_for_path("client/media/search_ico.png"); 
     GIcon *icon = g_file_icon_new(path);
     gtk_entry_set_icon_from_gicon(GTK_ENTRY(SearchField),GTK_ENTRY_ICON_SECONDARY, icon);
-    Home = gtk_image_new_from_file("client/media/home.png");
-    gtk_widget_set_name(GTK_WIDGET(Home), "home_icon");
-    load_css_main(t_screen.provider, Home);
-    Settings = gtk_image_new_from_file("client/media/settings.png");
-    gtk_widget_set_name(GTK_WIDGET(Settings), "settings_icon");
-    load_css_main(t_screen.provider, Settings);
-
+    
+    t_actives.home = gtk_image_new_from_file("client/media/home.png");
+    gtk_widget_set_name(GTK_WIDGET(t_actives.home ), "home_icon");
+    load_css_main(t_screen.provider, t_actives.home );
+    t_actives.settings = gtk_image_new_from_file("client/media/settings.png");
+    gtk_widget_set_name(GTK_WIDGET(t_actives.settings), "settings_icon");
+    load_css_main(t_screen.provider, t_actives.settings);
     GtkGesture *click_settings = gtk_gesture_click_new();
     gtk_gesture_set_state(click_settings, GTK_EVENT_SEQUENCE_CLAIMED);
     g_signal_connect_swapped(click_settings, "pressed", G_CALLBACK(show_settings), NULL);
-    gtk_widget_add_controller(Settings, GTK_EVENT_CONTROLLER(click_settings));
+    gtk_widget_add_controller(t_actives.settings, GTK_EVENT_CONTROLLER(click_settings));
 
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(t_main.logo));
     gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(SearchBox));
-    gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(Home));
-    gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(Settings));
+    gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(t_actives.home));
+    gtk_box_append(GTK_BOX(t_main.search_panel), GTK_WIDGET(t_actives.settings));
     gtk_box_set_spacing (GTK_BOX(t_main.search_panel), 0);
 //------------------------------------------------------------------------------------------------------------------------
     

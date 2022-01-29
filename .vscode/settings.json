@@ -3,6 +3,11 @@
         "gfile.h": "c",
         "uch_client.h": "c",
         "__locale": "c",
-        "locale": "c"
+        "locale": "c",
+        "__bit_reference": "c",
+        "algorithm": "c",
+        "bitset": "c",
+        "chrono": "c",
+        "unordered_map": "c"
     }
 }

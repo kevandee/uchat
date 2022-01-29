@@ -340,7 +340,7 @@ scrolledwindow {
 }
 
 #my_msg {
-  border-radius: 10px;
+  border-radius: 10px 10px 0px 10px;
   background: #ECB365;
   color: #fff;
   font-family: Arial, sans-serif;

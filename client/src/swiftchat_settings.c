@@ -289,7 +289,14 @@ static void send_settings(GtkWidget *widget, gpointer data) {
     show_settings();
 }
 
-void show_settings() {
+void show_settings() 
+{
+    gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.settings);
+    t_actives.settings = gtk_image_new_from_file("client/media/setting_active.png");
+    gtk_widget_set_name(GTK_WIDGET(t_actives.settings), "settings_icon");
+    load_css_main(t_screen.provider, t_actives.settings);
+    gtk_box_append(GTK_BOX(t_main.search_panel), t_actives.settings);
+
     gtk_grid_remove(GTK_GRID(t_main.grid), t_main.right_panel);
     t_main.right_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
