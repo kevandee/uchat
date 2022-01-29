@@ -279,7 +279,7 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         char message[512 + 32] = {0};
         sprintf(message, "<msg, chat_id= %d>%s", cur_client.cur_chat.id, res_str);
 
-        GtkWidget *my_msg_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        GtkWidget *my_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
         gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
         gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
         gtk_widget_set_margin_end(my_msg_box, 5);
@@ -299,16 +299,18 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
 
         if(n_chars > 50)
         {
-            //printf("%d\n", count);
             gtk_widget_set_size_request(my_msg, 300, 50);
         }
         else
         {
             gtk_widget_set_size_request(my_msg, n_chars*8 + 30, 20);
-            //printf("%d\n", (n_chars*10) + get_coefficient(count));
         }
 
         gtk_box_append(GTK_BOX(my_msg_box), my_msg);
+        if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
+            GtkWidget *User_logo = get_circle_widget_from_png_avatar(cur_client.avatar.path, 45, 45);
+            gtk_box_append(GTK_BOX(my_msg_box), User_logo);
+        }
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
 
         send(cur_client.serv_fd, message, 512+32, 0);
@@ -318,12 +320,21 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
 
 static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
 {
-    static int i=1;
     gint count=gtk_text_buffer_get_char_count(buffer);
-    g_print("%i Chars %i\n", i++, count);
+
+    GtkTextIter start, end, offset;
+    gtk_text_buffer_get_start_iter(buffer, &start);
+    gtk_text_buffer_get_end_iter(buffer, &end);
+    const char *buf_str = gtk_text_buffer_get_text(buffer, &start, &end, true);
+    if(buf_str[count-1] == '\n') {
+        gtk_text_buffer_get_iter_at_offset(buffer, &offset, count - 1);
+        gtk_text_buffer_delete(buffer, &offset, &end);
+        gtk_text_iter_assign(location, &offset);
+        return;
+    }
+    
     if(count>512) {
-        GtkTextIter offset, end;
-        gtk_text_buffer_get_iter_at_offset(buffer, &offset, 256);
+        gtk_text_buffer_get_iter_at_offset(buffer, &offset, 512);
         gtk_text_buffer_get_end_iter(buffer, &end);
         gtk_text_buffer_delete(buffer, &offset, &end);
         gtk_text_iter_assign(location, &offset);
