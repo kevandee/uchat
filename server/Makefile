@@ -8,9 +8,9 @@ install:
 
 server: ../libmx/libmx.a sql_lib ../utils/utils.a
 	@mkdir -p obj
-	@clang $(FLAGS) -c src/*.c -I../frameworks/openssl/
+	@clang $(FLAGS) `pkg-config --cflags gtk4` -c src/*.c -I../frameworks/openssl/
 	@mv *.o obj/
-	@clang $(FLAGS) -DTHREADSAFE=1 -g -o uchat_server obj/*.o ../utils/utils.a ../frameworks/SQLite3/sql.a ../libmx/libmx.a ../frameworks/openssl/libcrypto.a ../frameworks/openssl/libssl.a -lcurl -lpthread 
+	@clang $(FLAGS)  -DTHREADSAFE=1 -g -o uchat_server obj/*.o ../utils/utils.a ../frameworks/SQLite3/sql.a ../libmx/libmx.a ../frameworks/openssl/libcrypto.a ../frameworks/openssl/libssl.a -lcurl -lpthread 
 
 sql_lib:
 	@make -sC ../frameworks/SQLite3

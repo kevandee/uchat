@@ -156,7 +156,7 @@ static void send_avatar() {
         usleep(50);
     }
     gtk_widget_hide(t_main.logo);
-    t_main.logo = get_circle_widget_from_png_avatar(cur_client.avatar.path, 45, 45);
+    t_main.logo = get_circle_widget_from_png_avatar(&cur_client.avatar, 45, 45);
     gtk_box_prepend(GTK_BOX (t_main.search_panel), t_main.logo);
     show_settings();
 }
@@ -451,7 +451,7 @@ void show_settings()
     GtkWidget *user_image_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(user_image_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(user_image_box), GTK_ALIGN_CENTER);
-    GtkWidget *user_image = get_circle_widget_from_png_avatar(cur_client.avatar.path, 120, 120);
+    GtkWidget *user_image = get_circle_widget_from_png_avatar(&cur_client.avatar, 120, 120);
     gtk_box_append(GTK_BOX(user_image_box), user_image);
     GtkWidget *user_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(user_name_box), GTK_ALIGN_CENTER);

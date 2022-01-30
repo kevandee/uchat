@@ -14,12 +14,14 @@
 #include <string.h>
 #include "../../libmx/inc/libmx.h"
 
+#include <gtk/gtk.h>
+
 typedef struct s_avatar {
     double d_width;
 
     double orig_w;
     double orig_h;
-
+    cairo_surface_t *image;
     double scaled_w;
     double scaled_h;
     
@@ -60,6 +62,7 @@ typedef struct s_client {
     char *passwd;
 
     t_avatar avatar;
+    cairo_surface_t *scaled_for_chat;
     char name[32];
     char surname[32];
     char bio[256];

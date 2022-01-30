@@ -463,6 +463,7 @@ int main(int argc, char *argv[]) {
         new_client->login = NULL;
         new_client->passwd = NULL;
         //new_client->id = client_id;
+        new_client->scaled_for_chat = NULL;
         new_client->chats = NULL;
         t_chat init_chat = {0};
         new_client->cur_chat = init_chat;

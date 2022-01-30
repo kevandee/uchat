@@ -39,26 +39,36 @@ void *sender_func(void *param) {
 }
 
 gboolean add_msg(gpointer data) {
-    char *total_msg = data;
-    GtkWidget *incoming_msg_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_size_request(incoming_msg_box, 300, 50);
+    t_message *message = data;
+    char *total_msg = message->data;
+    GtkWidget *incoming_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_START);
-    gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
-    gtk_widget_set_margin_start(incoming_msg_box, 5);
+    gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_START);
+    gtk_widget_set_margin_end(incoming_msg_box, 5);
     gtk_widget_set_margin_bottom(incoming_msg_box, 5);
-    
-    GtkWidget* incoming_msg = gtk_text_view_new();
-    gtk_text_view_set_left_margin(GTK_TEXT_VIEW(incoming_msg), 10);
-    gtk_text_view_set_top_margin(GTK_TEXT_VIEW(incoming_msg), 10);
-    gtk_text_view_set_right_margin(GTK_TEXT_VIEW(incoming_msg), 10);
-    gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(incoming_msg), 10);
-    gtk_text_view_set_editable(GTK_TEXT_VIEW(incoming_msg), false);
-    gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW(incoming_msg), false);
-    gtk_widget_set_size_request(incoming_msg, 300, 50);
-    gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW(incoming_msg), GTK_WRAP_WORD_CHAR);
-    gtk_text_buffer_set_text (gtk_text_view_get_buffer(GTK_TEXT_VIEW(incoming_msg)), total_msg, mx_strlen(total_msg));
-    gtk_widget_set_name(incoming_msg, "my_msg");
-        load_css_main(t_screen.provider, incoming_msg);
+    GtkWidget *incoming_msg = gtk_label_new(total_msg);
+    gtk_widget_set_name(GTK_WIDGET(incoming_msg), "incoming-message");
+    load_css_main(t_screen.provider, incoming_msg);
+    gtk_label_set_wrap(GTK_LABEL(incoming_msg), TRUE);
+    gtk_label_set_wrap_mode(GTK_LABEL(incoming_msg), PANGO_WRAP_WORD_CHAR);
+    gtk_label_set_max_width_chars(GTK_LABEL(incoming_msg), 50);
+    gtk_label_set_selectable(GTK_LABEL(incoming_msg), TRUE);
+
+    if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
+        t_list *avatars = cur_client.cur_chat.users_avatars;
+        t_list *user_list = cur_client.cur_chat.users;
+        while (mx_strcmp(user_list->data, message->sender) != 0 && user_list) {
+            if (mx_strcmp(user_list->data, cur_client.login) == 0) {
+                user_list = user_list->next;
+            }
+            avatars = avatars->next;
+            user_list = user_list->next;
+        }
+
+        GtkWidget *User_logo = get_circle_widget_from_png_avatar(((t_avatar *)avatars->data), 45, 45);
+        gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
+    }
+
     gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
     gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
     return FALSE;
@@ -162,8 +172,13 @@ void *rec_func(void *param) {
                 char *total_msg = mx_strdup(mx_strchr(message, '>') + 1);     // сообщение
                                                                    // время надо получить локально на клиенте
                 printf("%s\n", total_msg);
+                t_message mes = {
+                    .c_id = chat_id
+                };
+                mx_strcpy(mes.sender, sender);
+                mx_strcpy(mes.data, total_msg);
                 if (cur_client.cur_chat.id == chat_id) {
-                    g_idle_add(add_msg, total_msg);
+                    g_idle_add(add_msg, &mes);
                 }
                 
                 
@@ -179,6 +194,7 @@ void *rec_func(void *param) {
                 mx_strdel(&cur_client.avatar.path);
                 cur_client.avatar.path = mx_strdup(buf);
 
+                printf("setts avatar\n");
                 t_main.loaded = true;
             }
             else if(mx_strcmp(mx_strtrim(message), "<image loaded>") == 0) {
@@ -186,7 +202,6 @@ void *rec_func(void *param) {
                 t_main.loaded = true;
             }
             else if (mx_strcmp(mx_strtrim(message), "<chat users avatars>") == 0) {
-                printf("tut\n");
                 cur_client.cur_chat.users_avatars = get_chat_users_avatars(&cur_client.cur_chat);
                 t_main.loaded = true;
             }
@@ -319,6 +334,7 @@ int main(int argc, char *argv[]) {
             .orig_h = 512,
             .scaled_w = 300,
             .scaled_h = 300,
+            .image = NULL,
             .path = "client/media/default_user.png",
             .name = "default_user.png", 
             .x = 200,

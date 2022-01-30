@@ -339,13 +339,42 @@ scrolledwindow {
   padding-left: 12px;
 }
 
-#my_msg {
+#message {
   border-radius: 10px 10px 0px 10px;
   background: #ECB365;
   color: #fff;
   font-family: Arial, sans-serif;
   font-weight: 400;
   font-size: 14px; 
+
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+#incoming-message{
+  border-radius: 10px 10px 10px 0px;
+  background: #233649;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px; 
+
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 0px;
+  margin-top: 0px;
 }
 
 #my_msg text {

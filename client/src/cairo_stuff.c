@@ -4,12 +4,12 @@ static void draw_circle_avatar(GtkDrawingArea *widget, cairo_t *cr, int w, int h
     (void)widget;
     (void)w;
     (void)h;
-
-    cairo_surface_t *image = (cairo_surface_t *)data;
+    t_avatar *avatar = data;
+    cairo_surface_t *image = avatar->image;
     double width = cairo_image_surface_get_width(image);
     double height = cairo_image_surface_get_height(image);
 
-    cairo_set_source_surface (cr, image, (cur_client.avatar.x - 200)* width/cur_client.avatar.scaled_w , (cur_client.avatar.y - 200)* height/cur_client.avatar.scaled_h); 
+    cairo_set_source_surface (cr, image, (avatar->x - 200)* width/avatar->scaled_w , (avatar->y - 200)* height/avatar->scaled_h); 
     
     cairo_arc(cr, w/2, h/2, w/2, 0, 2 * M_PI);
     cairo_clip(cr);
@@ -49,22 +49,31 @@ GtkWidget *get_circle_widget_from_png(const char *filename) {
     return GTK_WIDGET (darea);
 }
 
-GtkWidget *get_circle_widget_from_png_avatar(const char *filename, gint width, gint height){
+GtkWidget *get_circle_widget_from_png_avatar(t_avatar *avatar, gint width, gint height){
     GtkWidget *darea = NULL;
     gint org_width, org_height;
 
-    cairo_surface_t *image = get_surface_from_jpg(filename);
+    cairo_surface_t *image = get_surface_from_jpg(avatar->path);
     org_width = cairo_image_surface_get_width(image);
     org_height = cairo_image_surface_get_height(image);
     
-    cairo_surface_t *scaled_image = scale_to_half(image, org_width, org_height, cur_client.avatar.scaled_w * width/300, cur_client.avatar.scaled_h * height/300);
-    org_width = cairo_image_surface_get_width(scaled_image);
-    org_height = cairo_image_surface_get_height(scaled_image);
+    cairo_surface_t *scaled_image = scale_to_half(image, org_width, org_height, avatar->scaled_w * width/300, avatar->scaled_h * height/300);
+    avatar->image=scaled_image;
 
     darea = gtk_drawing_area_new();
     gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), width);
     gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), height);
-    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle_avatar, scaled_image, NULL);
+    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle_avatar, avatar, NULL);
+
+    return GTK_WIDGET (darea);
+
+}
+
+GtkWidget *get_circle_widget_current_user_avatar(){
+    GtkWidget * darea = gtk_drawing_area_new();
+    gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), 45);
+    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), 45);
+    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle_avatar, &cur_client.avatar, NULL);
 
     return GTK_WIDGET (darea);
 

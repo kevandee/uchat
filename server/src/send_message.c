@@ -32,8 +32,10 @@ void send_message(char *mes, char *sender, t_chat *chat) {
         }
         else {
             t_client *cl = get_client_by_name(users_tmp->data);
-            if (cl->login && mx_strcmp(cl->login, sender) != 0) {
-                send_all(cl->cl_socket, buf, 512 + 32);
+            if (cl) {
+                if (cl->login && mx_strcmp(cl->login, sender) != 0) {
+                    send_all(cl->cl_socket, buf, 512 + 32);
+                }
             }
         }
 
