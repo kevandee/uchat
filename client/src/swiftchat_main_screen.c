@@ -266,7 +266,7 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
 
         GtkWidget *entry = user_data;
         GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(entry));
-        GtkTextIter start, end;
+        GtkTextIter start, end ;
         gtk_text_buffer_get_start_iter(buffer, &start);
         gtk_text_buffer_get_end_iter(buffer, &end);
         //gint n_chars = gtk_text_buffer_get_char_count (buffer);
@@ -310,14 +310,19 @@ static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
 {
     gint count=gtk_text_buffer_get_char_count(buffer);
 
-    GtkTextIter start, end, offset;
+    GtkTextIter  start, end, offset;
     gtk_text_buffer_get_start_iter(buffer, &start);
     gtk_text_buffer_get_end_iter(buffer, &end);
     const char *buf_str = gtk_text_buffer_get_text(buffer, &start, &end, true);
+    printf("<%s>\n", buf_str);
+    gtk_text_buffer_get_start_iter(buffer, &start);
+    gtk_text_buffer_get_end_iter(buffer, &end);
     if(buf_str[count-1] == '\n') {
-        gtk_text_buffer_get_iter_at_offset(buffer, &offset, count - 1);
-        gtk_text_buffer_delete(buffer, &offset, &end);
-        gtk_text_iter_assign(location, &offset);
+        //gtk_text_buffer_get_iter_at_offset(buffer, &offset, count - 1);
+        gtk_text_buffer_get_end_iter(buffer, &end);
+        //gtk_text_buffer_delete(buffer, &offset, &end);
+        gtk_text_buffer_backspace(buffer, &end, true, true);
+        gtk_text_iter_assign(location, &end);
         return;
     }
     
@@ -379,6 +384,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     load_css_main(t_screen.provider, t_main.scrolled_window_right);
 
     GtkWidget *write_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_size_request(write_box, 800, 36);
     gtk_widget_set_name(GTK_WIDGET(write_box), "write_message_box");
     load_css_main(t_screen.provider, write_box);
     gtk_widget_set_halign(GTK_WIDGET(write_box), GTK_ALIGN_CENTER);

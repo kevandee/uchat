@@ -1,3 +1,0 @@
-include "cycle" # create an include cycle
-
-<Multi_key> <s> <e> <q> : "!"

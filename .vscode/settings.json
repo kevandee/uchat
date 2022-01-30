@@ -8,6 +8,8 @@
         "algorithm": "c",
         "bitset": "c",
         "chrono": "c",
-        "unordered_map": "c"
+        "unordered_map": "c",
+        "utils.h": "c",
+        "gtk.h": "c"
     }
 }

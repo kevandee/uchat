@@ -8,7 +8,7 @@ utils.a: objects
 
 objects:
 	mkdir -p obj
-	clang -std=c11 -Wall -Werror -Wextra -Wpedantic 'pkg-config --cflags gtk4' -c src/*.c -I inc/ 
+	clang -std=c11 -Wall -Werror -Wextra -Wpedantic `pkg-config --cflags gtk4` -c src/*.c -I inc/ 
 	mv *.o obj/
 	
 uninstall:

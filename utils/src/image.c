@@ -36,11 +36,7 @@ int recv_image(int socket, char *path) {
         stat = recv(socket, &size, sizeof(int), 0);
     }
 
-    printf("Packet received.\n");
-    printf("Packet size: %i\n",stat);
-    printf("Image size: %i\n",size);
-    printf("\n");
-
+    
     printf("Reply sent\n");
 
     image = fopen(path, "wb");
@@ -57,23 +53,17 @@ int recv_image(int socket, char *path) {
             read_size = recv(socket,imagearray, 10241, 0);
         }
 
-        printf("Packet number received: %i\n",packet_index);
-        printf("Packet size: %i\n",read_size);
+     
 
         //Write the currently read data into our image file
         write_size = fwrite(imagearray,1,read_size, image);
-        printf("Written image size: %i\n",write_size); 
-
+      
         if(read_size !=write_size) {
             printf("error in read write\n");    
         }
 
         recv_size += read_size;
         packet_index++;
-        printf("Total received image size: %i\n",recv_size);
-        printf(" \n");
-        printf(" \n");
-
     }
 
     fclose(image);

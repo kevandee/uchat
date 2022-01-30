@@ -374,9 +374,8 @@ void *client_work(void *param) {
             sprintf(buf, "<chat users avatars>");
             send_all(cur->cl_socket,buf, 512+32);
             while (users) {
-                printf("%s\n", users->data);
                 if (mx_strcmp(users->data, cur->login) != 0) {
-                    printf("%s\n", users->data);
+                    printf("%s %s\n", users->data, cur->login);
                     char *avatar_info = get_user_avatar(get_user_id(users->data));
                     t_avatar *avatar = parse_avatar_info(avatar_info);
                     

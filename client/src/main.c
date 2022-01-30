@@ -60,13 +60,16 @@ gboolean add_msg(gpointer data) {
         while (mx_strcmp(user_list->data, message->sender) != 0 && user_list) {
             if (mx_strcmp(user_list->data, cur_client.login) == 0) {
                 user_list = user_list->next;
+                continue;
             }
             avatars = avatars->next;
             user_list = user_list->next;
         }
 
-        GtkWidget *User_logo = get_circle_widget_from_png_avatar(((t_avatar *)avatars->data), 45, 45);
-        gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
+        if (avatars) {
+            GtkWidget *User_logo = get_circle_widget_from_png_avatar(((t_avatar *)avatars->data), 45, 45);
+            gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
+        }
     }
 
     gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
