@@ -314,18 +314,10 @@ static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
     GtkTextIter  start, end, offset;
     gtk_text_buffer_get_start_iter(buffer, &start);
     gtk_text_buffer_get_end_iter(buffer, &end);
-    const char *buf_str = gtk_text_buffer_get_text(buffer, &start, &end, true);
-    printf("<%s>\n", buf_str);
-    gtk_text_buffer_get_start_iter(buffer, &start);
-    gtk_text_buffer_get_end_iter(buffer, &end);
-    if(buf_str[count-1] == '\n') {
-        //gtk_text_buffer_get_iter_at_offset(buffer, &offset, count - 1);
-        gtk_text_buffer_get_end_iter(buffer, &end);
-        //gtk_text_buffer_delete(buffer, &offset, &end);
-        gtk_text_buffer_backspace(buffer, &end, true, true);
-        gtk_text_iter_assign(location, &end);
-        return;
-    }
+    //const char *buf_str = gtk_text_buffer_get_text(buffer, &start, &end, true);
+    //gtk_text_buffer_get_start_iter(buffer, &start);
+    //gtk_text_buffer_get_end_iter(buffer, &end);
+
     
     if(count>512) {
         gtk_text_buffer_get_iter_at_offset(buffer, &offset, 512);
