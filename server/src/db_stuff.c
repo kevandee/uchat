@@ -259,7 +259,7 @@ t_list *db_messages_sender(int c_id) {
     char *sql_pattern = "SELECT EXISTS (SELECT * FROM messages WHERE chat_id = (%d));";
     asprintf(&query, sql_pattern, c_id);
     t_list *list = sqlite3_exec_db(query, 1);
-    if (strcmp(list->data, "1") == 0) {
+    if (list && strcmp(list->data, "1") == 0) {
         sql_pattern = "SELECT * FROM messages WHERE chat_id = (%d) ORDER BY id DESC LIMIT 250;";
         asprintf(&query, sql_pattern, c_id);
         list = sqlite3_exec_db(query, 1);
