@@ -401,6 +401,35 @@ void *client_work(void *param) {
             }
             
         }
+        else if (mx_strncmp(message, "<get messages chat_id=", 22) == 0) { //"<get messages chat_id=%d, last_mes=%d>"
+            char *temp = message + 22;
+            int len = 0;
+            while (*(temp + len) != ',') {
+                len++;
+            }
+            char *c_id = mx_strndup(temp, len);
+            int chat_id = mx_atoi(c_id);
+            printf("c_id %s\n", c_id);
+            mx_strdel(&c_id);
+            t_list *mes_list = db_messages_sender(chat_id);
+            printf("chat_id %d\n", chat_id);
+            while(mes_list) {
+                char buf[512 + 32] = {0};
+                t_message *mes_send = (t_message *)mes_list->data;
+                sprintf(buf, "<msg, chat_id=%d, from=%s, prev=1>%s", chat_id, mes_send->sender, mes_send->data);
+
+                send_all(cur->cl_socket, buf, 512 + 32);
+
+                clear_message(buf, 544);
+                int status = 0;
+                recv(cur->cl_socket, &status, sizeof(int), 0);
+                if (!status)
+                    break;
+                mes_list = mes_list->next;
+            }
+
+            //send (cur->cl_socket, &count_mes, sizeof(int), 0);
+        }
         else if (mes_stat > 0) {
             printf("Message Received from %s | %s |\n", login, message);
 		    if(cur->cur_chat.id != 0){

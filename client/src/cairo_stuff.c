@@ -4,6 +4,11 @@ static void draw_circle_avatar(GtkDrawingArea *widget, cairo_t *cr, int w, int h
     (void)widget;
     (void)w;
     (void)h;
+    // lutiy kostil'
+    if (h != w) {
+        h = w;
+    }
+
     t_avatar *avatar = data;
     cairo_surface_t *image = avatar->image;
     double width = cairo_image_surface_get_width(image);
@@ -11,6 +16,8 @@ static void draw_circle_avatar(GtkDrawingArea *widget, cairo_t *cr, int w, int h
 
     cairo_set_source_surface (cr, image, (avatar->x - 200)* width/avatar->scaled_w , (avatar->y - 200)* height/avatar->scaled_h); 
     
+    printf ("w %d width %f\nh %d height %f\n", w, width, h, height);
+
     cairo_arc(cr, w/2, h/2, w/2, 0, 2 * M_PI);
     cairo_clip(cr);
     cairo_paint(cr);
@@ -53,12 +60,16 @@ GtkWidget *get_circle_widget_from_png_avatar(t_avatar *avatar, gint width, gint 
     GtkWidget *darea = NULL;
     gint org_width, org_height;
 
-    cairo_surface_t *image = get_surface_from_jpg(avatar->path);
-    org_width = cairo_image_surface_get_width(image);
-    org_height = cairo_image_surface_get_height(image);
-    
-    cairo_surface_t *scaled_image = scale_to_half(image, org_width, org_height, avatar->scaled_w * width/300, avatar->scaled_h * height/300);
-    avatar->image=scaled_image;
+    if (!avatar->image || (avatar->prev_w != width && avatar->prev_h != height)) {
+        cairo_surface_t *image = get_surface_from_jpg(avatar->path);
+        org_width = cairo_image_surface_get_width(image);
+        org_height = cairo_image_surface_get_height(image);
+
+        cairo_surface_t *scaled_image = scale_to_half(image, org_width, org_height, avatar->scaled_w * width/300, avatar->scaled_h * height/300);
+        avatar->image=scaled_image;
+        avatar->prev_w = width;
+        avatar->prev_h = height;
+    }
 
     darea = gtk_drawing_area_new();
     gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), width);

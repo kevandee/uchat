@@ -256,7 +256,7 @@ t_client *get_user_info(int id) {
 
 t_list *db_messages_sender(int c_id) {
     char *query = NULL;
-    char *sql_pattern = "SELECT * FROM messages WHERE chat_id = (%d) ORDER BY id DESC LIMIT 250;";
+    char *sql_pattern = "SELECT * FROM messages WHERE chat_id = (%d) ORDER BY id LIMIT 250;";
     asprintf(&query, sql_pattern, c_id);
     t_list *list = sqlite3_exec_db(query, 1);
     t_list *temp = NULL;

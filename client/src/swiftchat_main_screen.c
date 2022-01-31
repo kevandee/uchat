@@ -282,6 +282,7 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         sprintf(message, "<msg, chat_id= %d>%s", cur_client.cur_chat.id, str);
 
         GtkWidget *my_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+        
         gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
         gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
         gtk_widget_set_margin_end(my_msg_box, 5);
@@ -408,6 +409,8 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_box_set_spacing (GTK_BOX(t_main.right_panel), 5);
 
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
+    
+    get_messages_from_server(cur_client.cur_chat.id, -1);
 }
 
 static void get_list_users() {

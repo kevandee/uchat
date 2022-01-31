@@ -42,38 +42,64 @@ gboolean add_msg(gpointer data) {
     t_message *message = data;
     char *total_msg = message->data;
     GtkWidget *incoming_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
-    gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_START);
-    gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_START);
+    bool is_sender = false;
+    if (mx_strcmp(message->sender, cur_client.login) != 0){
+        gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_START);
+        gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_START);
+    }   
+    else {
+        gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
+        gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);           
+        is_sender = true;
+    }
     gtk_widget_set_margin_end(incoming_msg_box, 5);
     gtk_widget_set_margin_bottom(incoming_msg_box, 5);
     GtkWidget *incoming_msg = gtk_label_new(total_msg);
-    gtk_widget_set_name(GTK_WIDGET(incoming_msg), "incoming-message");
+    if (!is_sender)
+        gtk_widget_set_name(GTK_WIDGET(incoming_msg), "incoming-message");
+    else 
+        gtk_widget_set_name(GTK_WIDGET(incoming_msg), "message");
     load_css_main(t_screen.provider, incoming_msg);
     gtk_label_set_wrap(GTK_LABEL(incoming_msg), TRUE);
     gtk_label_set_wrap_mode(GTK_LABEL(incoming_msg), PANGO_WRAP_WORD_CHAR);
     gtk_label_set_max_width_chars(GTK_LABEL(incoming_msg), 50);
     gtk_label_set_selectable(GTK_LABEL(incoming_msg), TRUE);
-
+    GtkWidget *User_logo = NULL;
     if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
-        t_list *avatars = cur_client.cur_chat.users_avatars;
-        t_list *user_list = cur_client.cur_chat.users;
-        while (mx_strcmp(user_list->data, message->sender) != 0 && user_list) {
-            if (mx_strcmp(user_list->data, cur_client.login) == 0) {
+        if (!is_sender) {
+            t_list *avatars = cur_client.cur_chat.users_avatars;
+            t_list *user_list = cur_client.cur_chat.users;
+            while (mx_strcmp(user_list->data, message->sender) != 0 && user_list) {
+                if (mx_strcmp(user_list->data, cur_client.login) == 0) {
+                    user_list = user_list->next;
+                    continue;
+                }
+                avatars = avatars->next;
                 user_list = user_list->next;
-                continue;
             }
-            avatars = avatars->next;
-            user_list = user_list->next;
-        }
 
-        if (avatars) {
-            GtkWidget *User_logo = get_circle_widget_from_png_avatar(((t_avatar *)avatars->data), 45, 45);
-            gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
+            if (avatars) {
+                t_avatar *draw = avatars->data;
+                if (mx_strcmp (draw->name, "default") == 0) {
+                    draw = &t_main.default_avatar;
+                }
+                User_logo = get_circle_widget_from_png_avatar(draw, 45, 45);
+                gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
+            }
+        }
+        else {
+            User_logo = get_circle_widget_current_user_avatar();
         }
     }
 
     gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
-    gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
+    if (is_sender)
+        gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
+    //if (!message->prev)
+        gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
+    //else 
+    //    gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
+    pthread_mutex_unlock(&cl_mutex);
     return FALSE;
 }
 
@@ -167,23 +193,39 @@ void *rec_func(void *param) {
                 mx_strdel(&c_id);
                 temp = mx_strstr(message, "from=") + 5;
                 len = 0;
-                while (*(temp + len) != '>') {
+                while (*(temp + len) != ',') {
                     len++;
                 }
                 char *sender = mx_strndup(temp, len);              // отправитель
                 printf("%s\n", sender);
+                temp = mx_strstr(message, "prev=") + 6;
+                bool prev = *temp == '0' ? false : true; 
+                printf("bool %i\n", prev);
+
                 char *total_msg = mx_strdup(mx_strchr(message, '>') + 1);     // сообщение
                                                                    // время надо получить локально на клиенте
                 printf("%s\n", total_msg);
                 t_message mes = {
-                    .c_id = chat_id
+                    .c_id = chat_id,
+                    .prev = prev
                 };
                 mx_strcpy(mes.sender, sender);
                 mx_strcpy(mes.data, total_msg);
                 if (cur_client.cur_chat.id == chat_id) {
+                    pthread_mutex_lock(&cl_mutex);
                     g_idle_add(add_msg, &mes);
+                    
+                    pthread_mutex_lock(&cl_mutex);
+                    if (prev) {
+                        int status = 1;
+                        send(cur_client.serv_fd, &status, sizeof(int), 0);
+                    }
+                    pthread_mutex_unlock(&cl_mutex);
                 }
-                
+                else if (prev) {
+                    int status = 0;
+                    send(cur_client.serv_fd, &status, sizeof(int), 0);
+                }
                 
                 printf("%s\n", total_msg);
                 printf("> ");
@@ -344,6 +386,18 @@ int main(int argc, char *argv[]) {
             .y = 200
         },
     };
+    t_avatar default_avatar = {
+        .orig_w = 512,
+        .orig_h = 512,
+        .scaled_w = 300,
+        .scaled_h = 300,
+        .image = NULL,
+        .path = "client/media/default_user.png",
+        .name = "default_user.png", 
+        .x = 200,
+        .y = 200
+    };
+    t_main.default_avatar = default_avatar;
     cur_client = cur;;
     // Подключение к серверу, тут ничего менять не надо
     cur_client.serv_fd = socket(AF_INET, SOCK_STREAM, 0);

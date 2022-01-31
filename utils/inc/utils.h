@@ -24,6 +24,8 @@ typedef struct s_avatar {
     cairo_surface_t *image;
     double scaled_w;
     double scaled_h;
+    double prev_w;
+    double prev_h;
     
     double x;
     double y;
@@ -45,7 +47,8 @@ typedef struct s_chat {
 typedef struct s_message {
     int id;
     int c_id;
-    
+    bool prev;
+
     char sender[32];
     char type[32];
     char data[4096];
