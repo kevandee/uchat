@@ -83,7 +83,7 @@ gboolean add_msg(gpointer data) {
                 if (mx_strcmp (draw->name, "default") == 0) {
                     draw = &t_main.default_avatar;
                 }
-                User_logo = get_circle_widget_from_png_avatar(draw, 45, 45);
+                User_logo = get_circle_widget_from_png_avatar(draw, 45, 45, false);
                 gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
             }
         }

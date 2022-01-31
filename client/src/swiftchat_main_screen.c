@@ -445,7 +445,7 @@ void chat_show_main_screen(GtkWidget *window)
     SearchBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(SearchBox), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(SearchBox), GTK_ALIGN_CENTER);
-    t_main.logo = get_circle_widget_from_png_avatar(&cur_client.avatar, 45, 45);
+    t_main.logo = get_circle_widget_from_png_avatar(&cur_client.avatar, 45, 45, false);
     gtk_widget_set_name(GTK_WIDGET(t_main.logo), "account_avatar");
     load_css_main(t_screen.provider, t_main.logo);
     SearchField = gtk_entry_new();

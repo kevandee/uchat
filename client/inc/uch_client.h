@@ -86,7 +86,7 @@ GtkWidget *get_circle_widget_from_png(const char *filename);
 GtkWidget *get_circle_widget_from_png_custom(const char *filename, gint width, gint height);
 GtkWidget *get_circle_widget_current_user_avatar();
 
-GtkWidget *get_circle_widget_from_png_avatar(t_avatar *avatar, gint width, gint height);
+GtkWidget *get_circle_widget_from_png_avatar(t_avatar *avatar, gint width, gint height, bool must_update);
 t_list *get_chat_users_avatars(t_chat *chat);
 
 

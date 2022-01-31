@@ -250,19 +250,21 @@ void *client_work(void *param) {
             clear_message(buf, 512 + 32);
             char *path = mx_strjoin("data/avatars/", cur->login);
             sprintf(buf, "data/avatars/%s/%s", cur->login, recv_avatar.name);
+            printf("buf %s\n", buf);
             struct stat st = {0};
             if (stat(path, &st) == -1) {
                 mkdir(path, 0777);
             }
             mx_strdel(&path);
+            printf("buf %s\n", buf);
             recv_avatar.path = mx_strdup(buf);
-
+            clear_message(buf, 544);
             recv_image(cur->cl_socket, recv_avatar.path);
         
             sprintf(buf, "<image loaded>");
             send_all(cur->cl_socket, buf, 512 + 32); 
             clear_message(buf, 512 + 32);
-            printf("a\n");
+
             
             recv (cur->cl_socket, &recv_avatar.scaled_w, sizeof(double), 0);
             recv (cur->cl_socket, &recv_avatar.scaled_h, sizeof(double), 0);
@@ -273,10 +275,10 @@ void *client_work(void *param) {
             clear_message(buf, 512 + 32);
             sprintf(buf, "<setting avatar>");
             send_all(cur->cl_socket, buf, 512+32);
-            send_image(cur->cl_socket, recv_avatar.name);
+            send_image(cur->cl_socket, recv_avatar.path);
 
             sprintf(buf, "path=%s scaled_w=%f scaled_h=%f x=%f y=%f ", recv_avatar.path,recv_avatar.scaled_w, recv_avatar.scaled_h,recv_avatar.x, recv_avatar.y);
-
+            printf("buf %s\n", buf);
             char *query = NULL;
             char *sql_pattern = NULL;
             sql_pattern = "UPDATE users SET avatar = '%s' WHERE id = %d;";
