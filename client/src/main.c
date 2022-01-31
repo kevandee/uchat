@@ -95,10 +95,10 @@ gboolean add_msg(gpointer data) {
     gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
     if (is_sender)
         gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
-    //if (!message->prev)
+    if (!message->prev)
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
-    //else 
-    //    gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
+    else 
+        gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
     pthread_mutex_unlock(&cl_mutex);
     return FALSE;
 }
@@ -198,9 +198,9 @@ void *rec_func(void *param) {
                 }
                 char *sender = mx_strndup(temp, len);              // отправитель
                 printf("%s\n", sender);
-                temp = mx_strstr(message, "prev=") + 6;
+                temp = mx_strstr(message, "prev=") + 5;
                 bool prev = *temp == '0' ? false : true; 
-                printf("bool %i\n", prev);
+                printf("bool %i %c\n", prev, *temp);
 
                 char *total_msg = mx_strdup(mx_strchr(message, '>') + 1);     // сообщение
                                                                    // время надо получить локально на клиенте
@@ -209,6 +209,7 @@ void *rec_func(void *param) {
                     .c_id = chat_id,
                     .prev = prev
                 };
+            
                 mx_strcpy(mes.sender, sender);
                 mx_strcpy(mes.data, total_msg);
                 if (cur_client.cur_chat.id == chat_id) {

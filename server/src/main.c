@@ -359,6 +359,9 @@ void *client_work(void *param) {
             sql_pattern = "INSERT INTO messages (chat_id, user_id, text) VALUES (%d, %d, '%s');";
             asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, mx_strchr(message, '>') + 1);
             sqlite3_exec_db(query, 2);
+            char buf[544] = {0};
+            sprintf(buf, "<msg, chat_id=%d, from=%s, prev=1>%s", chat_id, cur->login, mx_strchr(message, '>') + 1);
+
 
             send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat);
             clear_message(message, MAX_LEN + NAME_LEN);
