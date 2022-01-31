@@ -103,6 +103,7 @@ void insert_user_db(t_client cur_client) {
     }
 
 }
+<<<<<<< HEAD
 */
 void insert_user_db(t_client cur_client) {
     char *query = NULL;
@@ -130,6 +131,8 @@ void insert_user_db(t_client cur_client) {
 
 }
 
+=======
+>>>>>>> 480ee74dc19dac4ef7b3458656b188391e095a6e
 /*void insert_user_db(t_client cur_client) {
     char *query = NULL;
     char *sql_pattern = "UPDATE user SET login = '%s', password = '%s', name = '%s', surname = '%s', bio = '%s';";
