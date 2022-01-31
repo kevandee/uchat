@@ -258,11 +258,11 @@ t_list *db_messages_sender(int c_id) {
     char *query = NULL;
     char *sql_pattern = "SELECT EXISTS (SELECT * FROM messages WHERE chat_id = (%d));";
     asprintf(&query, sql_pattern, c_id);
-    list = sqlite3_exec_db(query, 1);
+    t_list *list = sqlite3_exec_db(query, 1);
     if (strcmp(list->data, "1") == 0) {
         sql_pattern = "SELECT * FROM messages WHERE chat_id = (%d) ORDER BY id DESC LIMIT 250;";
         asprintf(&query, sql_pattern, c_id);
-        t_list *list = sqlite3_exec_db(query, 1);
+        list = sqlite3_exec_db(query, 1);
         t_list *temp = NULL;
         while (list->data != NULL && list != NULL) {
             
@@ -277,12 +277,23 @@ t_list *db_messages_sender(int c_id) {
             list = list->next;
             mx_strcpy(mess->type, list->data);
             mx_push_back(&temp, mess);
-            if (list->next == NULL) {
-                break;
-            }
+            
             list = list->next;
         }
         return temp;
     }
     return NULL;
 }
+
+ void message_changer(int m_id, char *new_text) {
+     char *query = NULL;
+    char *sql_pattern = NULL;
+    sql_pattern = "UPDATE messages SET text = '%s' WHERE id = %d;";
+    asprintf(&query, sql_pattern, new_text, m_id);
+    sqlite3_exec_db(query, 2);
+ }
+ 
+
+/*void db_delete_user(u_id) {
+
+}*/
