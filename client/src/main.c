@@ -338,10 +338,9 @@ static void load_css() {
     }
 
     get_all_user_data();
-    //printf("chat_name = %s\n", ((t_chat *)(cur_client.chats->data))->name);
 
-    //create_user_db(cur_client.login);
-    //insert_user_db(cur_client);
+    create_user_db(cur_client.login);
+    insert_user_db(cur_client);
 
     GtkWidget *child = gtk_window_get_child(GTK_WINDOW (t_screen.main_window));
     

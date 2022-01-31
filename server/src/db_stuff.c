@@ -277,12 +277,23 @@ t_list *db_messages_sender(int c_id) {
             list = list->next;
             mx_strcpy(mess->type, list->data);
             mx_push_back(&temp, mess);
-            if (list->next == NULL) {
-                break;
-            }
+            
             list = list->next;
         }
         return temp;
     }
     return NULL;
 }
+
+ void message_changer(int m_id, char *new_text) {
+     char *query = NULL;
+    char *sql_pattern = NULL;
+    sql_pattern = "UPDATE messages SET text = '%s' WHERE id = %d;";
+    asprintf(&query, sql_pattern, new_text, m_id);
+    sqlite3_exec_db(query, 2);
+ }
+ 
+
+/*void db_delete_user(u_id) {
+
+}*/
