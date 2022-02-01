@@ -26,6 +26,11 @@ void send_new_chat(t_chat *new_chat) {
                 send_all(client->cl_socket, user_name, 32);
                 temp_l = temp_l->next;
             }
+
+            if (new_chat->is_new) {
+                t_avatar default_avatar = {.name = "default", .path = "default"};
+                send_avatar(&default_avatar, client->cl_socket);
+            }
             printf("chat sended to %s\n", client->login);
         }
 

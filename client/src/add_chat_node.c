@@ -30,11 +30,13 @@ static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
     while (temp->next) {
         temp = temp->next;
     }
-
+    gtk_widget_hide(widget);
     show_chat_history(widget, temp->data);
+    //return_to_chatlist(NULL, NULL);
 }
 
 void add_chat_node(t_chat *chat) {
+
     GtkWidget *child_widget = gtk_button_new ();
     gtk_widget_set_size_request(child_widget, 200, 54);
     gtk_widget_set_name(GTK_WIDGET(child_widget), "scroll_buttons_border");
@@ -43,7 +45,21 @@ void add_chat_node(t_chat *chat) {
     gtk_widget_set_name(GTK_WIDGET(chat_info), "scroll_buttons");
     load_css_main(t_screen.provider, chat_info);
 
-    GtkWidget *chat_image = get_circle_widget_from_png_custom("test_circle.png", 57, 57);
+    if (mx_strcmp(chat->name, ".new_dialog") == 0) {
+        char buf[544] = {0};
+        t_main.loaded = false;
+        sprintf(buf, "<get user avatar>%s", chat->users->data);
+        send_all(cur_client.serv_fd, buf, 544);
+        while(!t_main.loaded) {
+            usleep(50);
+        }
+        chat->avatar = *t_main.loaded_avatar;
+        if (mx_strcmp(chat->avatar.name, "default") == 0) {
+            chat->avatar = t_main.default_avatar;
+        }
+    }
+
+    GtkWidget *chat_image = get_circle_widget_from_png_avatar(&chat->avatar, 57, 57, false);
     gtk_widget_set_size_request(GTK_WIDGET(chat_image),  57, 0);
     gtk_widget_set_halign(GTK_WIDGET(chat_image), GTK_ALIGN_FILL);
     gtk_widget_set_valign(GTK_WIDGET(chat_image), GTK_ALIGN_CENTER);

@@ -93,7 +93,7 @@ gboolean add_msg(gpointer data) {
     }
 
     gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
-    if (is_sender)
+    if (is_sender && mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0)
         gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
     if (!message->prev)
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
@@ -144,6 +144,16 @@ void *rec_func(void *param) {
                     mx_push_back(&new_chat->users,mx_strdup(buf));
                     clear_message(buf, 32);
                 }
+                /////// аватарка чата
+                printf("a\n");
+                t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
+                get_avatar(t_main.loaded_avatar);
+                printf("gets avatar\n");
+                new_chat->avatar=*t_main.loaded_avatar;
+                if (mx_strcmp(new_chat->avatar.name, "default") == 0) {
+                    new_chat->avatar = t_main.default_group_avatar;
+                }
+                //////
                 mx_push_back(&cur_client.chats, new_chat);
                 if (!cur_client.sender_new_chat){
                     add_chat_node(new_chat);
@@ -243,6 +253,13 @@ void *rec_func(void *param) {
                 printf("setts avatar\n");
                 t_main.loaded = true;
             }
+            if(mx_strncmp(mx_strtrim(message), "<get user avatar>",17) == 0) {
+                printf("a\n");
+                t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
+                get_avatar(t_main.loaded_avatar);
+                printf("gets avatar\n");
+                t_main.loaded = true;
+            }
             else if(mx_strcmp(mx_strtrim(message), "<image loaded>") == 0) {
 
                 t_main.loaded = true;
@@ -339,6 +356,8 @@ static void load_css() {
 
     get_all_user_data();
 
+
+
     create_user_db(cur_client.login);
     insert_user_db(cur_client);
 
@@ -398,6 +417,18 @@ int main(int argc, char *argv[]) {
         .y = 200
     };
     t_main.default_avatar = default_avatar;
+    t_avatar default_group_avatar = {
+        .orig_w = 512,
+        .orig_h = 512,
+        .scaled_w = 300,
+        .scaled_h = 300,
+        .image = NULL,
+        .path = "client/media/default_groupchat.png",
+        .name = "default_groupchat.png", 
+        .x = 200,
+        .y = 200
+    };
+    t_main.default_group_avatar = default_group_avatar;
     cur_client = cur;;
     // Подключение к серверу, тут ничего менять не надо
     cur_client.serv_fd = socket(AF_INET, SOCK_STREAM, 0);

@@ -259,11 +259,6 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
 
     if (keyval == GDK_KEY_Return) 
     {
-        GtkAdjustment* adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right));
-        double to_this_pos = gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj)) - gtk_adjustment_get_page_size(GTK_ADJUSTMENT(adj));
-        gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), to_this_pos);
-        gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right),GTK_ADJUSTMENT(adj));
-
         GtkWidget *entry = user_data;
         GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(entry));
         GtkTextIter start, end ;
@@ -301,6 +296,13 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
             gtk_box_append(GTK_BOX(my_msg_box), User_logo);
         }
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
+
+        GtkAdjustment* adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right));
+        //double to_this_pos = gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj)) - gtk_adjustment_get_page_size(GTK_ADJUSTMENT(adj));
+        gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj)) + 40);
+        gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right),GTK_ADJUSTMENT(adj));
+
+
 
         send(cur_client.serv_fd, message, 512+32, 0);
         gtk_text_buffer_set_text (buffer, "", 0);
@@ -405,15 +407,6 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     get_messages_from_server(cur_client.cur_chat.id, -1);
 }
 
-static void get_list_users() {
-    t_main.loaded = false;
-    char message[512+32] = {0};
-    sprintf(message, "<users list>");
-    send(cur_client.serv_fd, message, 512+32, 0);
-    while (!t_main.loaded)
-        usleep(50);
-}
-
 
 void chat_show_main_screen(GtkWidget *window) 
 {
@@ -438,6 +431,7 @@ void chat_show_main_screen(GtkWidget *window)
 //-----------------------------------------------SearchPanel---------------------------------------------------------------
     GtkWidget *SearchBox, *SearchField;
     t_main.search_panel = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_size_request(t_main.search_panel, 200, 45);
     gtk_widget_set_halign(GTK_WIDGET(t_main.search_panel), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(t_main.search_panel), GTK_ALIGN_CENTER);
     //gtk_widget_set_margin_bottom(GTK_WIDGET(t_main.search_panel), 27);
@@ -455,12 +449,12 @@ void chat_show_main_screen(GtkWidget *window)
     
     ///////////
 
-    GtkGesture *click_search_field = gtk_gesture_click_new();
-    gtk_gesture_set_state(click_search_field, GTK_EVENT_SEQUENCE_CLAIMED);
-    g_signal_connect_swapped(click_search_field, "pressed", G_CALLBACK(get_list_users), t_auth.LOGIN_menu);
-    gtk_widget_add_controller(SearchField, GTK_EVENT_CONTROLLER(click_search_field));
+    //GtkGesture *click_search_field = gtk_gesture_click_new();
+    //gtk_gesture_set_state(click_search_field, GTK_EVENT_SEQUENCE_CLAIMED);
+    //g_signal_connect_after(click_search_field, "pressed", G_CALLBACK(get_list_users), t_auth.LOGIN_menu);
+    //gtk_widget_add_controller(SearchBox, GTK_EVENT_CONTROLLER(click_search_field));
     g_signal_connect (SearchField, "notify::text", G_CALLBACK (text_changed_main_screen), NULL);
-
+    
     ///////////
 
     load_css_main(t_screen.provider, SearchField);

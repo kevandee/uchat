@@ -54,6 +54,31 @@ void get_all_user_data() {
             mx_push_back(&new_chat->users,mx_strdup(buf));
             clear_message(buf, 32);
         }
+
+        // chat avatar
+
+        char buf[32] = {0};
+        recv_all(cur_client.serv_fd, buf, 32);
+        new_chat->avatar.name = mx_strdup(buf);
+        if (mx_strcmp(new_chat->avatar.name, "default") != 0) {
+            char *pattern = "client_data/%s";
+            asprintf(&new_chat->avatar.path, pattern, new_chat->avatar.name);
+            recv_image(cur_client.serv_fd, new_chat->avatar.path);
+            send_all(cur_client.serv_fd, "<image loaded>", 14); 
+            printf("a\n");
+            recv(cur_client.serv_fd, &new_chat->avatar.scaled_w, sizeof(double), 0);
+            recv(cur_client.serv_fd, &new_chat->avatar.scaled_h, sizeof(double), 0);
+            recv(cur_client.serv_fd, &new_chat->avatar.x, sizeof(double), 0);
+            recv(cur_client.serv_fd, &new_chat->avatar.y, sizeof(double), 0);
+        }
+        else {
+            if (mx_strncmp(new_chat->name,".dialog", 7) == 0)
+                new_chat->avatar = t_main.default_avatar;
+            else 
+                new_chat->avatar = t_main.default_group_avatar;
+        }
+
+        //////////////
         mx_push_back(&cur_client.chats, new_chat);
     }
 

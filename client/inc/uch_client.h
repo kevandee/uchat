@@ -41,6 +41,8 @@ struct
     bool drawed;
     t_list *check_buttons_user_list;
     t_avatar default_avatar;
+    t_avatar default_group_avatar;
+    t_avatar *loaded_avatar;
 }   t_main;
 
 struct
@@ -92,6 +94,7 @@ t_list *get_chat_users_avatars(t_chat *chat);
 
 void get_all_user_data();
 void get_messages_from_server(int c_id, int mes_id);
+t_avatar *get_avatar(t_avatar *avatar);
 
 void create_user_db(char *login);
 void insert_user_db(t_client cur_client);

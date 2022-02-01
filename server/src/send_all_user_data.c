@@ -58,5 +58,38 @@ void send_all_user_data(t_client *client) {
         printf("chat sended to %s\n", client->login);
 
         temp = temp->next;
+        char *avatar_info = NULL;
+        if (mx_strncmp(chat->name, ".dialog", 7) != 0){
+            avatar_info = get_chat_avatar(chat->id);
+        }
+        else {
+            t_list *find_user = chat->users;
+            while (find_user) {
+                if (mx_strcmp(client->login, find_user->data) != 0) {
+                    break;
+                }
+        
+                find_user = find_user->next;
+            }
+            avatar_info = get_user_avatar(get_user_id(find_user->data));
+        }
+        t_avatar *chat_avatar = parse_avatar_info(avatar_info);
+
+        temp_str = chat_avatar->path;
+        while (mx_strchr(temp_str,'/')) {
+            temp_str = mx_strchr(temp_str,'/') + 1;
+        }
+        sprintf(buf_name, "%s", temp_str);
+        send_all(client->cl_socket, buf_name, 32);
+        clear_message(buf_name, 32);
+        if (mx_strcmp(chat_avatar->path, "default") != 0){
+            send_image(client->cl_socket, chat_avatar->path);
+            recv_all(client->cl_socket, buf_name, 14);
+            send(client->cl_socket, &chat_avatar->scaled_w, sizeof(double), 0);
+            send(client->cl_socket, &chat_avatar->scaled_h, sizeof(double), 0);
+            send(client->cl_socket, &chat_avatar->x, sizeof(double), 0);
+            send(client->cl_socket, &chat_avatar->y, sizeof(double), 0);
+        }
+        
     }
 }
