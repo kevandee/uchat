@@ -93,7 +93,7 @@ t_list *get_chat_users_avatars(t_chat *chat);
 void get_all_user_data();
 void get_messages_from_server(int c_id, int mes_id);
 
-void create_user_db(char *login);
+void create_user_db(t_client cur_client);
 void insert_user_db(t_client cur_client);
 void *user_exec_db(char *login, char *query, int type);
 char *get_db_name(char *login);

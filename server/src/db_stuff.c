@@ -265,28 +265,19 @@ t_list *db_messages_sender(int c_id) {
         list = sqlite3_exec_db(query, 1);
         t_list *temp = NULL;
         while (list != NULL && list->data != NULL) {
-            printf("sosi1\n");
             t_message *mess = (t_message *)malloc(sizeof(t_message));
             mess->id = mx_atoi(list->data);
-            printf("sosi2\n");
             list = list->next;
             mess->c_id = mx_atoi(list->data);
-            printf("sosi3\n");
             list = list->next;
             mx_strcpy(mess->sender, get_user_login(mx_atoi(list->data)));
-            printf("sosi4\n");
             list = list->next;
             mx_strcpy(mess->data, list->data);
-            printf("sosi5\n");
             list = list->next;
             mx_strcpy(mess->type, list->data);
-            printf("sosi6\n");
             mx_push_back(&temp, mess);
-            printf("sosi7\n");
-            
             list = list->next;
         }
-        printf("sosi8\n");
         return temp;
     }
     return NULL;
