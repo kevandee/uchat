@@ -259,11 +259,6 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
 
     if (keyval == GDK_KEY_Return) 
     {
-        GtkAdjustment* adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right));
-        double to_this_pos = gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj)) - gtk_adjustment_get_page_size(GTK_ADJUSTMENT(adj));
-        gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), to_this_pos);
-        gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right),GTK_ADJUSTMENT(adj));
-
         GtkWidget *entry = user_data;
         GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(entry));
         GtkTextIter start, end ;
@@ -301,6 +296,13 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
             gtk_box_append(GTK_BOX(my_msg_box), User_logo);
         }
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
+
+        GtkAdjustment* adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right));
+        //double to_this_pos = gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj)) - gtk_adjustment_get_page_size(GTK_ADJUSTMENT(adj));
+        gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj)) + 40);
+        gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right),GTK_ADJUSTMENT(adj));
+
+
 
         send(cur_client.serv_fd, message, 512+32, 0);
         gtk_text_buffer_set_text (buffer, "", 0);

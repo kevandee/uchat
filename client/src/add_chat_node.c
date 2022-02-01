@@ -35,6 +35,7 @@ static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
 }
 
 void add_chat_node(t_chat *chat) {
+
     GtkWidget *child_widget = gtk_button_new ();
     gtk_widget_set_size_request(child_widget, 200, 54);
     gtk_widget_set_name(GTK_WIDGET(child_widget), "scroll_buttons_border");
@@ -43,7 +44,7 @@ void add_chat_node(t_chat *chat) {
     gtk_widget_set_name(GTK_WIDGET(chat_info), "scroll_buttons");
     load_css_main(t_screen.provider, chat_info);
 
-    GtkWidget *chat_image = get_circle_widget_from_png_custom("test_circle.png", 57, 57);
+    GtkWidget *chat_image = get_circle_widget_from_png_avatar(&t_main.default_group_avatar, 57, 57, false);
     gtk_widget_set_size_request(GTK_WIDGET(chat_image),  57, 0);
     gtk_widget_set_halign(GTK_WIDGET(chat_image), GTK_ALIGN_FILL);
     gtk_widget_set_valign(GTK_WIDGET(chat_image), GTK_ALIGN_CENTER);

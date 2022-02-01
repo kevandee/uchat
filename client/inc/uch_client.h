@@ -41,6 +41,7 @@ struct
     bool drawed;
     t_list *check_buttons_user_list;
     t_avatar default_avatar;
+    t_avatar default_group_avatar;
 }   t_main;
 
 struct
