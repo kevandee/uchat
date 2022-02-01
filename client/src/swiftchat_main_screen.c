@@ -329,6 +329,11 @@ static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
     }
 }
 
+static void show_stickers()
+{
+
+}
+
 void show_chat_history(GtkWidget *widget, gpointer data)
 {
     cairo_surface_t *image = get_surface_from_jpg(cur_client.avatar.path);
@@ -373,30 +378,45 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     load_css_main(t_screen.provider, t_main.scroll_box_right);
     
     t_main.scrolled_window_right = gtk_scrolled_window_new ();
-    gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 828, 680);
+    gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 828, 660);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_right), t_main.scroll_box_right);
     gtk_widget_set_name(GTK_WIDGET(t_main.scrolled_window_right), "message_scroll");
     load_css_main(t_screen.provider, t_main.scrolled_window_right);
 
     GtkWidget *write_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_widget_set_size_request(write_box, 800, 36);
     gtk_widget_set_name(GTK_WIDGET(write_box), "write_message_box");
     load_css_main(t_screen.provider, write_box);
-    gtk_widget_set_halign(GTK_WIDGET(write_box), GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(GTK_WIDGET(write_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_halign(GTK_WIDGET(write_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(write_box), GTK_ALIGN_START);
+    gtk_box_set_spacing(GTK_BOX(write_box), 10);
     GtkWidget *write_message = gtk_text_view_new();
     gtk_widget_set_name(GTK_WIDGET(write_message), "write_message");
+    gtk_widget_set_size_request(write_message, 800, 0);
     load_css_main(t_screen.provider, write_message);
     GtkTextBuffer *bio_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (write_message));
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(write_message), GTK_WRAP_WORD_CHAR);
-    gtk_widget_set_size_request(write_message, 800, 36);
     g_signal_connect_after(bio_buffer, "insert-text", G_CALLBACK(insert_text_bio), NULL);
-
     GtkEventController *return_controller = gtk_event_controller_key_new();
     g_signal_connect_after(return_controller, "key-released", G_CALLBACK(return_controll_func), write_message);
     gtk_widget_add_controller(write_message,  GTK_EVENT_CONTROLLER(return_controller));
-    gtk_box_append(GTK_BOX(write_box), write_message);
+    GtkWidget *write_message_scroll = gtk_scrolled_window_new ();
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(write_message_scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+    gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (write_message_scroll), write_message);
+    gtk_scrolled_window_set_propagate_natural_height (GTK_SCROLLED_WINDOW(write_message_scroll),false);
+    gtk_scrolled_window_set_propagate_natural_width (GTK_SCROLLED_WINDOW(write_message_scroll),true);
+    load_css_main(t_screen.provider, write_message_scroll);
 
+    GtkWidget *stickers_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *stickers = gtk_image_new_from_file("client/media/search_ico.png");
+    GtkGesture *click_sstickers = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_sstickers, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_sstickers, "pressed", G_CALLBACK(show_stickers), NULL);
+    gtk_widget_add_controller(stickers, GTK_EVENT_CONTROLLER(click_sstickers));
+
+    gtk_box_append(GTK_BOX(stickers_box), stickers);
+
+    gtk_box_append(GTK_BOX(write_box), write_message_scroll);
+    gtk_box_append(GTK_BOX(write_box), stickers_box);
 
     gtk_box_append(GTK_BOX(t_main.right_panel), t_main.scrolled_window_right);
     gtk_box_append(GTK_BOX(t_main.right_panel), write_box);
