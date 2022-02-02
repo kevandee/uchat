@@ -35,10 +35,12 @@ struct
     GtkWidget *right_panel;
     GtkWidget *scroll_box_right;
     GtkWidget *scrolled_window_right;
+    double adj_pos;
 
     t_list *search_users_list;
     bool loaded;
     bool drawed;
+    bool scroll_mes;
     t_list *check_buttons_user_list;
     t_avatar default_avatar;
     t_avatar default_group_avatar;
@@ -75,6 +77,7 @@ void return_to_chatlist(GtkWidget *widget, gpointer data);
 void add_chat_dialog(GtkWidget *widget, gpointer data);
 
 void *scroll_func();
+void *save_scroll_func();
 
 void send_login(GtkWidget *widget, gpointer data);
 void chat_show_main_screen(GtkWidget *window);

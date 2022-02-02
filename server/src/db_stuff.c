@@ -270,11 +270,11 @@ t_list *db_messages_sender(int c_id, int prev) {
     t_list *list = sqlite3_exec_db(query, 1);
     if (list && strcmp(list->data, "1") == 0) {
         if (prev == -1) {
-            sql_pattern = "SELECT * FROM messages WHERE chat_id = (%d) ORDER BY id DESC LIMIT 50;";
+            sql_pattern = "SELECT * FROM messages WHERE chat_id = (%d) ORDER BY id DESC LIMIT 20;";
             asprintf(&query, sql_pattern, c_id);
         }
         else {
-            sql_pattern = "SELECT * FROM messages WHERE chat_id = (%d) AND id < (%d) ORDER BY id DESC LIMIT 50;";
+            sql_pattern = "SELECT * FROM messages WHERE chat_id = (%d) AND id < (%d) ORDER BY id DESC LIMIT 20;";
             asprintf(&query, sql_pattern, c_id, prev);
         }
         list = sqlite3_exec_db(query, 1);

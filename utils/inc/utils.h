@@ -43,6 +43,8 @@ typedef struct s_chat {
     t_list *users_avatars;
     t_list *messages;
 
+    int last_mes_id;
+
     bool is_new; // для сервера
     bool is_avatar;
     t_avatar avatar;

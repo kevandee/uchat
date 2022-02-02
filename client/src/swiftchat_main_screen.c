@@ -332,8 +332,27 @@ static void show_stickers()
 
 }
 
+void load_more_messages (GtkScrolledWindow *scrolled_window, GtkPositionType pos, gpointer data) {
+    if (pos == GTK_POS_BOTTOM) {
+        return;
+    }
+    t_main.scroll_mes = false;
+    (void)scrolled_window;
+    t_chat *chat = data;
+    printf("load mes\n");
+
+    GtkAdjustment* adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right));
+    t_main.adj_pos = gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj));//gtk_adjustment_get_value(GTK_ADJUSTMENT(adj));
+    
+    
+    printf("load adj val %f\n", t_main.adj_pos);
+    get_messages_from_server(chat->id, chat->last_mes_id);
+
+}
+
 void show_chat_history(GtkWidget *widget, gpointer data)
 {
+    t_main.scroll_mes = true;
     cairo_surface_t *image = get_surface_from_jpg(cur_client.avatar.path);
     int org_width = cairo_image_surface_get_width(image);
     int org_height = cairo_image_surface_get_height(image);
@@ -414,6 +433,8 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_right), t_main.scroll_box_right);
     gtk_widget_set_name(GTK_WIDGET(t_main.scrolled_window_right), "message_scroll");
     load_css_main(t_screen.provider, t_main.scrolled_window_right);
+
+    g_signal_connect(t_main.scrolled_window_right, "edge-reached", G_CALLBACK(load_more_messages), &cur_client.cur_chat);
 
     GtkWidget *write_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(GTK_WIDGET(write_box), "write_message_box");

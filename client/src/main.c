@@ -100,9 +100,6 @@ gboolean add_msg(gpointer data) {
     else 
         gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
     pthread_mutex_unlock(&cl_mutex);
-    
-    pthread_t display_thread = NULL;
-    pthread_create(&display_thread, NULL, scroll_func, NULL);
 
     return FALSE;
 }
@@ -205,7 +202,7 @@ void *rec_func(void *param) {
                 t_main.loaded = true;
 
             }
-            else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0){
+            else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0){ // "<msg, chat_id=%d, mes_id=%d, from=%s, prev=1>%s"
                 char *temp = message + 14;
                 int len = 0;
                 while (*(temp + len) != ',') {
@@ -215,6 +212,15 @@ void *rec_func(void *param) {
                 printf("%s\n", c_id);
                 int chat_id = mx_atoi(c_id);                        // ид чата, в который надо вставить сообщение
                 (void)chat_id; // избавляюсь от unused variable
+                mx_strdel(&c_id);
+                temp = mx_strstr(message, "mes_id=") + 7;
+                len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *mes_id = mx_strndup(temp, len);
+                printf("%s\n", mes_id);
+                int message_id = mx_atoi(mes_id);
                 mx_strdel(&c_id);
                 temp = mx_strstr(message, "from=") + 5;
                 len = 0;
@@ -232,17 +238,17 @@ void *rec_func(void *param) {
                 printf("%s\n", total_msg);
                 t_message mes = {
                     .c_id = chat_id,
-                    .prev = prev
+                    .prev = prev,
+                    .id = message_id
                 };
-            
                 mx_strcpy(mes.sender, sender);
                 mx_strcpy(mes.data, total_msg);
                 if (cur_client.cur_chat.id == chat_id) {
                     pthread_mutex_lock(&cl_mutex);
                     g_idle_add(add_msg, &mes);
-                    
                     pthread_mutex_lock(&cl_mutex);
                     if (prev) {
+                        cur_client.cur_chat.last_mes_id = mes.id;
                         int status = 1;
                         send(cur_client.serv_fd, &status, sizeof(int), 0);
                     }
@@ -250,9 +256,19 @@ void *rec_func(void *param) {
                 }
                 else if (prev) {
                     int status = 0;
-                    send(cur_client.serv_fd, &status, sizeof(int), 0);
+                    send(cur_client.serv_fd, &status, sizeof(int), 0);        
                 }
-                
+                pthread_t display_thread = NULL;
+                if (!prev || t_main.scroll_mes) {           
+                    pthread_create(&display_thread, NULL, scroll_func, NULL);  
+                }
+                else {
+                    printf("save\n");
+
+                    pthread_create(&display_thread, NULL, save_scroll_func, NULL);  
+
+                    
+                }
                 printf("%s\n", total_msg);
                 printf("> ");
                 fflush(stdout);
