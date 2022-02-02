@@ -49,5 +49,5 @@ t_client *get_user_info(int id);
 t_avatar *parse_avatar_info(char *avatar_info);
 char *get_user_avatar(int id);
 char  *get_chat_avatar(int id);
-t_list *db_messages_sender(int c_id);
+t_list *db_messages_sender(int c_id, int prev);
 #endif

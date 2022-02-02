@@ -253,10 +253,10 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
 }
 
 void *scroll_func() {
-    sleep(1);
+    usleep(50000);
 
     GtkAdjustment* adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right));
-    double to_this_pos = gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj)) - gtk_adjustment_get_page_size(GTK_ADJUSTMENT(adj));
+    gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj)));
     gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right),GTK_ADJUSTMENT(adj));
 
     return NULL;

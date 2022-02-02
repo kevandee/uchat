@@ -417,7 +417,7 @@ void *client_work(void *param) {
             int chat_id = mx_atoi(c_id);
             printf("c_id %s\n", c_id);
             mx_strdel(&c_id);
-            t_list *mes_list = db_messages_sender(chat_id);
+            t_list *mes_list = db_messages_sender(chat_id, -1); //DODELAI
             printf("chat_id %d\n", chat_id);
             while(mes_list) {
                 char buf[512 + 32] = {0};
@@ -495,8 +495,8 @@ int main(int argc, char *argv[]) {
     users_list = NULL;
     pthread_mutex_init(&send_mutex, NULL);
 
-    char *weather = get_weather("Kharkov");
-    printf("%s\n", weather);
+    //char *weather = get_weather("Kharkov");
+    //printf("%s\n", weather);
     int client_id = 0;
     while(1) {
         client_fd = accept(serv_fd, (struct sockaddr *) &adr, &adrlen);
