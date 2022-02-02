@@ -346,15 +346,17 @@ scrolledwindow {
   font-family: Arial, sans-serif;
   font-weight: 400;
   font-size: 16px; 
-  padding-top: 9px;
+  padding-top: 12px;
   padding-left: 12px;
+  padding-bottom: 9px;
+  line-height:  20px;
   background-color: #212D38;
   caret-color: #fff;
   color: #fff;
 }
 
 #message {
-  border-radius: 10px 10px 0px 10px;
+  border-radius: 10px 0px 10px 10px;
   background: #ECB365;
   color: #fff;
   font-family: Arial, sans-serif;
@@ -373,7 +375,7 @@ scrolledwindow {
 }
 
 #incoming-message{
-  border-radius: 10px 10px 10px 0px;
+  border-radius: 0px 10px 10px 10px;
   background: #233649;
   color: #fff;
   font-family: Arial, sans-serif;

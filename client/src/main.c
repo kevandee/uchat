@@ -117,6 +117,7 @@ void *rec_func(void *param) {
             printf("|%s|\n", message);
             if(mx_strcmp(mx_strtrim(message), "<add chat>") == 0) {
                 t_chat *new_chat = (t_chat *)malloc(sizeof(t_chat));
+                new_chat->is_new = true;
                 new_chat->messages = NULL;
                 new_chat->users = NULL;
 
@@ -145,25 +146,28 @@ void *rec_func(void *param) {
                     clear_message(buf, 32);
                 }
                 /////// аватарка чата
-                /*char buf[32] = {0};
-                recv_all(cur_client.serv_fd, buf, 32);
-                new_chat->chat_avatar.name = mx_strdup(buf);
-                clear_message(buf, 32);
-                if (mx_strcmp(new_chat->chat_avatar.name, "default") != 0) {
-                    char *pattern = "client_data/%s";
-                    asprintf(&new_chat->chat_avatar.path, pattern, new_chat->chat_avatar.name);
-                    printf("b\n");
-                    recv_image(cur_client.serv_fd, new_chat->chat_avatar.path);
-                    send_all(cur_client.serv_fd, "<image loaded>", 14); 
-                    recv(cur_client.serv_fd, &new_chat->chat_avatar.scaled_w, sizeof(double), 0);
-                    recv(cur_client.serv_fd, &new_chat->chat_avatar.scaled_h, sizeof(double), 0);
-                    recv(cur_client.serv_fd, &new_chat->chat_avatar.x, sizeof(double), 0);
-                    recv(cur_client.serv_fd, &new_chat->chat_avatar.y, sizeof(double), 0);
-                }*/
+                if (mx_strncmp(new_chat->name, ".dialog", 7) !=0) {
+                    printf("a\n");
+                    t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
+                    get_avatar(t_main.loaded_avatar);
+                    printf("gets avatar\n");
+                    new_chat->avatar=*t_main.loaded_avatar;
+                    if (mx_strcmp(new_chat->avatar.name, "default") == 0) {
+                        if (mx_strncmp(new_chat->name, ".dialog", 7) != 0)
+                            new_chat->avatar = t_main.default_group_avatar;
+                        else
+                            new_chat->avatar = t_main.default_avatar;
+                    }
+                    new_chat->is_avatar = true;
+                }
+                else {
+                    new_chat->is_avatar = false;
+                }
+
                 //////
                 mx_push_back(&cur_client.chats, new_chat);
                 if (!cur_client.sender_new_chat){
-                    add_chat_node(new_chat);
+                    g_idle_add(add_chat_node, new_chat);
                 }
                 else {
                     cur_client.sender_new_chat = false;
@@ -258,6 +262,13 @@ void *rec_func(void *param) {
                 cur_client.avatar.path = mx_strdup(buf);
 
                 printf("setts avatar\n");
+                t_main.loaded = true;
+            }
+            if(mx_strncmp(mx_strtrim(message), "<get user avatar>",17) == 0) {
+                printf("a\n");
+                t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
+                get_avatar(t_main.loaded_avatar);
+                printf("gets avatar %s\n", t_main.loaded_avatar->name);
                 t_main.loaded = true;
             }
             else if(mx_strcmp(mx_strtrim(message), "<image loaded>") == 0) {
@@ -356,8 +367,7 @@ static void load_css() {
 
     get_all_user_data();
 
-    create_user_db(cur_client.login);
-    insert_user_db(cur_client);
+    create_user_db(cur_client);
 
     GtkWidget *child = gtk_window_get_child(GTK_WINDOW (t_screen.main_window));
     

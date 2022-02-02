@@ -29,6 +29,7 @@ void send_all_user_data(t_client *client);
 void send_message(char *mes, char *sender, t_chat *chat);
 void clear_message(char *mes, const int size);
 void send_new_chat(t_chat *new_chat);
+void send_avatar(t_avatar *avatar, int client_fd);
 void change_chat_by_id(int id, t_client *cur);
 
 void free_client(t_client **client, t_list **users_list);
@@ -47,5 +48,6 @@ t_chat *chat_info (int c_id);
 t_client *get_user_info(int id);
 t_avatar *parse_avatar_info(char *avatar_info);
 char *get_user_avatar(int id);
+char  *get_chat_avatar(int id);
 t_list *db_messages_sender(int c_id);
 #endif

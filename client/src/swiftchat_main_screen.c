@@ -31,6 +31,7 @@ void return_to_chatlist(GtkWidget *widget, gpointer data) {
 
     t_list *chats = cur_client.chats;
     while (chats) {
+        
         add_chat_node(chats->data);
         chats = chats->next;
     }
@@ -251,6 +252,15 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left), add_chat_box);
 }
 
+void *scroll_func() {
+    sleep(1);
+
+    GtkAdjustment* adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right));
+    double to_this_pos = gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj)) - gtk_adjustment_get_page_size(GTK_ADJUSTMENT(adj));
+    gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right),GTK_ADJUSTMENT(adj));
+
+    return NULL;
+}
 
 static void return_controll_func(GtkEventControllerKey *controller, guint keyval, guint keycode, GdkModifierType state, gpointer user_data) {
     (void)controller;
@@ -292,16 +302,13 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
 
         gtk_box_append(GTK_BOX(my_msg_box), msg);
         if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
-            GtkWidget *User_logo = get_circle_widget_current_user_avatar();
-            gtk_box_append(GTK_BOX(my_msg_box), User_logo);
+            GtkWidget *user_logo = get_circle_widget_current_user_avatar();
+            gtk_box_append(GTK_BOX(my_msg_box), user_logo);
         }
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
 
-        GtkAdjustment* adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right));
-        //double to_this_pos = gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj)) - gtk_adjustment_get_page_size(GTK_ADJUSTMENT(adj));
-        gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj)) + 40);
-        gtk_scrolled_window_set_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right),GTK_ADJUSTMENT(adj));
-
+        pthread_t display_thread = NULL;
+        pthread_create(&display_thread, NULL, scroll_func, NULL);
 
 
         send(cur_client.serv_fd, message, 512+32, 0);
@@ -327,6 +334,11 @@ static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
         gtk_text_buffer_delete(buffer, &offset, &end);
         gtk_text_iter_assign(location, &offset);
     }
+}
+
+static void show_stickers()
+{
+
 }
 
 void show_chat_history(GtkWidget *widget, gpointer data)
@@ -365,55 +377,93 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     t_main.right_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_CENTER);
-    gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 18);
+    gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 30);
+    gtk_widget_set_margin_top(GTK_WIDGET(t_main.right_panel), 20);
+    gtk_box_set_spacing (GTK_BOX(t_main.right_panel), 8);
+
+    GtkWidget *chat_headerbar = gtk_grid_new();
+    gtk_grid_set_column_spacing (GTK_GRID(chat_headerbar), 535);
+
+
+    GtkWidget *chat_headerbar_left = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    gtk_widget_set_halign(GTK_WIDGET(chat_headerbar_left), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(chat_headerbar_left), GTK_ALIGN_CENTER);
+    GtkWidget *photo_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget *photo = get_circle_widget_from_png_custom("client/media/default_groupchat.png", 50, 50);
+    gtk_box_append(GTK_BOX(photo_box), photo);
+    GtkWidget *info_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_widget_set_halign(GTK_WIDGET(info_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(info_box), GTK_ALIGN_CENTER);
+    GtkWidget *group_or_user_name = gtk_label_new("Name Surname");
+    GtkWidget *status = gtk_label_new("last seen 13 minutes ago");
+    gtk_box_append(GTK_BOX(info_box), group_or_user_name);
+    gtk_box_append(GTK_BOX(info_box), status);
+
+    gtk_box_append(GTK_BOX(chat_headerbar_left), photo_box);
+    gtk_box_append(GTK_BOX(chat_headerbar_left), info_box);
+
+    GtkWidget *chat_headerbar_right = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 20);
+    gtk_widget_set_halign(GTK_WIDGET(chat_headerbar_right), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(chat_headerbar_right), GTK_ALIGN_CENTER);
+    GtkWidget *block_img = gtk_image_new_from_file("client/media/settings.png"); 
+    GtkWidget *mute_img = gtk_image_new_from_file("client/media/settings.png");
+    gtk_box_append(GTK_BOX(chat_headerbar_right), block_img);
+    gtk_box_append(GTK_BOX(chat_headerbar_right), mute_img); 
+
+    gtk_grid_attach (GTK_GRID(chat_headerbar), chat_headerbar_left, 0, 0, 1, 1);
+    gtk_grid_attach_next_to (GTK_GRID(chat_headerbar), chat_headerbar_right, chat_headerbar_left, GTK_POS_RIGHT, 1, 1);
 
     t_main.scroll_box_right = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_valign(GTK_WIDGET(t_main.scroll_box_right), GTK_ALIGN_END);
     gtk_widget_set_name(GTK_WIDGET(t_main.scroll_box_right), "messagebox_scroll");
+    gtk_widget_set_margin_end(t_main.scroll_box_right, 30);
     load_css_main(t_screen.provider, t_main.scroll_box_right);
-    
     t_main.scrolled_window_right = gtk_scrolled_window_new ();
-    gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 828, 680);
+    gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 818, 588);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_right), t_main.scroll_box_right);
     gtk_widget_set_name(GTK_WIDGET(t_main.scrolled_window_right), "message_scroll");
     load_css_main(t_screen.provider, t_main.scrolled_window_right);
 
     GtkWidget *write_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_widget_set_size_request(write_box, 800, 36);
     gtk_widget_set_name(GTK_WIDGET(write_box), "write_message_box");
     load_css_main(t_screen.provider, write_box);
-    gtk_widget_set_halign(GTK_WIDGET(write_box), GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(GTK_WIDGET(write_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_halign(GTK_WIDGET(write_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(write_box), GTK_ALIGN_START);
+    gtk_box_set_spacing(GTK_BOX(write_box), 10);
     GtkWidget *write_message = gtk_text_view_new();
     gtk_widget_set_name(GTK_WIDGET(write_message), "write_message");
+    gtk_widget_set_size_request(write_message, 800, 0);
     load_css_main(t_screen.provider, write_message);
     GtkTextBuffer *bio_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (write_message));
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(write_message), GTK_WRAP_WORD_CHAR);
-    gtk_widget_set_size_request(write_message, 800, 36);
     g_signal_connect_after(bio_buffer, "insert-text", G_CALLBACK(insert_text_bio), NULL);
-
     GtkEventController *return_controller = gtk_event_controller_key_new();
     g_signal_connect_after(return_controller, "key-released", G_CALLBACK(return_controll_func), write_message);
     gtk_widget_add_controller(write_message,  GTK_EVENT_CONTROLLER(return_controller));
-    gtk_box_append(GTK_BOX(write_box), write_message);
+    GtkWidget *write_message_scroll = gtk_scrolled_window_new ();
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(write_message_scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+    gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (write_message_scroll), write_message);
+    gtk_scrolled_window_set_propagate_natural_height (GTK_SCROLLED_WINDOW(write_message_scroll),false);
+    gtk_scrolled_window_set_propagate_natural_width (GTK_SCROLLED_WINDOW(write_message_scroll),true);
+    load_css_main(t_screen.provider, write_message_scroll);
+    GtkWidget *stickers_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *stickers = gtk_image_new_from_file("client/media/search_ico.png");
+    GtkGesture *click_sstickers = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_sstickers, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_sstickers, "pressed", G_CALLBACK(show_stickers), NULL);
+    gtk_widget_add_controller(stickers, GTK_EVENT_CONTROLLER(click_sstickers));
+    gtk_box_append(GTK_BOX(stickers_box), stickers);
 
+    gtk_box_append(GTK_BOX(write_box), write_message_scroll);
+    gtk_box_append(GTK_BOX(write_box), stickers_box);
 
+    gtk_box_append(GTK_BOX(t_main.right_panel), chat_headerbar);
     gtk_box_append(GTK_BOX(t_main.right_panel), t_main.scrolled_window_right);
     gtk_box_append(GTK_BOX(t_main.right_panel), write_box);
-    gtk_box_set_spacing (GTK_BOX(t_main.right_panel), 5);
 
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
     
     get_messages_from_server(cur_client.cur_chat.id, -1);
-}
-
-static void get_list_users() {
-    t_main.loaded = false;
-    char message[512+32] = {0};
-    sprintf(message, "<users list>");
-    send(cur_client.serv_fd, message, 512+32, 0);
-    while (!t_main.loaded)
-        usleep(50);
 }
 
 
@@ -440,6 +490,7 @@ void chat_show_main_screen(GtkWidget *window)
 //-----------------------------------------------SearchPanel---------------------------------------------------------------
     GtkWidget *SearchBox, *SearchField;
     t_main.search_panel = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_size_request(t_main.search_panel, 200, 45);
     gtk_widget_set_halign(GTK_WIDGET(t_main.search_panel), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(t_main.search_panel), GTK_ALIGN_CENTER);
     //gtk_widget_set_margin_bottom(GTK_WIDGET(t_main.search_panel), 27);
@@ -457,12 +508,12 @@ void chat_show_main_screen(GtkWidget *window)
     
     ///////////
 
-    GtkGesture *click_search_field = gtk_gesture_click_new();
-    gtk_gesture_set_state(click_search_field, GTK_EVENT_SEQUENCE_CLAIMED);
-    g_signal_connect_swapped(click_search_field, "pressed", G_CALLBACK(get_list_users), t_auth.LOGIN_menu);
-    gtk_widget_add_controller(SearchField, GTK_EVENT_CONTROLLER(click_search_field));
+    //GtkGesture *click_search_field = gtk_gesture_click_new();
+    //gtk_gesture_set_state(click_search_field, GTK_EVENT_SEQUENCE_CLAIMED);
+    //g_signal_connect_after(click_search_field, "pressed", G_CALLBACK(get_list_users), t_auth.LOGIN_menu);
+    //gtk_widget_add_controller(SearchBox, GTK_EVENT_CONTROLLER(click_search_field));
     g_signal_connect (SearchField, "notify::text", G_CALLBACK (text_changed_main_screen), NULL);
-
+    
     ///////////
 
     load_css_main(t_screen.provider, SearchField);

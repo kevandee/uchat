@@ -184,6 +184,7 @@ void *client_work(void *param) {
             int *data = sqlite3_exec_db(query, 2);
             int c_id = data[0];
             new_chat->id = c_id;
+            new_chat->is_new = true;
             t_list *temp_list = new_chat->users;
             int admin = 1;
             while (temp_list) {
@@ -434,6 +435,16 @@ void *client_work(void *param) {
             }
 
             //send (cur->cl_socket, &count_mes, sizeof(int), 0);
+        }
+        else if(mx_strncmp(message, "<get user avatar>", 17) == 0) { //<get user avatar>
+            char *user_name = message + 17;
+            printf("get user avatar %s\n", user_name);
+            char *avatar_info = get_user_avatar(get_user_id(user_name));
+            t_avatar *avatar = parse_avatar_info(avatar_info);
+            char buf[544] = {0};
+            sprintf(buf, "<get user avatar>");
+            send_all(cur->cl_socket, buf, 544);
+            send_avatar(avatar, cur->cl_socket);
         }
         else if (mes_stat > 0) {
             printf("Message Received from %s | %s |\n", login, message);

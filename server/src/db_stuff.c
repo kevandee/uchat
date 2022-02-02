@@ -14,7 +14,7 @@ void sqlite3_create_db() {
         }
         sql = mx_strrejoin(sql, "PRAGMA encoding = \"UTF-8\";");
         sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, name TEXT DEFAULT \".clear\", surname TEXT DEFAULT \".clear\", bio TEXT DEFAULT \".clear\", avatar TEXT DEFAULT \"default\", theme TEXT DEFAULT dark);");
-        sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER PRIMARY KEY, name TEXT NOT NULL, members INTEGER NOT NULL);");
+        sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER PRIMARY KEY, name TEXT NOT NULL, members INTEGER NOT NULL, avatar TEXT DEFAULT \"default\");");
         sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, admin BOOLEAN NOT NULL DEFAULT FALSE);");
         sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, text TEXT DEFAULT NULL, type TEXT DEFAULT text);");
         sql = mx_strrejoin(sql, "INSERT INTO users (login, password) VALUES ('Dima123', 'Dimapassword');");
@@ -109,6 +109,15 @@ char  *get_user_bio(int id) {
 char  *get_user_avatar(int id) {
     char *query = NULL;
     char *sql_pattern = "SELECT avatar FROM users WHERE id = (%d);";
+    asprintf(&query, sql_pattern, id);
+    t_list *list = sqlite3_exec_db(query, 1);
+    char *login = list->data;
+    return login;
+}
+
+char  *get_chat_avatar(int id) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT avatar FROM chats WHERE id = (%d);";
     asprintf(&query, sql_pattern, id);
     t_list *list = sqlite3_exec_db(query, 1);
     char *login = list->data;
@@ -265,28 +274,19 @@ t_list *db_messages_sender(int c_id) {
         list = sqlite3_exec_db(query, 1);
         t_list *temp = NULL;
         while (list != NULL && list->data != NULL) {
-            printf("sosi1\n");
             t_message *mess = (t_message *)malloc(sizeof(t_message));
             mess->id = mx_atoi(list->data);
-            printf("sosi2\n");
             list = list->next;
             mess->c_id = mx_atoi(list->data);
-            printf("sosi3\n");
             list = list->next;
             mx_strcpy(mess->sender, get_user_login(mx_atoi(list->data)));
-            printf("sosi4\n");
             list = list->next;
             mx_strcpy(mess->data, list->data);
-            printf("sosi5\n");
             list = list->next;
             mx_strcpy(mess->type, list->data);
-            printf("sosi6\n");
             mx_push_back(&temp, mess);
-            printf("sosi7\n");
-            
             list = list->next;
         }
-        printf("sosi8\n");
         return temp;
     }
     return NULL;

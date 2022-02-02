@@ -1,6 +1,5 @@
 .DS_Store
 *.o
-*.json
 *.db
 uchat
 uchat_server

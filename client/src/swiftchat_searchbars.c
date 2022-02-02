@@ -17,6 +17,15 @@ static bool is_dialog(char *name) {
     return false;
 }
 
+static void get_list_users() {
+    t_main.loaded = false;
+    char message[512+32] = {0};
+    sprintf(message, "<users list>");
+    send(cur_client.serv_fd, message, 512+32, 0);
+    while (!t_main.loaded)
+        usleep(50);
+}
+
 void text_changed_main_screen(GObject *object, GParamSpec *pspec, gpointer data) {
     (void)data;
     (void)pspec;
@@ -26,6 +35,10 @@ void text_changed_main_screen(GObject *object, GParamSpec *pspec, gpointer data)
 
     has_text = gtk_entry_get_text_length (entry) > 0;
     
+    if (gtk_entry_get_text_length (entry) == 1 && !t_main.search_users_list) {
+        get_list_users();
+    }
+
     if(has_text) {
         t_main.scroll_box_left = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
         gtk_widget_set_size_request(GTK_WIDGET(t_main.scroll_box_left), 310, 0);
