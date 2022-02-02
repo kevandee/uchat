@@ -100,6 +100,10 @@ gboolean add_msg(gpointer data) {
     else 
         gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
     pthread_mutex_unlock(&cl_mutex);
+    
+    pthread_t display_thread = NULL;
+    pthread_create(&display_thread, NULL, scroll_func, NULL);
+
     return FALSE;
 }
 

@@ -74,6 +74,8 @@ void show_chat_history(GtkWidget *widget, gpointer data);
 void return_to_chatlist(GtkWidget *widget, gpointer data);
 void add_chat_dialog(GtkWidget *widget, gpointer data);
 
+void *scroll_func();
+
 void send_login(GtkWidget *widget, gpointer data);
 void chat_show_main_screen(GtkWidget *window);
 gboolean add_chat_node(gpointer data);
