@@ -13,10 +13,10 @@ void sqlite3_create_db() {
             exit(EXIT_FAILURE);
         }
         sql = mx_strrejoin(sql, "PRAGMA encoding = \"UTF-8\";");
-        sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, name TEXT DEFAULT \".clear\", surname TEXT DEFAULT \".clear\", bio TEXT DEFAULT \".clear\", avatar TEXT DEFAULT \"default\", theme TEXT DEFAULT dark);");
-        sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER PRIMARY KEY, name TEXT NOT NULL, members INTEGER NOT NULL, avatar TEXT DEFAULT \"default\");");
-        sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, admin BOOLEAN NOT NULL DEFAULT FALSE);");
-        sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY, chat_id INT NOT NULL, user_id INT NOT NULL, text TEXT DEFAULT NULL, type TEXT DEFAULT text);");
+        sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, login TEXT NOT NULL, password TEXT NOT NULL, name TEXT DEFAULT \".clear\", surname TEXT DEFAULT \".clear\", bio TEXT DEFAULT \".clear\", avatar TEXT DEFAULT \"default\", theme TEXT DEFAULT dark);");
+        sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, members INTEGER NOT NULL, avatar TEXT DEFAULT \"default\");");
+        sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT, chat_id INTEGER NOT NULL, user_id INTEGER NOT NULL, admin BOOLEAN NOT NULL DEFAULT FALSE);");
+        sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, chat_id INTEGER NOT NULL, user_id INTEGER NOT NULL, text TEXT DEFAULT NULL, type TEXT DEFAULT text);");
         sql = mx_strrejoin(sql, "INSERT INTO users (login, password) VALUES ('Dima123', 'Dimapassword');");
         sql = mx_strrejoin(sql, "INSERT INTO users (login, password) VALUES ('Fibbs123', 'Mafilirkan');");
         rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
@@ -299,7 +299,7 @@ t_list *db_messages_sender(int c_id, int prev) {
 }
 
  void message_changer(int m_id, char *new_text) {
-     char *query = NULL;
+    char *query = NULL;
     char *sql_pattern = NULL;
     sql_pattern = "UPDATE messages SET text = '%s' WHERE id = %d;";
     asprintf(&query, sql_pattern, new_text, m_id);
@@ -307,6 +307,10 @@ t_list *db_messages_sender(int c_id, int prev) {
  }
  
 
-/*void db_delete_user(u_id) {
-
-}*/
+void db_delete_message(int m_id) {
+    char *query = NULL;
+    char *sql_pattern = NULL;
+    sql_pattern = "DELETE FROM messages WHERE id = %d;";
+    asprintf(&query, sql_pattern, m_id);
+    sqlite3_exec_db(query, 2);
+}
