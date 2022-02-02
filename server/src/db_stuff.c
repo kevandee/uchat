@@ -263,14 +263,20 @@ t_client *get_user_info(int id) {
  }
 
 
-t_list *db_messages_sender(int c_id) {
+t_list *db_messages_sender(int c_id, int prev) {
     char *query = NULL;
     char *sql_pattern = "SELECT EXISTS (SELECT * FROM messages WHERE chat_id = (%d));";
     asprintf(&query, sql_pattern, c_id);
     t_list *list = sqlite3_exec_db(query, 1);
     if (list && strcmp(list->data, "1") == 0) {
-        sql_pattern = "SELECT * FROM messages WHERE chat_id = (%d) ORDER BY id DESC LIMIT 250;";
-        asprintf(&query, sql_pattern, c_id);
+        if (prev == -1) {
+            sql_pattern = "SELECT * FROM messages WHERE chat_id = (%d) ORDER BY id DESC LIMIT 50;";
+            asprintf(&query, sql_pattern, c_id);
+        }
+        else {
+            sql_pattern = "SELECT * FROM messages WHERE chat_id = (%d) AND id < (%d) ORDER BY id DESC LIMIT 50;";
+            asprintf(&query, sql_pattern, c_id, prev);
+        }
         list = sqlite3_exec_db(query, 1);
         t_list *temp = NULL;
         while (list != NULL && list->data != NULL) {
