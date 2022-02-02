@@ -36,6 +36,9 @@ struct
     GtkWidget *scroll_box_right;
     GtkWidget *scrolled_window_right;
     double adj_pos;
+    GtkWidget *sticker_panel;
+    GtkWidget *sticker_scroll_box;
+    GtkWidget *sticker_scroll_window;
 
     t_list *search_users_list;
     bool loaded;

@@ -16,7 +16,8 @@ void create_user_db(t_client cur_client) {
         sql = mx_strrejoin(sql, "PRAGMA encoding = \"UTF-8\";");
         sql = mx_strrejoin(sql, "CREATE TABLE user (id INTEGER NOT NULL, login TEXT NOT NULL, password TEXT NOT NULL, name TEXT DEFAULT \".clear\", surname TEXT DEFAULT \".clear\", bio TEXT DEFAULT \".clear\", avatar TEXT DEFAULT \"default\", theme TEXT DEFAULT dark);");
         sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER NOT NULL, name TEXT NOT NULL, members INTEGER NOT NULL);");
-        sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY, chat_id INTEGER NOT NULL, user_name TEXT NOT NULL);");
+        sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT,  chat_id INTEGER NOT NULL, user_name TEXT NOT NULL);");
+        sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER NOT NULL, chat_id INTEGER NOT NULL, user_name TEXT NOT NULL, text TEXT DEFAULT NULL, type TEXT DEFAULT text);");
         rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
         if (rc != SQLITE_OK) {
             fprintf(stderr, "Failed to select data\n");
@@ -89,8 +90,10 @@ char *get_db_name(char *login) {
 void insert_user_db(t_client cur_client) {
     user_exec_db(cur_client.login, "DELETE FROM user; DELETE FROM chats; DELETE FROM members;", 2);
     char *query = NULL;
-    char *sql_pattern = "INSERT INTO user (id, login, password, name, surname, bio) VALUES (%d, '%s', '%s', '%s', '%s', '%s');";
-    asprintf(&query, sql_pattern, cur_client.id, cur_client.login, cur_client.passwd, cur_client.name, cur_client.surname, cur_client.bio);
+    char *buff = NULL;
+    asprintf(&buff, "path=%s scaled_w=%f scaled_h=%f x=%f y=%f ", cur_client.avatar.path, cur_client.avatar.scaled_w, cur_client.avatar.scaled_h,cur_client.avatar.x, cur_client.avatar.y);
+    char *sql_pattern = "INSERT INTO user (id, login, password, name, surname, bio) VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s');";
+    asprintf(&query, sql_pattern, cur_client.id, cur_client.login, cur_client.passwd, cur_client.name, cur_client.surname, cur_client.bio, buff);
     user_exec_db(cur_client.login, query, 2);
     t_list *temp = cur_client.chats;
     while(temp != NULL && temp->data != NULL) {
@@ -106,7 +109,6 @@ void insert_user_db(t_client cur_client) {
  
             users = users->next;
         }
-
         temp = temp->next;
     }
 }

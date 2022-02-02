@@ -327,8 +327,94 @@ static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
     }
 }
 
-static void show_stickers()
+static void show_stickers(gpointer data);
+
+static void hide_stickers(gpointer data)
 {
+    GtkWidget **change = data;
+    gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 818, 588);
+    gtk_widget_set_size_request(change[0], 800, 0);
+    gtk_grid_set_column_spacing (GTK_GRID(change[1]), 535);
+    gtk_box_remove(GTK_BOX(change[2]), change[3]);
+    change[3] = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    change[4] = gtk_image_new_from_file("client/media/sticker.png");
+    gtk_widget_set_size_request(change[4], 20, 20);
+    gtk_box_append(GTK_BOX(change[3]), change[4]);
+
+    GtkGesture *click_stickers = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_stickers, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_stickers, "pressed", G_CALLBACK(show_stickers), (gpointer)change);
+    gtk_widget_add_controller(change[4], GTK_EVENT_CONTROLLER(click_stickers));
+    gtk_box_append(GTK_BOX(change[2]), change[3]);
+
+    gtk_widget_hide(t_main.sticker_panel);
+}
+
+static void show_stickers(gpointer data)
+{
+    GtkWidget **change = data;
+    gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 543, 588);
+    gtk_widget_set_size_request(change[0], 525, 0);
+    gtk_grid_set_column_spacing (GTK_GRID(change[1]), 260);
+    gtk_box_remove(GTK_BOX(change[2]), change[3]);
+    change[3] = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    change[4] = gtk_image_new_from_file("client/media/sticker_active.png");
+    gtk_widget_set_size_request(change[4], 20, 20);
+    gtk_box_append(GTK_BOX(change[3]), change[4]);
+
+    t_main.sticker_scroll_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_valign(GTK_WIDGET(t_main.sticker_scroll_box), GTK_ALIGN_END);
+    gtk_widget_set_name(GTK_WIDGET(t_main.sticker_scroll_box), "stickerbox_scroll");
+    load_css_main(t_screen.provider, t_main.sticker_scroll_box);
+
+    GtkWidget *stickers = gtk_grid_new();
+    gtk_grid_set_row_spacing(GTK_GRID(stickers), 5);
+    gtk_grid_set_column_spacing(GTK_GRID(stickers), 5);
+
+    int sticker_num = 1;
+    int i = 0;
+    int j = 0;
+    GtkWidget *single;
+    for(i = 1; i <= 15; i++)    // Columns
+    {
+        for(j = 1; j <= 4; j++) // Rows
+        {
+            //GError *error = NULL;
+            //GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(mx_strjoin(mx_strjoin("client/media/withoutbg/", mx_itoa(sticker_num)), ".png"), &error);
+            //single = gtk_image_new_from_pixbuf (pixbuf);
+            //single = gtk_image_new_from_file(mx_strjoin(mx_strjoin("client/media/withoutbg/", mx_itoa(sticker_num++)), ".png"));
+            single = gtk_image_new_from_file("client/media/video-calling.png");
+            gtk_widget_set_size_request(GTK_WIDGET(single), 70, 70);
+            gtk_grid_attach(GTK_GRID(stickers), single, j, i, 1, 1);
+            gtk_widget_set_name(GTK_WIDGET(single), "stickers");
+            if(sticker_num > 60) break;
+            sticker_num++;
+        }
+    }
+
+    gtk_box_append(GTK_BOX(t_main.sticker_scroll_box), stickers);
+
+
+    t_main.sticker_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(t_main.sticker_panel), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(t_main.sticker_panel), GTK_ALIGN_CENTER);
+    gtk_widget_set_margin_top(t_main.sticker_panel, 10);
+
+    t_main.sticker_scroll_window = gtk_scrolled_window_new();
+    gtk_widget_set_size_request(GTK_WIDGET(t_main.sticker_scroll_window), 295, 588);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.sticker_scroll_window), t_main.sticker_scroll_box);
+    gtk_widget_set_name(GTK_WIDGET(t_main.sticker_scroll_window), "sticker_panel");
+    load_css_main(t_screen.provider, t_main.sticker_scroll_window);
+
+    gtk_box_append(GTK_BOX(t_main.sticker_panel),  t_main.sticker_scroll_window);
+
+    gtk_grid_attach(GTK_GRID(t_main.grid), t_main.sticker_panel, 2, 0, 1, 2);
+
+    GtkGesture *click_stickers = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_stickers, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_stickers, "pressed", G_CALLBACK(hide_stickers), (gpointer)change);
+    gtk_widget_add_controller(change[4], GTK_EVENT_CONTROLLER(click_stickers));
+    gtk_box_append(GTK_BOX(change[2]), change[3]);
 
 }
 
@@ -353,6 +439,11 @@ void load_more_messages (GtkScrolledWindow *scrolled_window, GtkPositionType pos
 void show_chat_history(GtkWidget *widget, gpointer data)
 {
     t_main.scroll_mes = true;
+    if(t_main.sticker_panel)
+    {
+        gtk_widget_hide(t_main.sticker_panel);
+    }
+
     cairo_surface_t *image = get_surface_from_jpg(cur_client.avatar.path);
     int org_width = cairo_image_surface_get_width(image);
     int org_height = cairo_image_surface_get_height(image);
@@ -459,10 +550,19 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_scrolled_window_set_propagate_natural_width (GTK_SCROLLED_WINDOW(write_message_scroll),true);
     load_css_main(t_screen.provider, write_message_scroll);
     GtkWidget *stickers_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    GtkWidget *stickers = gtk_image_new_from_file("client/media/search_ico.png");
+    GtkWidget *stickers = gtk_image_new_from_file("client/media/sticker.png");
+    gtk_widget_set_size_request(stickers, 20, 20);
+    
+    GtkWidget **resize = (GtkWidget **)malloc(6 * sizeof(GtkWidget *));
+    resize[0] = write_message;
+    resize[1] = chat_headerbar;
+    resize[2] = write_box;
+    resize[3] = stickers_box;
+    resize[4] = stickers;
+    resize[5] = data;
     GtkGesture *click_sstickers = gtk_gesture_click_new();
     gtk_gesture_set_state(click_sstickers, GTK_EVENT_SEQUENCE_CLAIMED);
-    g_signal_connect_swapped(click_sstickers, "pressed", G_CALLBACK(show_stickers), NULL);
+    g_signal_connect_swapped(click_sstickers, "pressed", G_CALLBACK(show_stickers), (gpointer)resize);
     gtk_widget_add_controller(stickers, GTK_EVENT_CONTROLLER(click_sstickers));
     gtk_box_append(GTK_BOX(stickers_box), stickers);
 
