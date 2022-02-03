@@ -419,25 +419,31 @@ static void show_stickers(gpointer data)
 }
 
 void load_more_messages (GtkScrolledWindow *scrolled_window, GtkPositionType pos, gpointer data) {
-    if (pos == GTK_POS_BOTTOM) {
+    (void)scrolled_window;
+    t_chat *chat = data;
+    if (pos == GTK_POS_BOTTOM || chat->last_mes_id == 1) {
         return;
     }
     t_main.scroll_mes = false;
-    (void)scrolled_window;
-    t_chat *chat = data;
-    printf("load mes\n");
+    
 
     GtkAdjustment* adj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW(t_main.scrolled_window_right));
     t_main.adj_pos = gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj));//gtk_adjustment_get_value(GTK_ADJUSTMENT(adj));
     
-    
-    printf("load adj val %f\n", t_main.adj_pos);
     get_messages_from_server(chat->id, chat->last_mes_id);
 
 }
 
 void show_chat_history(GtkWidget *widget, gpointer data)
 {
+    (void)widget;
+    if (cur_client.cur_chat.id == ((t_chat *)data)->id) {
+        return;
+    }
+
+    printf("id of chat %d\n", ((t_chat *)data)->id);
+    cur_client.cur_chat = *((t_chat *)data);
+    
     t_main.scroll_mes = true;
     if(t_main.sticker_panel)
     {
@@ -460,10 +466,6 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_widget_add_controller(t_actives.settings, GTK_EVENT_CONTROLLER(click_settings));
     gtk_box_append(GTK_BOX(t_main.search_panel), t_actives.settings);
 
-    (void)widget;
-
-    printf("id of chat %d\n", ((t_chat *)data)->id);
-    cur_client.cur_chat = *((t_chat *)data);
 
     if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
         char buf[512+32] = {0};
@@ -539,6 +541,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     load_css_main(t_screen.provider, write_message);
     GtkTextBuffer *bio_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (write_message));
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(write_message), GTK_WRAP_WORD_CHAR);
+
     g_signal_connect_after(bio_buffer, "insert-text", G_CALLBACK(insert_text_bio), NULL);
     GtkEventController *return_controller = gtk_event_controller_key_new();
     g_signal_connect_after(return_controller, "key-released", G_CALLBACK(return_controll_func), write_message);
@@ -576,6 +579,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
     
     get_messages_from_server(cur_client.cur_chat.id, -1);
+    t_main.first_load_mes = true;
 }
 
 

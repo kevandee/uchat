@@ -49,7 +49,14 @@ gboolean add_msg(gpointer data) {
     }   
     else {
         gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
-        gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);           
+        gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
+
+        GtkGesture *gesture = gtk_gesture_click_new();
+        gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
+         gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
+        g_signal_connect_swapped(gesture, "pressed", G_CALLBACK(show_message_menu), incoming_msg_box);
+        gtk_widget_add_controller(incoming_msg_box, GTK_EVENT_CONTROLLER(gesture));
+
         is_sender = true;
     }
     gtk_widget_set_margin_end(incoming_msg_box, 5);
@@ -63,7 +70,7 @@ gboolean add_msg(gpointer data) {
     gtk_label_set_wrap(GTK_LABEL(incoming_msg), TRUE);
     gtk_label_set_wrap_mode(GTK_LABEL(incoming_msg), PANGO_WRAP_WORD_CHAR);
     gtk_label_set_max_width_chars(GTK_LABEL(incoming_msg), 50);
-    gtk_label_set_selectable(GTK_LABEL(incoming_msg), TRUE);
+    gtk_label_set_selectable(GTK_LABEL(incoming_msg), FALSE);
     GtkWidget *User_logo = NULL;
     if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
         if (!is_sender) {
@@ -95,10 +102,11 @@ gboolean add_msg(gpointer data) {
     gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
     if (is_sender && mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0)
         gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
-    if (!message->prev)
+    if (!message->prev) 
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
     else 
         gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
+    t_main.last_mes = incoming_msg_box;
     pthread_mutex_unlock(&cl_mutex);
 
     return FALSE;
@@ -258,20 +266,27 @@ void *rec_func(void *param) {
                     int status = 0;
                     send(cur_client.serv_fd, &status, sizeof(int), 0);        
                 }
-                pthread_t display_thread = NULL;
+                
                 if (!prev || t_main.scroll_mes) {           
+                    pthread_t display_thread = NULL;
                     pthread_create(&display_thread, NULL, scroll_func, NULL);  
                 }
-                else {
-                    printf("save\n");
-
-                    pthread_create(&display_thread, NULL, save_scroll_func, NULL);  
-
-                    
-                }
+        
                 printf("%s\n", total_msg);
                 printf("> ");
                 fflush(stdout);
+            }
+            else if(mx_strncmp(message, "<last message>", 14) == 0) {
+                if (!t_main.first_load_mes){
+                    pthread_t display_thread = NULL;
+                    pthread_create(&display_thread, NULL, save_scroll_func, NULL);
+                }
+                else {
+                    printf ("down\n");
+                    pthread_t display_thread = NULL;
+                    pthread_create(&display_thread, NULL, scroll_func, NULL);  
+                    t_main.first_load_mes = false;
+                }  
             }
             else if(mx_strcmp(mx_strtrim(message), "<setting avatar>") == 0) {
                 printf("a\n");
@@ -457,7 +472,7 @@ int main(int argc, char *argv[]) {
         .y = 200
     };
     t_main.default_group_avatar = default_group_avatar;
-    cur_client = cur;;
+    cur_client = cur;
     // Подключение к серверу, тут ничего менять не надо
     cur_client.serv_fd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in adr = {0};
