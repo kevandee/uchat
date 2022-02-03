@@ -17,17 +17,24 @@ void *client_work(void *param) {
     char choise;
 
     bool err_msg = true;
+    
+    // Proverka svazy
+    char buf[6];
+    SSL_read(cur->ssl, buf, 6);
+    bool temperror = true;
+    SSL_write(cur->ssl, &temperror, sizeof(bool));
+    // Procerka svazy
 
     while (err_msg) {
         // sign up or sign in
-        if(recv(cur->cl_socket, &choise, 1, 0) <= 0) {
+        if(SSL_read(cur->ssl, &choise, 1) <= 0) {
             free_client(&cur, &users_list);
             
             return NULL;
         }
         printf("choise %c\n", choise);
         // login
-        if(recv(cur->cl_socket, login, NAME_LEN, 0) <= 0 || mx_strlen(login) <  2 || mx_strlen(login) >= 32){
+        if(SSL_read(cur->ssl, login, NAME_LEN) <= 0 || mx_strlen(login) <  2 || mx_strlen(login) >= 32){
             printf("Didn't enter the name.\n");
             free_client(&cur, &users_list);
 
@@ -37,7 +44,7 @@ void *client_work(void *param) {
         }
 
         //passwd
-        if(recv(cur->cl_socket, passwd, 16, 0) <= 0 || mx_strlen(passwd) <  8 || mx_strlen(passwd) > 16){
+        if(SSL_read(cur->ssl, passwd, 16) <= 0 || mx_strlen(passwd) <  8 || mx_strlen(passwd) > 16){
             printf("Didn't enter the password.\n");
             free_client(&cur, &users_list);
 
@@ -63,11 +70,11 @@ void *client_work(void *param) {
                     asprintf(&query, sql_pattern, cur->login, cur->passwd);
                     sqlite3_exec_db(query, 2);
                     const bool success_reg = false;
-                    send(cur->cl_socket, &success_reg, sizeof(bool), 0);
+                    SSL_write(cur->ssl, &success_reg, sizeof(bool));
                 }
                 else {
                     //LOGIN ALREDAY TAKEN
-                    send(cur->cl_socket, &err_msg, sizeof(bool), 0);
+                    SSL_write(cur->ssl, &err_msg, sizeof(bool));
                 }
                 break;
             }
@@ -88,7 +95,7 @@ void *client_work(void *param) {
                 }
                 else {
                     //USER NOT FOUND
-                    send(cur->cl_socket, &err_msg, sizeof(bool), 0);
+                    SSL_write(cur->ssl, &err_msg, sizeof(bool));
                 }
                 break;
             }
@@ -108,7 +115,7 @@ void *client_work(void *param) {
     }
     
     cur->id = get_user_id(cur->login);
-    send(cur->cl_socket, &err_msg,sizeof(bool), 0);
+    SSL_write(cur->ssl, &err_msg, sizeof(bool));
     
     send_all_user_data(cur);
     sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
@@ -117,7 +124,7 @@ void *client_work(void *param) {
     send_message(buff_out,login, NULL);
     char message[MAX_LEN + NAME_LEN];
     while (is_run) {
-        int mes_stat = recv(cur->cl_socket, message, MAX_LEN + NAME_LEN, 0);
+        int mes_stat = SSL_read(cur->ssl, message, MAX_LEN + NAME_LEN);
 
         if (mes_stat == 0 || (mx_strcmp(message, "exit") == 0)) {
             sprintf(buff_out, "%s has left\n", cur->login);
@@ -125,16 +132,16 @@ void *client_work(void *param) {
             is_run = false;
         }
         else if (mx_strcmp(message, "<users list>") == 0) {
-            send_all(cur->cl_socket, "<users list>", 13);
+            send_all(cur->ssl, "<users list>", 13);
             t_list *users_l = sqlite3_exec_db("SELECT login FROM users", 1);
             
             int users_count = mx_list_size(users_l);
             printf("users count %d\n", users_count);
-            send(cur->cl_socket, &users_count, sizeof(int), 0);
+            SSL_write(cur->ssl, &users_count, sizeof(int));
             while (users_l) {
                 char buf[20] = {0};
                 sprintf(buf, "%s", users_l->data);
-                send_all(cur->cl_socket, buf, 20);
+                send_all(cur->ssl, buf, 20);
                 users_l = users_l->next;
             }
             clear_message(message, MAX_LEN + NAME_LEN);
@@ -245,7 +252,7 @@ void *client_work(void *param) {
         else if(mx_strncmp(message, "<setting avatar>", 16) == 0){
             char buf[512 + 32] = {0};
             t_avatar recv_avatar;
-            recv_all(cur->cl_socket, buf, 512 + 32);
+            recv_all(cur->ssl, buf, 512 + 32);
             recv_avatar.name = mx_strdup(buf);
             clear_message(buf, 512 + 32);
             char *path = mx_strjoin("data/avatars/", cur->login);
@@ -259,23 +266,23 @@ void *client_work(void *param) {
             printf("buf %s\n", buf);
             recv_avatar.path = mx_strdup(buf);
             clear_message(buf, 544);
-            recv_image(cur->cl_socket, recv_avatar.path);
+            recv_image(cur->ssl, recv_avatar.path);
         
             sprintf(buf, "<image loaded>");
-            send_all(cur->cl_socket, buf, 512 + 32); 
+            send_all(cur->ssl, buf, 512 + 32); 
             clear_message(buf, 512 + 32);
 
             
-            recv (cur->cl_socket, &recv_avatar.scaled_w, sizeof(double), 0);
-            recv (cur->cl_socket, &recv_avatar.scaled_h, sizeof(double), 0);
+            SSL_read(cur->ssl, &recv_avatar.scaled_w, sizeof(double));
+            SSL_read(cur->ssl, &recv_avatar.scaled_h, sizeof(double));
 
-            recv (cur->cl_socket, &recv_avatar.x, sizeof(double), 0);
-            recv (cur->cl_socket, &recv_avatar.y, sizeof(double), 0);
+            SSL_read(cur->ssl, &recv_avatar.x, sizeof(double));
+            SSL_read(cur->ssl, &recv_avatar.y, sizeof(double));
 
             clear_message(buf, 512 + 32);
             sprintf(buf, "<setting avatar>");
-            send_all(cur->cl_socket, buf, 512+32);
-            send_image(cur->cl_socket, recv_avatar.path);
+            send_all(cur->ssl, buf, 512+32);
+            send_image(cur->ssl, recv_avatar.path);
 
             sprintf(buf, "path=%s scaled_w=%f scaled_h=%f x=%f y=%f ", recv_avatar.path,recv_avatar.scaled_w, recv_avatar.scaled_h,recv_avatar.x, recv_avatar.y);
             printf("buf %s\n", buf);
@@ -377,7 +384,7 @@ void *client_work(void *param) {
 
             char buf[512+32] = {0};
             sprintf(buf, "<chat users avatars>");
-            send_all(cur->cl_socket,buf, 512+32);
+            send_all(cur->ssl,buf, 512+32);
             while (users) {
                 if (mx_strcmp(users->data, cur->login) != 0) {
                     printf("%s %s\n", users->data, cur->login);
@@ -390,15 +397,15 @@ void *client_work(void *param) {
                     }
                     char buf_name[32] = {0};
                     sprintf(buf_name, "%s", temp_str);
-                    send_all(cur->cl_socket, buf_name, 32);
+                    send_all(cur->ssl, buf_name, 32);
                     clear_message(buf_name, 32);
                     if (mx_strcmp(avatar->path, "default") != 0){
-                        send_image(cur->cl_socket, avatar->path);
-                        recv_all(cur->cl_socket, buf_name, 14);
-                        send(cur->cl_socket, &avatar->scaled_w, sizeof(double), 0);
-                        send(cur->cl_socket, &avatar->scaled_h, sizeof(double), 0);
-                        send(cur->cl_socket, &avatar->x, sizeof(double), 0);
-                        send(cur->cl_socket, &avatar->y, sizeof(double), 0);
+                        send_image(cur->ssl, avatar->path);
+                        recv_all(cur->ssl, buf_name, 14);
+                        SSL_write(cur->ssl, &avatar->scaled_w, sizeof(double));
+                        SSL_write(cur->ssl, &avatar->scaled_h, sizeof(double));
+                        SSL_write(cur->ssl, &avatar->x, sizeof(double));
+                        SSL_write(cur->ssl, &avatar->y, sizeof(double));
                     }
                 }
 
@@ -423,11 +430,11 @@ void *client_work(void *param) {
                 t_message *mes_send = (t_message *)mes_list->data;
                 sprintf(buf, "<msg, chat_id=%d, from=%s, prev=1>%s", chat_id, mes_send->sender, mes_send->data);
 
-                send_all(cur->cl_socket, buf, 512 + 32);
+                send_all(cur->ssl, buf, 512 + 32);
 
                 clear_message(buf, 544);
                 int status = 0;
-                recv(cur->cl_socket, &status, sizeof(int), 0);
+                SSL_read(cur->ssl, &status, sizeof(int));
                 if (!status)
                     break;
                 mes_list = mes_list->next;
@@ -454,6 +461,44 @@ void *client_work(void *param) {
     return NULL;
 }
 
+t_client *create_new_client(const struct sockaddr_in adr, int client_fd, int *client_id) {
+    t_client *new_client = (t_client *)malloc(sizeof(t_client));
+    new_client->adr = adr;
+    new_client->cl_socket = client_fd;
+    new_client->login = NULL;
+    new_client->passwd = NULL;
+    //new_client->id = client_id;
+    new_client->scaled_for_chat = NULL;
+    new_client->chats = NULL;
+    t_chat init_chat = {0};
+    new_client->cur_chat = init_chat;
+
+    printf("id %d\n", *client_id);
+    (*client_id)++;
+    mx_push_back(&users_list, new_client);
+    return new_client;
+}
+
+void client_work_wrapper(SSL_CTX *context, int client_fd, pthread_t *thread, t_client *new_client) {
+    // threadin
+    SSL *ssl;
+    ssl = SSL_new(context);             //get new SSL state
+    SSL_set_fd(ssl, client_fd);         //set connection socket to SSL state
+
+    if (SSL_accept(ssl) < 0) {
+        ERR_print_errors_fp(stderr);
+        close_connection(ssl);
+        return;
+    }
+
+    new_client->ssl = ssl;
+
+    // Certificate check (delete? anyway client has no certs)
+    //certificate_ckeck(ssl);
+
+    // nu thread
+    pthread_create(thread, NULL, client_work, new_client);
+}
 
 int main(int argc, char *argv[]) {
     printf("%s\n", SSLeay_version(SSLEAY_VERSION));
@@ -463,54 +508,56 @@ int main(int argc, char *argv[]) {
         mx_printerr("usage: ./uchat_server <port>\n");
         return -1;
     }
-    
-    int serv_fd = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in adr = {0};
-    adr.sin_family = AF_INET;
-    adr.sin_port = htons(mx_atoi(argv[1]));
-    if (bind(serv_fd, (struct sockaddr *) &adr, sizeof(struct sockaddr_in)) < 0) {
-        perror("ERROR: Socket binding failed");
-        return EXIT_FAILURE;
-    }
-
-    if (listen(serv_fd, 5) < 0) {
-        perror("ERROR: Socket listening failed");
-        return EXIT_FAILURE;
-	}
-
-    socklen_t adrlen = sizeof(struct sockaddr_in);
-    int client_fd;
-    pthread_t thread;
-    users_list = NULL;
-    pthread_mutex_init(&send_mutex, NULL);
 
     char *weather = get_weather("Kharkov");
     printf("%s\n", weather);
-    int client_id = 0;
-    while(1) {
-        client_fd = accept(serv_fd, (struct sockaddr *) &adr, &adrlen);
-        
-        t_client *new_client = (t_client *)malloc(sizeof(t_client));
-        new_client->adr = adr;
-        new_client->cl_socket = client_fd;
-        new_client->login = NULL;
-        new_client->passwd = NULL;
-        //new_client->id = client_id;
-        new_client->scaled_for_chat = NULL;
-        new_client->chats = NULL;
-        t_chat init_chat = {0};
-        new_client->cur_chat = init_chat;
-    
-        printf("id %d\n", client_id);
-        
-        client_id++;
-        mx_push_back(&users_list, new_client);
 
-        pthread_create(&thread, NULL, client_work, new_client);
+    //  SSLing
+    SSL_CTX *context;
+    SSL_library_init();
+    context = CTX_initialize_server();
+    printf("SSL: SSL initialized\n");
+
+    // creaating certificate and pkey
+    EVP_PKEY *pkey = create_key();
+    printf("SSL: key generated\n");
+    X509 *x509 = create_X509(pkey);
+    printf("SSL: X509 generated\n");
+    write_certs(pkey, x509);
+    printf("SSL: certificates saved\n");
+    load_certs(context, "certificate.pem", "PEM_privatekey.pem");
+    printf("SSL: certificates loaded\n");
+
+    // opening connection
+    struct sockaddr_in adr = {0};
+    socklen_t adrlen = sizeof(adr);
+    int serv_fd = open_server_connection(mx_atoi(argv[1]), &adr, adrlen);
+    printf("SSL: connection opened\n");
+
+    // for client serving
+    pthread_t thread;
+    users_list = NULL;
+    pthread_mutex_init(&send_mutex, NULL);
+    int client_id = 0;
+    int client_fd;
+
+    while (1) {
+        // accept client connection
+        client_fd = accept(serv_fd, (struct sockaddr*) &adr, &adrlen);
+        printf("SSL: client accepted\n");
+        printf("SSL: Connection: %s:%d\n",inet_ntoa(adr.sin_addr), ntohs(adr.sin_port));
+
+        // handle client
+        t_client *new_client = create_new_client(adr, client_fd, &client_id);
+        client_work_wrapper(context, client_fd, &thread, new_client);
         sleep(1);
     }
-
+    close (serv_fd);
+    SSL_CTX_free(context);
+    //  SSLing ends here
     close(client_fd);
     close(serv_fd);
+    //  SSLing
+
     return 0;
 }

@@ -22,14 +22,14 @@ void *sender_func(void *param) {
         getline(&message, &len, stdin);
         message = mx_strtrim(message);
         if (mx_strcmp(message, "users") == 0) {
-            send(cur_client.serv_fd, message, mx_strlen(message) - 1, 0);
+            SSL_write(cur_client.ssl, message, mx_strlen(message) - 1);
         }
         else if (mx_strcmp(message, "exit") == 0) {
-            send(cur_client.serv_fd, message, 4, 0);
+            SSL_write(cur_client.ssl, message, 4);
             break;
         }
         else {
-            send(cur_client.serv_fd, message, mx_strlen(message), 0);
+            SSL_write(cur_client.ssl, message, mx_strlen(message));
         }
         clear_message(message, 512);
         clear_message(buf, 512 + 32);
@@ -107,11 +107,11 @@ void *rec_func(void *param) {
     while(!t_main.loaded) {
         sleep(1);
     }
-    int fd = cur_client.serv_fd;
+    SSL *fd = cur_client.ssl;
     (void)param;
     char message[512 + 32] = {0};
     while (1) {
-		int receive = recv(fd, message, 512 + 32, 0);
+		int receive = SSL_read(fd, message, 512 + 32);
 
         if (receive > 0) {
             printf("|%s|\n", message);
@@ -127,13 +127,13 @@ void *rec_func(void *param) {
                 }
                 mx_strcpy(new_chat->name, buf_name);
                 printf("recv chatname %s\n", new_chat->name);
-                receive = recv(fd, &new_chat->id, sizeof(int), 0);
+                receive = SSL_read(fd, &new_chat->id, sizeof(int));
                 while (receive < 0) {
-                    receive = recv(fd, &new_chat->id, sizeof(int), 0);
+                    receive = SSL_read(fd, &new_chat->id, sizeof(int));
                 }
-                receive = recv(fd, &new_chat->count_users, sizeof(int), 0);
+                receive = SSL_read(fd, &new_chat->count_users, sizeof(int));
                 while (receive < 0) {
-                    receive = recv(fd, &new_chat->count_users, sizeof(int), 0);
+                    receive = SSL_read(fd, &new_chat->count_users, sizeof(int));
                 }
                 for (int i = 0; i < new_chat->count_users; i++) {
                     char buf[32] = {0};
@@ -158,7 +158,6 @@ void *rec_func(void *param) {
                 Дим, тут данные о новом чате приняты на клиент, добавляй на локальную бд
                 */
                 
-            
                 //printf("%s gets chat %s\n", cur_client->login, new_chat->name);
                 printf("> ");
                 fflush(stdout);
@@ -168,11 +167,11 @@ void *rec_func(void *param) {
                 t_list *users_list = NULL;
                 int count_users;
                 printf("reseive\n");
-                recv(cur_client.serv_fd, &count_users, sizeof(int), 0);
+                SSL_read(cur_client.ssl, &count_users, sizeof(int));
                 for (int i = 0; i < count_users; i++) {
                     printf("reseive\n");
                     char buf[20] = {0};
-                    recv_all(cur_client.serv_fd, buf, 20);
+                    recv_all(cur_client.ssl, buf, 20);
                     mx_push_back(&users_list, mx_strtrim(buf));
                 }
                 t_main.search_users_list = users_list;
@@ -219,13 +218,13 @@ void *rec_func(void *param) {
                     pthread_mutex_lock(&cl_mutex);
                     if (prev) {
                         int status = 1;
-                        send(cur_client.serv_fd, &status, sizeof(int), 0);
+                        SSL_write(cur_client.ssl, &status, sizeof(int));
                     }
                     pthread_mutex_unlock(&cl_mutex);
                 }
                 else if (prev) {
                     int status = 0;
-                    send(cur_client.serv_fd, &status, sizeof(int), 0);
+                    SSL_write(cur_client.ssl, &status, sizeof(int));
                 }
                 
                 printf("%s\n", total_msg);
@@ -236,7 +235,7 @@ void *rec_func(void *param) {
                 printf("a\n");
                 char buf[544] = {0};
                 sprintf(buf, "client_data/%s", cur_client.avatar.name);
-                recv_image(cur_client.serv_fd, buf);
+                recv_image(cur_client.ssl, buf);
                 mx_strdel(&cur_client.avatar.path);
                 cur_client.avatar.path = mx_strdup(buf);
 
@@ -317,17 +316,24 @@ static void load_css() {
     }
 
     char message[32] = {0};
+    printf("err1\n");
     // Отправка данных для авторизации на сервер
-    send(cur_client.serv_fd, "i", 1, 0);
+    SSL_write(cur_client.ssl, "i", 1);
     sprintf(message, "%s", cur_client.login);
-    send(cur_client.serv_fd, message, 32, 0);
+    printf("err2\n");
+    SSL_write(cur_client.ssl, message, 32);
     clear_message(message, 32);
+    printf("err3\n");
     sprintf(message, "%s", cur_client.passwd);
-    send(cur_client.serv_fd, message, 16, 0);
+    SSL_write(cur_client.ssl, message, 16);
+    printf("err4\n");
 
     bool err_aut;
-    recv(cur_client.serv_fd, &err_aut, sizeof(bool), 0); // Ожидание ответа от сервера об успешности входа или регистрации
-    
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    SSL_read(cur_client.ssl, &err_aut, sizeof(bool)); // Ожидание ответа от сервера об успешности входа или регистрации
+    printf("err5\n");
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     if (err_aut) {
         mx_strdel(&cur_client.login);
         mx_strdel(&cur_client.passwd);
@@ -399,14 +405,54 @@ int main(int argc, char *argv[]) {
     };
     t_main.default_avatar = default_avatar;
     cur_client = cur;;
-    // Подключение к серверу, тут ничего менять не надо
-    cur_client.serv_fd = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in adr = {0};
-    adr.sin_family = AF_INET;
-    adr.sin_port = htons(mx_atoi(argv[2]));
-    connect(cur_client.serv_fd, (struct sockaddr *)&adr, sizeof(adr));
-    inet_pton(AF_INET, argv[1], &adr.sin_addr); //"127.0.0.1"
-    cur_client.adr = adr;
+
+    //      =====   SSLing    =====
+    SSL_CTX *context;
+    SSL *ssl;
+    SSL_library_init();
+
+    context = CTX_initialize_client();
+    open_client_connection(argv[1], mx_atoi(argv[2]));
+
+    ssl = SSL_new(context);
+    if (SSL_set_fd(ssl, cur_client.serv_fd) == 0) {
+        perror("ERROR: socket descriptor attachment failed!\n");
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+    cur_client.ssl = ssl;
+
+    if (SSL_connect(ssl) == -1) {
+        ERR_print_errors_fp(stderr);
+        return -1;
+    }
+
+    printf("SSL: chipher: %s\n", SSL_get_cipher(ssl));
+    X509 *cert = SSL_get_peer_certificate(ssl);
+    if (cert == NULL) {
+        printf("SSL: No client certificates configured.\n");
+    }
+    else {
+        printf("SSL: Server certificates:\n");
+        char *line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
+        printf("SSL: Subject: %s\n", line);
+        free(line);
+        line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
+        printf("SSL: Issuer: %s\n", line);
+        free(line);
+        X509_free(cert);
+    }
+
+    //      echo server check
+    const char *check_request = "Pablo";
+    int check_len = mx_strlen(check_request);
+    SSL_write(ssl, check_request, check_len);
+    //char check_reply[6] = {0};
+    bool tempbool;
+    SSL_read(ssl, &tempbool, sizeof(bool));
+    printf("SSL: request - %s\nSSL: reply   - %d\n", check_request, tempbool);
+    //      =====   SSLing    =====
+
     // Запуск потоков для приёма и отправки сообщений, будем смотреть. Может, придётся переделать под события из гтк
     t_main.loaded = false;
     pthread_t sender_th;
@@ -421,12 +467,9 @@ int main(int argc, char *argv[]) {
     g_signal_connect(application, "activate", G_CALLBACK(activate), NULL);
     status = g_application_run(G_APPLICATION(application), FALSE, NULL);
 
-
     //ожидание завершения потоков, если нужно добавить код, то добавлять до этих функций
     pthread_join(sender_th, NULL);
     pthread_join(rec_th, NULL);
-
-
 
     close(cur_client.serv_fd);
 

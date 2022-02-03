@@ -18,6 +18,8 @@
 #include "../../utils/inc/utils.h"
 
 #include <gtk/gtk.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 extern t_client cur_client;
 extern pthread_mutex_t cl_mutex;
@@ -97,5 +99,9 @@ void create_user_db(char *login);
 void insert_user_db(t_client cur_client);
 void *user_exec_db(char *login, char *query, int type);
 char *get_db_name(char *login);
+
+//SSLing
+SSL_CTX *CTX_initialize_client();
+void open_client_connection(char* server_IP, int port);
 
 #endif

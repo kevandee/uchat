@@ -68,7 +68,7 @@ static void send_chat(GtkWidget *widget, gpointer data) {
     t_main.loaded = false;
     char buf[512 + 32] = {0};
     sprintf(buf, "<add chat, name=%s>%s", name, users);
-    send_all(cur_client.serv_fd, buf, 512+32);
+    send_all(cur_client.ssl, buf, 512+32);
     while (!t_main.loaded) {
         usleep(50);
     }
@@ -96,7 +96,7 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
     t_main.loaded = false;
     char message[512+32] = {0};
     sprintf(message, "<users list>");
-    send(cur_client.serv_fd, message, 512+32, 0);
+    SSL_write(cur_client.ssl, message, 512+32);
     while (!t_main.loaded)
         usleep(50);
     printf("gets search list\n");
@@ -302,7 +302,7 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         }
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
 
-        send(cur_client.serv_fd, message, 512+32, 0);
+        SSL_write(cur_client.ssl, message, 512+32);
         gtk_text_buffer_set_text (buffer, "", 0);
     }
 }
@@ -353,7 +353,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
         char buf[512+32] = {0};
         sprintf(buf, "<chat users avatars>%d", cur_client.cur_chat.id);
-        send_all(cur_client.serv_fd,buf, 512+32);
+        send_all(cur_client.ssl,buf, 512+32);
         t_main.loaded = false;
         while (!t_main.loaded) {
             usleep(50);
@@ -409,7 +409,7 @@ static void get_list_users() {
     t_main.loaded = false;
     char message[512+32] = {0};
     sprintf(message, "<users list>");
-    send(cur_client.serv_fd, message, 512+32, 0);
+    SSL_write(cur_client.ssl, message, 512+32);
     while (!t_main.loaded)
         usleep(50);
 }

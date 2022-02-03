@@ -1,10 +1,10 @@
 #include "../inc/utils.h"
 
-int send_all(int sockfd, const char *buf, int len) {
+int send_all(SSL *sockfd, const char *buf, int len) {
     ssize_t n;
 
     while (len > 0) {
-        n = send(sockfd, buf, len, 0);
+        n = SSL_write(sockfd, buf, len);
         if (n < 0)
             return -1;
         buf += n;
@@ -15,11 +15,11 @@ int send_all(int sockfd, const char *buf, int len) {
 }
 
 
-int recv_all(int sockfd, char * buf, int len) {
+int recv_all(SSL *sockfd, char * buf, int len) {
     ssize_t n;
 
     while (len > 0) {
-        n = recv(sockfd, buf, len, 0);
+        n = SSL_read(sockfd, buf, len);
         if (n <= 0)
             return n;
         buf += n;

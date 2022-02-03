@@ -22,7 +22,7 @@ static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
     char buf[512 + 32] = {0};
     cur_client.sender_new_chat = true;
     sprintf(buf, "<add chat, name=.dialog>%s", users);
-    send_all(cur_client.serv_fd, buf, 512+32);
+    send_all(cur_client.ssl, buf, 512+32);
     while (!t_main.loaded) {
         usleep(50);
     }

@@ -145,15 +145,15 @@ static void register_button_click(GtkWidget *widget, gpointer data)
     
     char message[32] = {0};
     // Отправка данных для регистрации на сервер
-    send(cur_client.serv_fd, "u", 1, 0);
+    SSL_write(cur_client.ssl, "u", 1);
     sprintf(message, "%s", cur_client.login);
-    send(cur_client.serv_fd, message, 32, 0);
+    SSL_write(cur_client.ssl, message, 32);
     clear_message(message, 32);
     sprintf(message, "%s", cur_client.passwd);
-    send(cur_client.serv_fd, message, 16, 0);
+    SSL_write(cur_client.ssl, message, 16);
 
     bool err_aut;
-    recv(cur_client.serv_fd, &err_aut, sizeof(bool), 0); // Ожидание ответа от сервера об успешности регистрации
+    SSL_read(cur_client.ssl, &err_aut, sizeof(bool)); // Ожидание ответа от сервера об успешности регистрации
     
     if (err_aut) {
         gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessageRegister), "REGISTRATION ERROR");

@@ -20,6 +20,9 @@
 #include <pthread.h>
 #include <curl/curl.h>
 
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 
 extern t_list *users_list;
 extern pthread_mutex_t send_mutex;
@@ -48,4 +51,15 @@ t_client *get_user_info(int id);
 t_avatar *parse_avatar_info(char *avatar_info);
 char *get_user_avatar(int id);
 t_list *db_messages_sender(int c_id);
+
+//SSling
+SSL_CTX *CTX_initialize_server();
+EVP_PKEY *create_key();
+X509 *create_X509(EVP_PKEY *pkey);
+void write_certs(EVP_PKEY *pkey, X509 *x509);
+void load_certs(SSL_CTX* context, char* cert_name, char* key_name);
+int open_server_connection(int port, struct sockaddr_in *adr, socklen_t adrlen);
+void certificate_ckeck(SSL *ssl);
+void close_connection(SSL *ssl);
+//SSLing
 #endif

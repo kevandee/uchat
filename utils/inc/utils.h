@@ -15,6 +15,7 @@
 #include "../../libmx/inc/libmx.h"
 
 #include <gtk/gtk.h>
+#include <openssl/ssl.h>
 
 typedef struct s_avatar {
     double d_width;
@@ -56,6 +57,8 @@ typedef struct s_message {
 
 typedef struct s_client {
     int serv_fd;
+
+    SSL *ssl;// client ssl structure with coneection to server
     
     struct sockaddr_in adr;
     int cl_socket;
@@ -78,11 +81,11 @@ typedef struct s_client {
     bool sender_new_chat;
 }              t_client;
 
-void send_image(int socket, char *file);
-int recv_image(int socket, char *path);
+void send_image(SSL *socket, char *file);
+int recv_image(SSL *socket, char *path);
 
-int send_all(int sockfd, const char *buf, int len);
-int recv_all(int sockfd, char * buf, int len);
+int send_all(SSL *sockfd, const char *buf, int len);
+int recv_all(SSL *sockfd, char * buf, int len);
 
 void clear_message(char *mes, const int size);
 

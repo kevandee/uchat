@@ -131,25 +131,25 @@ static void move_image (GtkGestureDrag *gesture, double offset_x, double offset_
 static void send_avatar() {
     char buf[512 + 32] = {0};
     sprintf(buf, "%s", "<setting avatar>");
-    send_all(cur_client.serv_fd, buf, 512 + 32);
+    send_all(cur_client.ssl, buf, 512 + 32);
     clear_message(buf, 512 + 32);
     
     sprintf(buf, "%s", cur_client.avatar.name);
-    send_all(cur_client.serv_fd, buf, 512 + 32);
+    send_all(cur_client.ssl, buf, 512 + 32);
     clear_message(buf, 512 + 32);
     t_main.loaded = false;
-    send_image(cur_client.serv_fd, cur_client.avatar.path);
+    send_image(cur_client.ssl, cur_client.avatar.path);
     
     while (!t_main.loaded) {
         usleep(50);
     }
 
 
-    send (cur_client.serv_fd, &cur_client.avatar.scaled_w, sizeof(double), 0);
-    send (cur_client.serv_fd, &cur_client.avatar.scaled_h, sizeof(double), 0);
+    SSL_write(cur_client.ssl, &cur_client.avatar.scaled_w, sizeof(double));
+    SSL_write(cur_client.ssl, &cur_client.avatar.scaled_h, sizeof(double));
 
-    send (cur_client.serv_fd, &cur_client.avatar.x, sizeof(double), 0);
-    send (cur_client.serv_fd, &cur_client.avatar.y, sizeof(double), 0);
+    SSL_write(cur_client.ssl, &cur_client.avatar.x, sizeof(double));
+    SSL_write(cur_client.ssl, &cur_client.avatar.y, sizeof(double));
 
     t_main.loaded = false;
     while (!t_main.loaded) {
@@ -287,7 +287,7 @@ static void send_settings(GtkWidget *widget, gpointer data) {
 
     char buf[544] = {0};
     sprintf(buf, "<setting, name=%s, surname=%s>%s", tmp_name, tmp_surname, tmp_bio);
-    send_all(cur_client.serv_fd, buf, 544);
+    send_all(cur_client.ssl, buf, 544);
     show_settings();
 }
 

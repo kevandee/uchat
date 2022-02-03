@@ -1,6 +1,6 @@
 #include "../inc/utils.h"
 
-void send_image(int socket, char *file) {
+void send_image(SSL *socket, char *file) {
     int size, read_size;
     int stat;
     char send_buffer[10240];
@@ -8,16 +8,16 @@ void send_image(int socket, char *file) {
     fseek(picture, 0, SEEK_END);
     size = ftell(picture);
     fseek(picture, 0, SEEK_SET);
-    send(socket, &size, sizeof(int), 0);
+    SSL_write(socket, &size, sizeof(int));
 
     while(!feof(picture)) {
        //Read from the file into our send buffer
        read_size = fread(send_buffer, 1, sizeof(send_buffer)-1, picture);
 
        //Send data through our socket
-       stat = send(socket, send_buffer, read_size, 0);
+       stat = SSL_write(socket, send_buffer, read_size);
        while (stat < 0){
-         stat = send(socket, send_buffer, read_size, 0);
+         stat = SSL_write(socket, send_buffer, read_size);
        }
 
        //Zero out our send buffer
@@ -25,15 +25,15 @@ void send_image(int socket, char *file) {
     }
 }
 
-int recv_image(int socket, char *path) {
+int recv_image(SSL *socket, char *path) {
     int  recv_size = 0,size = 0, read_size, write_size, packet_index =1,stat;
     char imagearray[10241];
     FILE *image;
 
     //Find the size of the image
-    stat = recv(socket, &size, sizeof(int), 0);
+    stat = SSL_read(socket, &size, sizeof(int));
     while (stat < 0) {
-        stat = recv(socket, &size, sizeof(int), 0);
+        stat = SSL_read(socket, &size, sizeof(int));
     }
 
     
@@ -48,9 +48,9 @@ int recv_image(int socket, char *path) {
 
     //Loop while we have not received the entire file yet
     while(recv_size < size) {
-        read_size = recv(socket,imagearray, 10241, 0);
+        read_size = SSL_read(socket,imagearray, 10241);
         while(read_size <0) {
-            read_size = recv(socket,imagearray, 10241, 0);
+            read_size = SSL_read(socket,imagearray, 10241);
         }
 
      
