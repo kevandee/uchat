@@ -138,12 +138,14 @@ void *client_work(void *param) {
             int users_count = mx_list_size(users_l);
             printf("users count %d\n", users_count);
             SSL_write(cur->ssl, &users_count, sizeof(int));
+            printf("users count %d\n", users_count);
             while (users_l) {
                 char buf[20] = {0};
                 sprintf(buf, "%s", users_l->data);
                 send_all(cur->ssl, buf, 20);
                 users_l = users_l->next;
             }
+            printf("users count %d\n", users_count);
             clear_message(message, MAX_LEN + NAME_LEN);
             continue;
         }
@@ -210,7 +212,6 @@ void *client_work(void *param) {
 
             // отправка на клиенты
             pthread_mutex_lock(&send_mutex);
-
             send_new_chat(new_chat);
 
             mx_push_back(&cur->chats, new_chat);
@@ -459,8 +460,8 @@ void *client_work(void *param) {
             t_avatar *avatar = parse_avatar_info(avatar_info);
             char buf[544] = {0};
             sprintf(buf, "<get user avatar>");
-            send_all(cur->cl_socket, buf, 544);
-            send_avatar(avatar, cur->cl_socket);
+            send_all(cur->ssl, buf, 544);
+            send_avatar(avatar, cur->ssl);
         }
         else if (mes_stat > 0) {
             printf("Message Received from %s | %s |\n", login, message);

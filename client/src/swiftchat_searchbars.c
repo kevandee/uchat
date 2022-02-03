@@ -21,7 +21,7 @@ static void get_list_users() {
     t_main.loaded = false;
     char message[512+32] = {0};
     sprintf(message, "<users list>");
-    send(cur_client.serv_fd, message, 512+32, 0);
+    send_all(cur_client.ssl, message, 512+32);
     while (!t_main.loaded)
         usleep(50);
 }

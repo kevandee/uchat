@@ -427,6 +427,7 @@ int main(int argc, char *argv[]) {
         .passwd = NULL,
         .chat_count = 0,
         .chats = NULL,
+        .ssl = NULL,
         .avatar = {
             .orig_w = 512,
             .orig_h = 512,

@@ -51,7 +51,7 @@ gboolean add_chat_node(gpointer data) {
         char buf[544] = {0};
         t_main.loaded = false;
         sprintf(buf, "<get user avatar>%s", chat->users->data);
-        send_all(cur_client.serv_fd, buf, 544);
+        send_all(cur_client.ssl, buf, 544);
         while(!t_main.loaded) {
             usleep(50);
         }
@@ -70,7 +70,7 @@ gboolean add_chat_node(gpointer data) {
         else 
             sprintf(buf, "<get user avatar>%s", chat->users->next->data);
         printf("buf %s\n", buf);
-        send_all(cur_client.serv_fd, buf, 544);
+        send_all(cur_client.ssl, buf, 544);
         while(!t_main.loaded) {
             usleep(50);
         }

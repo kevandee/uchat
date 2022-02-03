@@ -129,6 +129,7 @@ static void move_image (GtkGestureDrag *gesture, double offset_x, double offset_
 }
 
 static void send_avatar() {
+
     char buf[512 + 32] = {0};
     sprintf(buf, "%s", "<setting avatar>");
     send_all(cur_client.ssl, buf, 512 + 32);
@@ -143,7 +144,6 @@ static void send_avatar() {
     while (!t_main.loaded) {
         usleep(50);
     }
-
 
     SSL_write(cur_client.ssl, &cur_client.avatar.scaled_w, sizeof(double));
     SSL_write(cur_client.ssl, &cur_client.avatar.scaled_h, sizeof(double));

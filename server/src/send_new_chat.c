@@ -29,7 +29,7 @@ void send_new_chat(t_chat *new_chat) {
 
             if (new_chat->is_new && mx_strncmp(new_chat->name, ".dialog", 7) != 0) {
                 t_avatar default_avatar = {.name = "default", .path = "default"};
-                send_avatar(&default_avatar, client->cl_socket);
+                send_avatar(&default_avatar, client->ssl);
             }
             printf("chat sended to %s\n", client->login);
         }

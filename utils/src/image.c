@@ -35,7 +35,6 @@ int recv_image(SSL *socket, char *path) {
     while (stat < 0) {
         stat = SSL_read(socket, &size, sizeof(int));
     }
-
     
     printf("Reply sent\n");
 
@@ -53,8 +52,6 @@ int recv_image(SSL *socket, char *path) {
             read_size = SSL_read(socket,imagearray, 10241);
         }
 
-     
-
         //Write the currently read data into our image file
         write_size = fwrite(imagearray,1,read_size, image);
       
@@ -67,9 +64,7 @@ int recv_image(SSL *socket, char *path) {
     }
 
     fclose(image);
-    
     printf("Image successfully Received!\n");
-    
     
     return 1;
 }

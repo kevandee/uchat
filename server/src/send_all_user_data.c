@@ -73,6 +73,7 @@ void send_all_user_data(t_client *client) {
             }
             avatar_info = get_user_avatar(get_user_id(find_user->data));
         }
+
         t_avatar *chat_avatar = parse_avatar_info(avatar_info);
 
         temp_str = chat_avatar->path;
@@ -80,16 +81,15 @@ void send_all_user_data(t_client *client) {
             temp_str = mx_strchr(temp_str,'/') + 1;
         }
         sprintf(buf_name, "%s", temp_str);
-        send_all(client->cl_socket, buf_name, 32);
+        send_all(client->ssl, buf_name, 32);
         clear_message(buf_name, 32);
         if (mx_strcmp(chat_avatar->path, "default") != 0){
-            send_image(client->cl_socket, chat_avatar->path);
-            recv_all(client->cl_socket, buf_name, 14);
-            send(client->cl_socket, &chat_avatar->scaled_w, sizeof(double), 0);
-            send(client->cl_socket, &chat_avatar->scaled_h, sizeof(double), 0);
-            send(client->cl_socket, &chat_avatar->x, sizeof(double), 0);
-            send(client->cl_socket, &chat_avatar->y, sizeof(double), 0);
-        }
-        
+            send_image(client->ssl, chat_avatar->path);
+            recv_all(client->ssl, buf_name, 14);
+            SSL_write(client->ssl, &chat_avatar->scaled_w, sizeof(double));
+            SSL_write(client->ssl, &chat_avatar->scaled_h, sizeof(double));
+            SSL_write(client->ssl, &chat_avatar->x, sizeof(double));
+            SSL_write(client->ssl, &chat_avatar->y, sizeof(double));
+        }       
     }
 }
