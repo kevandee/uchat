@@ -386,7 +386,6 @@ static void load_css() {
     }
 
     get_all_user_data();
-
     create_user_db(cur_client);
 
     GtkWidget *child = gtk_window_get_child(GTK_WINDOW (t_screen.main_window));
@@ -396,18 +395,24 @@ static void load_css() {
     chat_show_main_screen(t_screen.main_window);
 }
 
-static void activate(GtkApplication *application)
-{
+static void activate(GtkApplication *application) {
     t_screen.main_window = gtk_application_window_new (application);
     gtk_window_set_title (GTK_WINDOW ( t_screen.main_window), "Swiftchat");
     gtk_window_set_default_size (GTK_WINDOW ( t_screen.main_window), 1200, 760);
     gtk_window_set_resizable (GTK_WINDOW ( t_screen.main_window), FALSE);
 
-    load_css();
-    chat_show_auth_screen();
-    chat_decorate_headerbar();
-
-    gtk_widget_show(t_screen.main_window);
+    /*struct stat c_buffer;
+    int exist = stat("client_data/client.db", &c_buffer);
+    if (exist == 0) {
+        t_list *temp = user_exec_db("SELECT login, password FROM user;", 1);
+    }*/
+    //РОМА ТУТ НАДО ЗАПУСТИТЬ ГЛАВНЫЙ ЭКРАН ПО КОНКРЕТНОМУ ПОЛЬЗОВАТЕЛЮ (ДАННЫЕ В temp) ИГНОРИРУЮ АВТОРИЗАЦИЮ/РЕГИСТРАЦИЮ
+    //else {
+        load_css();
+        chat_show_auth_screen();
+        chat_decorate_headerbar();
+        gtk_widget_show(t_screen.main_window);
+    //}
 }
 
 int main(int argc, char *argv[]) {

@@ -106,7 +106,7 @@ t_avatar *get_avatar(t_avatar *avatar);
 
 void create_user_db(t_client cur_client);
 void insert_user_db(t_client cur_client);
-void *user_exec_db(char *login, char *query, int type);
+void *user_exec_db(char *query, int type);
 char *get_db_name(char *login);
 
 #endif
