@@ -484,7 +484,6 @@ int main(int argc, char *argv[]) {
         .y = 200
     };
     t_main.default_group_avatar = default_group_avatar;
-<<<<<<< HEAD
     cur_client = cur;;
 
     //      =====   SSLing    =====
@@ -534,17 +533,6 @@ int main(int argc, char *argv[]) {
     printf("SSL: request - %s\nSSL: reply   - %d\n", check_request, tempbool);
     //      =====   SSLing    =====
 
-=======
-    cur_client = cur;
-    // Подключение к серверу, тут ничего менять не надо
-    cur_client.serv_fd = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in adr = {0};
-    adr.sin_family = AF_INET;
-    adr.sin_port = htons(mx_atoi(argv[2]));
-    connect(cur_client.serv_fd, (struct sockaddr *)&adr, sizeof(adr));
-    inet_pton(AF_INET, argv[1], &adr.sin_addr); //"127.0.0.1"
-    cur_client.adr = adr;
->>>>>>> 8c7fe98e29c7cb50dc27472691716efbc7728342
     // Запуск потоков для приёма и отправки сообщений, будем смотреть. Может, придётся переделать под события из гтк
     t_main.loaded = false;
     pthread_t sender_th;

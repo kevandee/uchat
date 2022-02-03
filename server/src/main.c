@@ -452,7 +452,7 @@ void *client_work(void *param) {
             }
 
             sprintf(buf, "<last message>");
-            send_all(cur->cl_socket, buf, 512 + 32);
+            send_all(cur->ssl, buf, 512 + 32);
             //send (cur->cl_socket, &count_mes, sizeof(int), 0);
         }
         else if(mx_strncmp(message, "<get user avatar>", 17) == 0) { //<get user avatar>
