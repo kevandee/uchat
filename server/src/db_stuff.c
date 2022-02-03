@@ -301,7 +301,7 @@ t_list *db_messages_sender(int c_id, int prev) {
  void message_changer(int m_id, char *new_text) {
     char *query = NULL;
     char *sql_pattern = NULL;
-    sql_pattern = "UPDATE messages SET text = '%s' WHERE id = %d;";
+    sql_pattern = "UPDATE messages SET text = '%s', type = 'text_edited' WHERE id = %d;";
     asprintf(&query, sql_pattern, new_text, m_id);
     sqlite3_exec_db(query, 2);
  }

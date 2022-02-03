@@ -39,6 +39,7 @@ void free_client(t_client **client, t_list **users_list);
 t_client *get_client_by_name(char *name);
 
 char *get_weather(char *city);
+char *get_facts();
 
 void sqlite3_create_db();
 void *sqlite3_exec_db(char *query, int type);

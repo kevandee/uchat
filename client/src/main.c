@@ -49,7 +49,14 @@ gboolean add_msg(gpointer data) {
     }   
     else {
         gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
-        gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);           
+        gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
+
+        GtkGesture *gesture = gtk_gesture_click_new();
+        gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
+         gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
+        g_signal_connect_swapped(gesture, "pressed", G_CALLBACK(show_message_menu), incoming_msg_box);
+        gtk_widget_add_controller(incoming_msg_box, GTK_EVENT_CONTROLLER(gesture));
+
         is_sender = true;
     }
     gtk_widget_set_margin_end(incoming_msg_box, 5);
@@ -63,7 +70,7 @@ gboolean add_msg(gpointer data) {
     gtk_label_set_wrap(GTK_LABEL(incoming_msg), TRUE);
     gtk_label_set_wrap_mode(GTK_LABEL(incoming_msg), PANGO_WRAP_WORD_CHAR);
     gtk_label_set_max_width_chars(GTK_LABEL(incoming_msg), 50);
-    gtk_label_set_selectable(GTK_LABEL(incoming_msg), TRUE);
+    gtk_label_set_selectable(GTK_LABEL(incoming_msg), FALSE);
     GtkWidget *User_logo = NULL;
     if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
         if (!is_sender) {
@@ -95,10 +102,11 @@ gboolean add_msg(gpointer data) {
     gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
     if (is_sender && mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0)
         gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
-    if (!message->prev)
+    if (!message->prev) 
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
     else 
         gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
+    t_main.last_mes = incoming_msg_box;
     pthread_mutex_unlock(&cl_mutex);
 
     return FALSE;
@@ -257,20 +265,27 @@ void *rec_func(void *param) {
                     int status = 0;
                     SSL_write(cur_client.ssl, &status, sizeof(int));        
                 }
-                pthread_t display_thread = NULL;
+                
                 if (!prev || t_main.scroll_mes) {           
+                    pthread_t display_thread = NULL;
                     pthread_create(&display_thread, NULL, scroll_func, NULL);  
                 }
-                else {
-                    printf("save\n");
-
-                    pthread_create(&display_thread, NULL, save_scroll_func, NULL);  
-
-                    
-                }
+        
                 printf("%s\n", total_msg);
                 printf("> ");
                 fflush(stdout);
+            }
+            else if(mx_strncmp(message, "<last message>", 14) == 0) {
+                if (!t_main.first_load_mes){
+                    pthread_t display_thread = NULL;
+                    pthread_create(&display_thread, NULL, save_scroll_func, NULL);
+                }
+                else {
+                    printf ("down\n");
+                    pthread_t display_thread = NULL;
+                    pthread_create(&display_thread, NULL, scroll_func, NULL);  
+                    t_main.first_load_mes = false;
+                }  
             }
             else if(mx_strcmp(mx_strtrim(message), "<setting avatar>") == 0) {
                 printf("a\n");
@@ -392,7 +407,6 @@ static void load_css() {
     }
 
     get_all_user_data();
-
     create_user_db(cur_client);
 
     GtkWidget *child = gtk_window_get_child(GTK_WINDOW (t_screen.main_window));
@@ -402,18 +416,24 @@ static void load_css() {
     chat_show_main_screen(t_screen.main_window);
 }
 
-static void activate(GtkApplication *application)
-{
+static void activate(GtkApplication *application) {
     t_screen.main_window = gtk_application_window_new (application);
     gtk_window_set_title (GTK_WINDOW ( t_screen.main_window), "Swiftchat");
     gtk_window_set_default_size (GTK_WINDOW ( t_screen.main_window), 1200, 760);
     gtk_window_set_resizable (GTK_WINDOW ( t_screen.main_window), FALSE);
 
-    load_css();
-    chat_show_auth_screen();
-    chat_decorate_headerbar();
-
-    gtk_widget_show(t_screen.main_window);
+    /*struct stat c_buffer;
+    int exist = stat("client_data/client.db", &c_buffer);
+    if (exist == 0) {
+        t_list *temp = user_exec_db("SELECT login, password FROM user;", 1);
+    }*/
+    //РОМА ТУТ НАДО ЗАПУСТИТЬ ГЛАВНЫЙ ЭКРАН ПО КОНКРЕТНОМУ ПОЛЬЗОВАТЕЛЮ (ДАННЫЕ В temp) ИГНОРИРУЮ АВТОРИЗАЦИЮ/РЕГИСТРАЦИЮ
+    //else {
+        load_css();
+        chat_show_auth_screen();
+        chat_decorate_headerbar();
+        gtk_widget_show(t_screen.main_window);
+    //}
 }
 
 int main(int argc, char *argv[]) {
@@ -464,6 +484,7 @@ int main(int argc, char *argv[]) {
         .y = 200
     };
     t_main.default_group_avatar = default_group_avatar;
+<<<<<<< HEAD
     cur_client = cur;;
 
     //      =====   SSLing    =====
@@ -513,6 +534,17 @@ int main(int argc, char *argv[]) {
     printf("SSL: request - %s\nSSL: reply   - %d\n", check_request, tempbool);
     //      =====   SSLing    =====
 
+=======
+    cur_client = cur;
+    // Подключение к серверу, тут ничего менять не надо
+    cur_client.serv_fd = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in adr = {0};
+    adr.sin_family = AF_INET;
+    adr.sin_port = htons(mx_atoi(argv[2]));
+    connect(cur_client.serv_fd, (struct sockaddr *)&adr, sizeof(adr));
+    inet_pton(AF_INET, argv[1], &adr.sin_addr); //"127.0.0.1"
+    cur_client.adr = adr;
+>>>>>>> 8c7fe98e29c7cb50dc27472691716efbc7728342
     // Запуск потоков для приёма и отправки сообщений, будем смотреть. Может, придётся переделать под события из гтк
     t_main.loaded = false;
     pthread_t sender_th;

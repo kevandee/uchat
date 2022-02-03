@@ -2,11 +2,10 @@
 
 void create_user_db(t_client cur_client) {
     sqlite3 *db;
-    char *db_name = get_db_name(cur_client.login);
     struct stat u_buffer;
-    int exist = stat(db_name, &u_buffer);
+    int exist = stat("client_data/client.db", &u_buffer);
     if (exist != 0) {
-        int rc = sqlite3_open(db_name, &db);
+        int rc = sqlite3_open("client_data/client.db", &db);
         char *sql = NULL, *err_msg = 0;
         if (rc != SQLITE_OK) {
             fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
@@ -14,10 +13,7 @@ void create_user_db(t_client cur_client) {
             exit(EXIT_FAILURE);
         }
         sql = mx_strrejoin(sql, "PRAGMA encoding = \"UTF-8\";");
-        sql = mx_strrejoin(sql, "CREATE TABLE user (id INTEGER NOT NULL, login TEXT NOT NULL, password TEXT NOT NULL, name TEXT DEFAULT \".clear\", surname TEXT DEFAULT \".clear\", bio TEXT DEFAULT \".clear\", avatar TEXT DEFAULT \"default\", theme TEXT DEFAULT dark);");
-        sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER NOT NULL, name TEXT NOT NULL, members INTEGER NOT NULL);");
-        sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT,  chat_id INTEGER NOT NULL, user_name TEXT NOT NULL);");
-        sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER NOT NULL, chat_id INTEGER NOT NULL, user_name TEXT NOT NULL, text TEXT DEFAULT NULL, type TEXT DEFAULT text);");
+        sql = mx_strrejoin(sql, "CREATE TABLE user (id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL);");
         rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
         if (rc != SQLITE_OK) {
             fprintf(stderr, "Failed to select data\n");
@@ -26,13 +22,17 @@ void create_user_db(t_client cur_client) {
             sqlite3_close(db);
             exit(EXIT_FAILURE);
         }
-
-        insert_user_db(cur_client);
-
-
         mx_strdel(&sql);
         sqlite3_close(db);
     }
+    else {
+        user_exec_db("DELETE FROM user;", 2);
+    }
+
+    char *query = NULL;
+    char *sql_pattern = "INSERT INTO user (login, password) VALUES ('%s', '%s');";
+    asprintf(&query, sql_pattern, cur_client.login, cur_client.passwd);
+    user_exec_db(query, 2);
 }
 
 static int callback(void *data, int argc, char **argv, char **azColName) {
@@ -42,7 +42,6 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
     if (argc == 0)
         return 0;
     for (int i = 0; i < argc; i++) {
-        // printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
         if(argv[i] == NULL)
             mx_push_back(*(&list_data), strdup("NULL"));
         else
@@ -51,10 +50,9 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
     return 0;
 }
 
-void *user_exec_db(char *login, char *query, int type) {
+void *user_exec_db(char *query, int type) {
     sqlite3 *db;
-    char *db_name = get_db_name(login);
-    int rc = sqlite3_open(db_name, &db);
+    int rc = sqlite3_open("client_data/client.db", &db);
     char *err_msg = 0;
     t_list *list = NULL;
     int auto_inc;
@@ -74,16 +72,17 @@ void *user_exec_db(char *login, char *query, int type) {
     return NULL;
 }
 
-char *get_db_name(char *login) {
+//FOR PERSONAL DB. RISKY!
+/*char *get_db_name(char *login) {
     struct stat st = {0};
     if (stat(login, &st) == -1) {
         mkdir(login, 0777);
     }
-    char *db_name = NULL;
+    char *"client.db" = NULL;
     char *sql_pattern = "%s/%s.db";
-    asprintf(&db_name, sql_pattern, login, login);
+    asprintf(&"client.db", sql_pattern, login, login);
     
-    return db_name;
+    return "client.db";
 }
 
 
@@ -113,7 +112,7 @@ void insert_user_db(t_client cur_client) {
     }
 }
 
-/*void update_user_db(t_client cur_client) {
+void update_user_db(t_client cur_client) {
     char *query = NULL;
     //USER INFO UPDATE
     char *sql_pattern = "UPDATE user SET login = '%s', password = '%s', name = '%s', surname = '%s', bio = '%s';";

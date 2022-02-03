@@ -46,6 +46,8 @@ struct
     bool loaded;
     bool drawed;
     bool scroll_mes;
+    bool first_load_mes;
+    GtkWidget *last_mes;
     t_list *check_buttons_user_list;
     t_avatar default_avatar;
     t_avatar default_group_avatar;
@@ -97,7 +99,7 @@ cairo_surface_t *scale_to_half(cairo_surface_t *s, int orig_width, int orig_heig
 GtkWidget *get_circle_widget_from_png(const char *filename);
 GtkWidget *get_circle_widget_from_png_custom(const char *filename, gint width, gint height);
 GtkWidget *get_circle_widget_current_user_avatar();
-
+void show_message_menu(gpointer data);
 GtkWidget *get_circle_widget_from_png_avatar(t_avatar *avatar, gint width, gint height, bool must_update);
 t_list *get_chat_users_avatars(t_chat *chat);
 
@@ -108,7 +110,7 @@ t_avatar *get_avatar(t_avatar *avatar);
 
 void create_user_db(t_client cur_client);
 void insert_user_db(t_client cur_client);
-void *user_exec_db(char *login, char *query, int type);
+void *user_exec_db(char *query, int type);
 char *get_db_name(char *login);
 
 //SSLing

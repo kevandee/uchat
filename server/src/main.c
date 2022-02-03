@@ -436,8 +436,8 @@ void *client_work(void *param) {
 
             t_list *mes_list = db_messages_sender(chat_id, mes_id); //DODELAI
             printf("chat_id %d\n", chat_id);
+            char buf[512 + 32] = {0};
             while(mes_list) {
-                char buf[512 + 32] = {0};
                 t_message *mes_send = (t_message *)mes_list->data;
                 sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, mes_send->data);
 
@@ -451,6 +451,8 @@ void *client_work(void *param) {
                 mes_list = mes_list->next;
             }
 
+            sprintf(buf, "<last message>");
+            send_all(cur->cl_socket, buf, 512 + 32);
             //send (cur->cl_socket, &count_mes, sizeof(int), 0);
         }
         else if(mx_strncmp(message, "<get user avatar>", 17) == 0) { //<get user avatar>
@@ -561,7 +563,8 @@ int main(int argc, char *argv[]) {
     pthread_mutex_init(&send_mutex, NULL);
 
     //char *weather = get_weather("Kharkov");
-    //printf("%s\n", weather);
+    char *facts = get_facts();
+    printf("%s\n", facts);
     int client_id = 0;
     int client_fd;
 
