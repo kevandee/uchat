@@ -1,6 +1,6 @@
 #include "../inc/uch_server.h"
 
-size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream) {
+size_t write_data1(void *ptr, size_t size, size_t nmemb, FILE *stream) {
     size_t written;
     written = fwrite(ptr, size, nmemb, stream);
     return written;
@@ -19,7 +19,7 @@ char *get_weather(char *city) {
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data); 
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data1); 
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
