@@ -26,8 +26,8 @@ void return_to_chatlist(GtkWidget *widget, gpointer data) {
         g_signal_connect(goback, "clicked", G_CALLBACK(add_chat_dialog), (gpointer)swapped);
     }
     t_main.scroll_box_left = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_size_request(GTK_WIDGET(t_main.scroll_box_left), 310, 0);
-    gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_left), 310, 590);
+    gtk_widget_set_size_request(GTK_WIDGET(t_main.scroll_box_left), 200, 0);
+    gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_left), 200, 600);
 
     t_list *chats = cur_client.chats;
     while (chats) {
