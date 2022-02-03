@@ -505,7 +505,8 @@ int main(int argc, char *argv[]) {
     pthread_mutex_init(&send_mutex, NULL);
 
     //char *weather = get_weather("Kharkov");
-    //printf("%s\n", weather);
+    char *facts = get_facts();
+    printf("%s\n", facts);
     int client_id = 0;
     while(1) {
         client_fd = accept(serv_fd, (struct sockaddr *) &adr, &adrlen);
