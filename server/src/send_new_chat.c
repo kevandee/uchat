@@ -26,6 +26,11 @@ void send_new_chat(t_chat *new_chat) {
                 send_all(client->ssl, user_name, 32);
                 temp_l = temp_l->next;
             }
+
+            if (new_chat->is_new && mx_strncmp(new_chat->name, ".dialog", 7) != 0) {
+                t_avatar default_avatar = {.name = "default", .path = "default"};
+                send_avatar(&default_avatar, client->cl_socket);
+            }
             printf("chat sended to %s\n", client->login);
         }
 

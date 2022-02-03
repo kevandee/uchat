@@ -30,11 +30,15 @@ static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
     while (temp->next) {
         temp = temp->next;
     }
-
+    gtk_widget_hide(widget);
     show_chat_history(widget, temp->data);
+    //return_to_chatlist(NULL, NULL);
 }
 
-void add_chat_node(t_chat *chat) {
+///gboolean add_msg(gpointer data)
+gboolean add_chat_node(gpointer data) {
+    t_chat *chat = data;
+    printf ("/// chat name %s ///\n", chat->name);
     GtkWidget *child_widget = gtk_button_new ();
     gtk_widget_set_size_request(child_widget, 200, 54);
     gtk_widget_set_name(GTK_WIDGET(child_widget), "scroll_buttons_border");
@@ -43,7 +47,42 @@ void add_chat_node(t_chat *chat) {
     gtk_widget_set_name(GTK_WIDGET(chat_info), "scroll_buttons");
     load_css_main(t_screen.provider, chat_info);
 
-    GtkWidget *chat_image = get_circle_widget_from_png_custom("test_circle.png", 57, 57);
+    if (mx_strcmp(chat->name, ".new_dialog") == 0) {
+        char buf[544] = {0};
+        t_main.loaded = false;
+        sprintf(buf, "<get user avatar>%s", chat->users->data);
+        send_all(cur_client.serv_fd, buf, 544);
+        while(!t_main.loaded) {
+            usleep(50);
+        }
+        chat->avatar = *t_main.loaded_avatar;
+        if (mx_strcmp(chat->avatar.name, "default") == 0) {
+            printf("1\n");
+            chat->avatar = t_main.default_avatar;
+        }
+    }
+    else if (mx_strncmp(chat->name, ".dialog", 7) == 0 && chat->is_new && !chat->is_avatar) {
+        chat->is_new = false;
+        char buf[544] = {0};
+        t_main.loaded = false;
+        if (mx_strcmp(cur_client.login, chat->users->data) != 0)
+            sprintf(buf, "<get user avatar>%s", chat->users->data);
+        else 
+            sprintf(buf, "<get user avatar>%s", chat->users->next->data);
+        printf("buf %s\n", buf);
+        send_all(cur_client.serv_fd, buf, 544);
+        while(!t_main.loaded) {
+            usleep(50);
+        }
+        chat->avatar = *t_main.loaded_avatar;
+        if (mx_strcmp(chat->avatar.name, "default") == 0) {
+            printf("1\n");
+            chat->avatar = t_main.default_avatar;
+        }
+    }
+
+    printf ("chat name %s\n", chat->avatar.name);
+    GtkWidget *chat_image = get_circle_widget_from_png_avatar(&chat->avatar, 57, 57, false);
     gtk_widget_set_size_request(GTK_WIDGET(chat_image),  57, 0);
     gtk_widget_set_halign(GTK_WIDGET(chat_image), GTK_ALIGN_FILL);
     gtk_widget_set_valign(GTK_WIDGET(chat_image), GTK_ALIGN_CENTER);
@@ -88,4 +127,5 @@ void add_chat_node(t_chat *chat) {
         g_signal_connect(child_widget, "clicked", G_CALLBACK(show_chat_history), chat);
     }
     gtk_box_append(GTK_BOX(t_main.scroll_box_left), child_widget);
+    return FALSE;
 }

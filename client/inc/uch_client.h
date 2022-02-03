@@ -37,12 +37,19 @@ struct
     GtkWidget *right_panel;
     GtkWidget *scroll_box_right;
     GtkWidget *scrolled_window_right;
+    double adj_pos;
+    GtkWidget *sticker_panel;
+    GtkWidget *sticker_scroll_box;
+    GtkWidget *sticker_scroll_window;
 
     t_list *search_users_list;
     bool loaded;
     bool drawed;
+    bool scroll_mes;
     t_list *check_buttons_user_list;
     t_avatar default_avatar;
+    t_avatar default_group_avatar;
+    t_avatar *loaded_avatar;
 }   t_main;
 
 struct
@@ -74,9 +81,12 @@ void show_chat_history(GtkWidget *widget, gpointer data);
 void return_to_chatlist(GtkWidget *widget, gpointer data);
 void add_chat_dialog(GtkWidget *widget, gpointer data);
 
+void *scroll_func();
+void *save_scroll_func();
+
 void send_login(GtkWidget *widget, gpointer data);
 void chat_show_main_screen(GtkWidget *window);
-void add_chat_node(t_chat *chat);
+gboolean add_chat_node(gpointer data);
 int check_auth_input(const char *str);
 
 void text_changed_main_screen(GObject *object, GParamSpec *pspec, gpointer data);
@@ -94,8 +104,9 @@ t_list *get_chat_users_avatars(t_chat *chat);
 
 void get_all_user_data();
 void get_messages_from_server(int c_id, int mes_id);
+t_avatar *get_avatar(t_avatar *avatar);
 
-void create_user_db(char *login);
+void create_user_db(t_client cur_client);
 void insert_user_db(t_client cur_client);
 void *user_exec_db(char *login, char *query, int type);
 char *get_db_name(char *login);

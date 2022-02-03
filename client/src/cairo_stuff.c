@@ -16,8 +16,8 @@ static void draw_circle_avatar(GtkDrawingArea *widget, cairo_t *cr, int w, int h
 
     cairo_set_source_surface (cr, image, (avatar->x - 200)* width/avatar->scaled_w , (avatar->y - 200)* height/avatar->scaled_h); 
     
-    printf ("w %d width %f\nh %d height %f\n", w, width, h, height);
-    printf("x %f y %f\n", avatar->x, avatar->y);
+    //printf ("w %d width %f\nh %d height %f\n", w, width, h, height);
+    //printf("x %f y %f\n", avatar->x, avatar->y);
 
     cairo_arc(cr, w/2, h/2, w/2, 0, 2 * M_PI);
     cairo_clip(cr);

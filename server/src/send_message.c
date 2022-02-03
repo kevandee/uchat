@@ -11,7 +11,7 @@ void send_message(char *mes, char *sender, t_chat *chat) {
 
     char buf[512 + 32] = {0};
     if (chat)
-        sprintf(buf, "<msg, chat_id=%d, from=%s, prev=0>%s", chat->id, sender, mes);
+        sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, prev=0>%s", chat->id, chat->last_mes_id, sender, mes);
     pthread_mutex_lock(&send_mutex);
     int count = 0;
     

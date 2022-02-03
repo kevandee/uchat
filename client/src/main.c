@@ -93,13 +93,14 @@ gboolean add_msg(gpointer data) {
     }
 
     gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
-    if (is_sender)
+    if (is_sender && mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0)
         gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
     if (!message->prev)
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
     else 
         gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
     pthread_mutex_unlock(&cl_mutex);
+
     return FALSE;
 }
 
@@ -117,6 +118,7 @@ void *rec_func(void *param) {
             printf("|%s|\n", message);
             if(mx_strcmp(mx_strtrim(message), "<add chat>") == 0) {
                 t_chat *new_chat = (t_chat *)malloc(sizeof(t_chat));
+                new_chat->is_new = true;
                 new_chat->messages = NULL;
                 new_chat->users = NULL;
 
@@ -144,9 +146,29 @@ void *rec_func(void *param) {
                     mx_push_back(&new_chat->users,mx_strdup(buf));
                     clear_message(buf, 32);
                 }
+                /////// аватарка чата
+                if (mx_strncmp(new_chat->name, ".dialog", 7) !=0) {
+                    printf("a\n");
+                    t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
+                    get_avatar(t_main.loaded_avatar);
+                    printf("gets avatar\n");
+                    new_chat->avatar=*t_main.loaded_avatar;
+                    if (mx_strcmp(new_chat->avatar.name, "default") == 0) {
+                        if (mx_strncmp(new_chat->name, ".dialog", 7) != 0)
+                            new_chat->avatar = t_main.default_group_avatar;
+                        else
+                            new_chat->avatar = t_main.default_avatar;
+                    }
+                    new_chat->is_avatar = true;
+                }
+                else {
+                    new_chat->is_avatar = false;
+                }
+
+                //////
                 mx_push_back(&cur_client.chats, new_chat);
                 if (!cur_client.sender_new_chat){
-                    add_chat_node(new_chat);
+                    g_idle_add(add_chat_node, new_chat);
                 }
                 else {
                     cur_client.sender_new_chat = false;
@@ -179,7 +201,7 @@ void *rec_func(void *param) {
                 t_main.loaded = true;
 
             }
-            else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0){
+            else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0){ // "<msg, chat_id=%d, mes_id=%d, from=%s, prev=1>%s"
                 char *temp = message + 14;
                 int len = 0;
                 while (*(temp + len) != ',') {
@@ -189,6 +211,15 @@ void *rec_func(void *param) {
                 printf("%s\n", c_id);
                 int chat_id = mx_atoi(c_id);                        // ид чата, в который надо вставить сообщение
                 (void)chat_id; // избавляюсь от unused variable
+                mx_strdel(&c_id);
+                temp = mx_strstr(message, "mes_id=") + 7;
+                len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *mes_id = mx_strndup(temp, len);
+                printf("%s\n", mes_id);
+                int message_id = mx_atoi(mes_id);
                 mx_strdel(&c_id);
                 temp = mx_strstr(message, "from=") + 5;
                 len = 0;
@@ -206,17 +237,17 @@ void *rec_func(void *param) {
                 printf("%s\n", total_msg);
                 t_message mes = {
                     .c_id = chat_id,
-                    .prev = prev
+                    .prev = prev,
+                    .id = message_id
                 };
-            
                 mx_strcpy(mes.sender, sender);
                 mx_strcpy(mes.data, total_msg);
                 if (cur_client.cur_chat.id == chat_id) {
                     pthread_mutex_lock(&cl_mutex);
                     g_idle_add(add_msg, &mes);
-                    
                     pthread_mutex_lock(&cl_mutex);
                     if (prev) {
+                        cur_client.cur_chat.last_mes_id = mes.id;
                         int status = 1;
                         SSL_write(cur_client.ssl, &status, sizeof(int));
                     }
@@ -224,9 +255,19 @@ void *rec_func(void *param) {
                 }
                 else if (prev) {
                     int status = 0;
-                    SSL_write(cur_client.ssl, &status, sizeof(int));
+                    SSL_write(cur_client.ssl, &status, sizeof(int));        
                 }
-                
+                pthread_t display_thread = NULL;
+                if (!prev || t_main.scroll_mes) {           
+                    pthread_create(&display_thread, NULL, scroll_func, NULL);  
+                }
+                else {
+                    printf("save\n");
+
+                    pthread_create(&display_thread, NULL, save_scroll_func, NULL);  
+
+                    
+                }
                 printf("%s\n", total_msg);
                 printf("> ");
                 fflush(stdout);
@@ -240,6 +281,13 @@ void *rec_func(void *param) {
                 cur_client.avatar.path = mx_strdup(buf);
 
                 printf("setts avatar\n");
+                t_main.loaded = true;
+            }
+            if(mx_strncmp(mx_strtrim(message), "<get user avatar>",17) == 0) {
+                printf("a\n");
+                t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
+                get_avatar(t_main.loaded_avatar);
+                printf("gets avatar %s\n", t_main.loaded_avatar->name);
                 t_main.loaded = true;
             }
             else if(mx_strcmp(mx_strtrim(message), "<image loaded>") == 0) {
@@ -345,8 +393,7 @@ static void load_css() {
 
     get_all_user_data();
 
-    create_user_db(cur_client.login);
-    insert_user_db(cur_client);
+    create_user_db(cur_client);
 
     GtkWidget *child = gtk_window_get_child(GTK_WINDOW (t_screen.main_window));
     
@@ -404,6 +451,18 @@ int main(int argc, char *argv[]) {
         .y = 200
     };
     t_main.default_avatar = default_avatar;
+    t_avatar default_group_avatar = {
+        .orig_w = 512,
+        .orig_h = 512,
+        .scaled_w = 300,
+        .scaled_h = 300,
+        .image = NULL,
+        .path = "client/media/default_groupchat.png",
+        .name = "default_groupchat.png", 
+        .x = 200,
+        .y = 200
+    };
+    t_main.default_group_avatar = default_group_avatar;
     cur_client = cur;;
 
     //      =====   SSLing    =====

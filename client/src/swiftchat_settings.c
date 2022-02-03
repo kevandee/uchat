@@ -293,6 +293,10 @@ static void send_settings(GtkWidget *widget, gpointer data) {
 
 void show_settings() 
 {
+    if(t_main.sticker_panel)
+    {
+        gtk_widget_hide(t_main.sticker_panel);
+    }
     gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.settings);
     t_actives.settings = gtk_image_new_from_file("client/media/setting_active.png");
     gtk_widget_set_name(GTK_WIDGET(t_actives.settings), "settings_icon");

@@ -191,6 +191,7 @@ void *client_work(void *param) {
             int *data = sqlite3_exec_db(query, 2);
             int c_id = data[0];
             new_chat->id = c_id;
+            new_chat->is_new = true;
             t_list *temp_list = new_chat->users;
             int admin = 1;
             while (temp_list) {
@@ -367,11 +368,9 @@ void *client_work(void *param) {
             char *sql_pattern = NULL;
             sql_pattern = "INSERT INTO messages (chat_id, user_id, text) VALUES (%d, %d, '%s');";
             asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, mx_strchr(message, '>') + 1);
-            sqlite3_exec_db(query, 2);
-            char buf[544] = {0};
-            sprintf(buf, "<msg, chat_id=%d, from=%s, prev=1>%s", chat_id, cur->login, mx_strchr(message, '>') + 1);
+            int *mes_id = sqlite3_exec_db(query, 2);
 
-
+            cur->cur_chat.last_mes_id = *mes_id;
             send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat);
             clear_message(message, MAX_LEN + NAME_LEN);
         }
@@ -423,12 +422,23 @@ void *client_work(void *param) {
             int chat_id = mx_atoi(c_id);
             printf("c_id %s\n", c_id);
             mx_strdel(&c_id);
-            t_list *mes_list = db_messages_sender(chat_id);
+
+            temp = mx_strstr(message, "last_mes=") + 9;
+            len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            char *m_id = mx_strndup(temp, len);
+            int mes_id = mx_atoi(m_id);
+            printf("m_id %s\n", m_id);
+            mx_strdel(&m_id);
+
+            t_list *mes_list = db_messages_sender(chat_id, mes_id); //DODELAI
             printf("chat_id %d\n", chat_id);
             while(mes_list) {
                 char buf[512 + 32] = {0};
                 t_message *mes_send = (t_message *)mes_list->data;
-                sprintf(buf, "<msg, chat_id=%d, from=%s, prev=1>%s", chat_id, mes_send->sender, mes_send->data);
+                sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, mes_send->data);
 
                 send_all(cur->ssl, buf, 512 + 32);
 
@@ -441,6 +451,16 @@ void *client_work(void *param) {
             }
 
             //send (cur->cl_socket, &count_mes, sizeof(int), 0);
+        }
+        else if(mx_strncmp(message, "<get user avatar>", 17) == 0) { //<get user avatar>
+            char *user_name = message + 17;
+            printf("get user avatar %s\n", user_name);
+            char *avatar_info = get_user_avatar(get_user_id(user_name));
+            t_avatar *avatar = parse_avatar_info(avatar_info);
+            char buf[544] = {0};
+            sprintf(buf, "<get user avatar>");
+            send_all(cur->cl_socket, buf, 544);
+            send_avatar(avatar, cur->cl_socket);
         }
         else if (mes_stat > 0) {
             printf("Message Received from %s | %s |\n", login, message);
@@ -538,6 +558,9 @@ int main(int argc, char *argv[]) {
     pthread_t thread;
     users_list = NULL;
     pthread_mutex_init(&send_mutex, NULL);
+
+    //char *weather = get_weather("Kharkov");
+    //printf("%s\n", weather);
     int client_id = 0;
     int client_fd;
 
