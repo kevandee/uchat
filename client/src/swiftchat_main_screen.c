@@ -338,19 +338,19 @@ static void hide_stickers(gpointer data)
 {
     GtkWidget **change = data;
     gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 818, 588);
-    gtk_widget_set_size_request(change[0], 800, 0);
+    gtk_widget_set_size_request(change[0], 750, 0);
     gtk_grid_set_column_spacing (GTK_GRID(change[1]), 535);
     gtk_box_remove(GTK_BOX(change[2]), change[3]);
     change[3] = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     change[4] = gtk_image_new_from_file("client/media/sticker.png");
-    gtk_widget_set_size_request(change[4], 20, 20);
+    gtk_widget_set_size_request(change[4], 35, 35);
     gtk_box_append(GTK_BOX(change[3]), change[4]);
 
     GtkGesture *click_stickers = gtk_gesture_click_new();
     gtk_gesture_set_state(click_stickers, GTK_EVENT_SEQUENCE_CLAIMED);
     g_signal_connect_swapped(click_stickers, "pressed", G_CALLBACK(show_stickers), (gpointer)change);
     gtk_widget_add_controller(change[4], GTK_EVENT_CONTROLLER(click_stickers));
-    gtk_box_append(GTK_BOX(change[2]), change[3]);
+    gtk_box_insert_child_after(GTK_BOX(change[2]), change[3], change[6]);
 
     gtk_widget_hide(t_main.sticker_panel);
 }
@@ -364,8 +364,9 @@ static void show_stickers(gpointer data)
     gtk_box_remove(GTK_BOX(change[2]), change[3]);
     change[3] = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     change[4] = gtk_image_new_from_file("client/media/sticker_active.png");
-    gtk_widget_set_size_request(change[4], 20, 20);
+    gtk_widget_set_size_request(change[4], 35, 35);
     gtk_box_append(GTK_BOX(change[3]), change[4]);
+    gtk_box_insert_child_after(GTK_BOX(change[2]), change[3], change[6]);
 
     t_main.sticker_scroll_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_valign(GTK_WIDGET(t_main.sticker_scroll_box), GTK_ALIGN_END);
@@ -419,7 +420,6 @@ static void show_stickers(gpointer data)
     gtk_gesture_set_state(click_stickers, GTK_EVENT_SEQUENCE_CLAIMED);
     g_signal_connect_swapped(click_stickers, "pressed", G_CALLBACK(hide_stickers), (gpointer)change);
     gtk_widget_add_controller(change[4], GTK_EVENT_CONTROLLER(click_stickers));
-    gtk_box_append(GTK_BOX(change[2]), change[3]);
 
 }
 
@@ -541,10 +541,10 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     load_css_main(t_screen.provider, write_box);
     gtk_widget_set_halign(GTK_WIDGET(write_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(write_box), GTK_ALIGN_START);
-    gtk_box_set_spacing(GTK_BOX(write_box), 10);
+    gtk_box_set_spacing(GTK_BOX(write_box), 5);
     GtkWidget *write_message = gtk_text_view_new();
     gtk_widget_set_name(GTK_WIDGET(write_message), "write_message");
-    gtk_widget_set_size_request(write_message, 800, 0);
+    gtk_widget_set_size_request(write_message, 750, 0);
     load_css_main(t_screen.provider, write_message);
     GtkTextBuffer *bio_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (write_message));
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(write_message), GTK_WRAP_WORD_CHAR);
@@ -562,15 +562,20 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     load_css_main(t_screen.provider, write_message_scroll);
     GtkWidget *stickers_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     GtkWidget *stickers = gtk_image_new_from_file("client/media/sticker.png");
-    gtk_widget_set_size_request(stickers, 20, 20);
+    gtk_widget_set_size_request(stickers, 35, 35);
+    GtkWidget *attach_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *attach = gtk_image_new_from_file("client/media/attach.png");
+    gtk_widget_set_size_request(attach, 35, 35);
+    gtk_box_append(GTK_BOX(attach_box), attach);
     
-    GtkWidget **resize = (GtkWidget **)malloc(6 * sizeof(GtkWidget *));
+    GtkWidget **resize = (GtkWidget **)malloc(7 * sizeof(GtkWidget *));
     resize[0] = write_message;
     resize[1] = chat_headerbar;
     resize[2] = write_box;
     resize[3] = stickers_box;
     resize[4] = stickers;
     resize[5] = data;
+    resize[6] = write_message_scroll;
     GtkGesture *click_sstickers = gtk_gesture_click_new();
     gtk_gesture_set_state(click_sstickers, GTK_EVENT_SEQUENCE_CLAIMED);
     g_signal_connect_swapped(click_sstickers, "pressed", G_CALLBACK(show_stickers), (gpointer)resize);
@@ -579,6 +584,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
 
     gtk_box_append(GTK_BOX(write_box), write_message_scroll);
     gtk_box_append(GTK_BOX(write_box), stickers_box);
+    gtk_box_append(GTK_BOX(write_box), attach_box);
 
     gtk_box_append(GTK_BOX(t_main.right_panel), chat_headerbar);
     gtk_box_append(GTK_BOX(t_main.right_panel), t_main.scrolled_window_right);
