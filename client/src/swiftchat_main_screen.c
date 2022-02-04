@@ -1,6 +1,6 @@
 #include "../inc/uch_client.h"
  
-static void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
+void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
 {
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
     gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -295,8 +295,10 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
 
             gtk_box_append(GTK_BOX(my_msg_box), msg);
             if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
+                GtkWidget *user_logo_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
                 GtkWidget *user_logo = get_circle_widget_current_user_avatar();
-                gtk_box_append(GTK_BOX(my_msg_box), user_logo);
+                gtk_box_append(GTK_BOX(user_logo_box), user_logo);
+                gtk_box_append(GTK_BOX(my_msg_box), user_logo_box);
             }
             gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
 
@@ -342,7 +344,9 @@ static void hide_stickers(gpointer data)
     gtk_grid_set_column_spacing (GTK_GRID(change[1]), 535);
     gtk_box_remove(GTK_BOX(change[2]), change[3]);
     change[3] = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    change[4] = gtk_image_new_from_file("client/media/sticker.png");
+    if(cur_client.theme == DARK_THEME)
+        change[4] = gtk_image_new_from_file("client/media/sticker.png");
+    else change[4] = gtk_image_new_from_file("client/media/search_ico_grey.png");
     gtk_widget_set_size_request(change[4], 27, 27);
     gtk_box_append(GTK_BOX(change[3]), change[4]);
 
@@ -387,12 +391,14 @@ static void show_stickers(gpointer data)
         {
             //GError *error = NULL;
             //GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(mx_strjoin(mx_strjoin("client/media/withoutbg/", mx_itoa(sticker_num)), ".png"), &error);
+            //GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file("/Users/romanlitvinov/zTraining/uchat/client/media/stickers/sticker.png", &error);
             //single = gtk_image_new_from_pixbuf (pixbuf);
-            //single = gtk_image_new_from_file(mx_strjoin(mx_strjoin("client/media/withoutbg/", mx_itoa(sticker_num++)), ".png"));
-            single = gtk_image_new_from_file("client/media/video-calling.png");
+            single = gtk_image_new_from_file(mx_strjoin(mx_strjoin("client/media/stickers/", mx_itoa(sticker_num)), ".png"));
+            //single = gtk_image_new_from_file("client/media/1.png");
             gtk_widget_set_size_request(GTK_WIDGET(single), 70, 70);
             gtk_grid_attach(GTK_GRID(stickers), single, j, i, 1, 1);
             gtk_widget_set_name(GTK_WIDGET(single), "stickers");
+            //if(error) g_print("%s\n", error->message);
             if(sticker_num > 60) break;
             sticker_num++;
         }
@@ -463,8 +469,22 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     
     cur_client.avatar.image = scale_to_half(image, org_width, org_height, cur_client.avatar.scaled_w * 45/300, cur_client.avatar.scaled_h * 45/300);
 
+    gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.home);
+    if(cur_client.theme == DARK_THEME)
+        t_actives.home = gtk_image_new_from_file("client/media/home.png");
+    else t_actives.home = gtk_image_new_from_file("client/media/home_light.png");
+    gtk_widget_set_name(GTK_WIDGET(t_actives.home), "home_icon");
+    load_css_main(t_screen.provider, t_actives.home);
+    GtkGesture *click_home = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_home, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_home, "pressed", G_CALLBACK(show_home), NULL);
+    gtk_widget_add_controller(t_actives.home, GTK_EVENT_CONTROLLER(click_home));
+    gtk_box_append(GTK_BOX(t_main.search_panel), t_actives.home);
+
     gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.settings);
-    t_actives.settings = gtk_image_new_from_file("client/media/settings.png");
+    if(cur_client.theme == DARK_THEME)
+        t_actives.settings = gtk_image_new_from_file("client/media/settings.png");
+    else t_actives.settings = gtk_image_new_from_file("client/media/setting_light.png");
     gtk_widget_set_name(GTK_WIDGET(t_actives.settings), "settings_icon");
     load_css_main(t_screen.provider, t_actives.settings);
     GtkGesture *click_settings = gtk_gesture_click_new();
@@ -569,10 +589,17 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_scrolled_window_set_propagate_natural_width (GTK_SCROLLED_WINDOW(write_message_scroll),true);
     load_css_main(t_screen.provider, write_message_scroll);
     GtkWidget *stickers_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    GtkWidget *stickers = gtk_image_new_from_file("client/media/sticker.png");
+    GtkWidget *stickers = NULL;
+    if(cur_client.theme == DARK_THEME)
+        stickers = gtk_image_new_from_file("client/media/sticker.png");
+    else stickers = gtk_image_new_from_file("client/media/search_ico_grey.png");
+    //GtkWidget *stickers = gtk_image_new_from_file("client/media/sticker.png");
     gtk_widget_set_size_request(stickers, 27, 27);
     GtkWidget *attach_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    GtkWidget *attach = gtk_image_new_from_file("client/media/attach_img.png");
+    GtkWidget *attach = NULL;
+    if(cur_client.theme == DARK_THEME)
+        attach = gtk_image_new_from_file("client/media/attach_img.png");
+    else attach = gtk_image_new_from_file("client/media/search_ico_grey.png");
     gtk_widget_set_size_request(attach, 27, 27);
     gtk_box_append(GTK_BOX(attach_box), attach);
     
@@ -584,6 +611,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     resize[4] = stickers;
     resize[5] = data;
     resize[6] = write_message_scroll;
+
     GtkGesture *click_sstickers = gtk_gesture_click_new();
     gtk_gesture_set_state(click_sstickers, GTK_EVENT_SEQUENCE_CLAIMED);
     g_signal_connect_swapped(click_sstickers, "pressed", G_CALLBACK(show_stickers), (gpointer)resize);
@@ -604,7 +632,18 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     t_main.first_load_mes = true;
 }
 
-static void show_home() {
+void show_home() {
+    gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.settings);
+    if(cur_client.theme == DARK_THEME)
+        t_actives.settings = gtk_image_new_from_file("client/media/settings.png");
+    else t_actives.settings = gtk_image_new_from_file("client/media/setting_light.png");
+    gtk_widget_set_name(GTK_WIDGET(t_actives.settings), "settings_icon");
+    load_css_main(t_screen.provider, t_actives.settings);
+    GtkGesture *click_settings = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_settings, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_settings, "pressed", G_CALLBACK(show_settings), NULL);
+    gtk_widget_add_controller(t_actives.settings, GTK_EVENT_CONTROLLER(click_settings));
+    gtk_box_append(GTK_BOX(t_main.search_panel), t_actives.settings);
     if(t_main.sticker_panel)
     {
         gtk_widget_hide(t_main.sticker_panel);

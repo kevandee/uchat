@@ -1,13 +1,5 @@
 #include "../inc/uch_client.h"
 
-
-static void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
-{
-    GtkStyleContext *context = gtk_widget_get_style_context(widget);
-    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-
-}
-
 static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
 {
     gint count=gtk_text_buffer_get_char_count(buffer);
@@ -299,6 +291,20 @@ void show_settings()
     {
         gtk_widget_hide(t_main.sticker_panel);
     }
+
+    gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.home);
+    if(cur_client.theme == DARK_THEME)
+        t_actives.home = gtk_image_new_from_file("client/media/home.png");
+    else t_actives.home = gtk_image_new_from_file("client/media/home_light.png");
+    gtk_widget_set_name(GTK_WIDGET(t_actives.home), "home_icon");
+    load_css_main(t_screen.provider, t_actives.home);
+    GtkGesture *click_home = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_home, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_home, "pressed", G_CALLBACK(show_home), NULL);
+    gtk_widget_add_controller(t_actives.home, GTK_EVENT_CONTROLLER(click_home));
+    gtk_box_append(GTK_BOX(t_main.search_panel), t_actives.home);
+
+
     gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.settings);
     t_actives.settings = gtk_image_new_from_file("client/media/setting_active.png");
     gtk_widget_set_name(GTK_WIDGET(t_actives.settings), "settings_icon");

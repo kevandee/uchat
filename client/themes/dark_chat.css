@@ -324,8 +324,11 @@ scrolledwindow {
 }
 
 #scroll_buttons_border {
-  background:transparent;
-  border: transparent;
+  background: transparent;
+  outline-color: transparent;
+  border-color: transparent;
+  color: transparent;
+  box-shadow: none;
 }
 
 #chat_name {
