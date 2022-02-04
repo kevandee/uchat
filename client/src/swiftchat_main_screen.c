@@ -260,6 +260,7 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
 
     if (keyval == GDK_KEY_Return) 
     {
+        
         GtkWidget *entry = user_data;
         GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(entry));
         GtkTextIter start, end ;
@@ -275,34 +276,38 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         char *str = mx_strnew(1024);
         str = mx_strncpy(str, buf_str, mx_strlen(buf_str) - 1);
         char message[512 + 32] = {0};
-        sprintf(message, "<msg, chat_id= %d>%s", cur_client.cur_chat.id, str);
+        if (!t_main.message_change_id) {
+            sprintf(message, "<msg, chat_id= %d>%s", cur_client.cur_chat.id, str);
 
-        GtkWidget *my_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
-        
-        gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
-        gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
-        gtk_widget_set_margin_end(my_msg_box, 5);
-        gtk_widget_set_margin_bottom(my_msg_box, 5);
-        GtkWidget *msg = gtk_label_new(str);
-        gtk_widget_set_name(GTK_WIDGET(msg), "message");
-        load_css_main(t_screen.provider, msg);
-        gtk_label_set_wrap(GTK_LABEL(msg), TRUE);
-        gtk_label_set_wrap_mode(GTK_LABEL(msg), PANGO_WRAP_WORD_CHAR);
-        gtk_label_set_max_width_chars(GTK_LABEL(msg), 50);
-        gtk_label_set_selectable(GTK_LABEL(msg), FALSE);
+            GtkWidget *my_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+            
+            gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
+            gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
+            gtk_widget_set_margin_end(my_msg_box, 5);
+            gtk_widget_set_margin_bottom(my_msg_box, 5);
+            GtkWidget *msg = gtk_label_new(str);
+            gtk_widget_set_name(GTK_WIDGET(msg), "message");
+            load_css_main(t_screen.provider, msg);
+            gtk_label_set_wrap(GTK_LABEL(msg), TRUE);
+            gtk_label_set_wrap_mode(GTK_LABEL(msg), PANGO_WRAP_WORD_CHAR);
+            gtk_label_set_max_width_chars(GTK_LABEL(msg), 50);
+            gtk_label_set_selectable(GTK_LABEL(msg), FALSE);
 
-        gtk_box_append(GTK_BOX(my_msg_box), msg);
-        if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
-            GtkWidget *user_logo = get_circle_widget_current_user_avatar();
-            gtk_box_append(GTK_BOX(my_msg_box), user_logo);
+            gtk_box_append(GTK_BOX(my_msg_box), msg);
+            if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
+                GtkWidget *user_logo = get_circle_widget_current_user_avatar();
+                gtk_box_append(GTK_BOX(my_msg_box), user_logo);
+            }
+            gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
+
+            pthread_t display_thread = NULL;
+            pthread_create(&display_thread, NULL, scroll_func, NULL);
         }
-        gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
+        else {
+            sprintf(message, "<edit msg, chat_id=%d, mes_id=%d>%s", cur_client.cur_chat.id, t_main.message_change_id, str);
+        }           
 
-        pthread_t display_thread = NULL;
-        pthread_create(&display_thread, NULL, scroll_func, NULL);
-
-
-        SSL_write(cur_client.ssl, message, 512+32);
+        send_all(cur_client.ssl, message, 512+32);
         gtk_text_buffer_set_text (buffer, "", 0);
     }
 }
@@ -440,6 +445,8 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     if (cur_client.cur_chat.id == ((t_chat *)data)->id) {
         return;
     }
+    mx_clear_ldata(&cur_client.cur_chat.messages);
+    mx_clear_list(&cur_client.cur_chat.messages);
 
     printf("id of chat %d\n", ((t_chat *)data)->id);
     cur_client.cur_chat = *((t_chat *)data);
@@ -541,6 +548,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     load_css_main(t_screen.provider, write_message);
     GtkTextBuffer *bio_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (write_message));
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(write_message), GTK_WRAP_WORD_CHAR);
+    t_main.message_input_view = write_message;
 
     g_signal_connect_after(bio_buffer, "insert-text", G_CALLBACK(insert_text_bio), NULL);
     GtkEventController *return_controller = gtk_event_controller_key_new();

@@ -44,6 +44,10 @@ struct
     GtkWidget *sticker_panel;
     GtkWidget *sticker_scroll_box;
     GtkWidget *sticker_scroll_window;
+    GtkWidget *message_input_view;
+
+    int message_change_id;
+    t_list *message_widgets_list;
 
     t_list *search_users_list;
     bool loaded;
