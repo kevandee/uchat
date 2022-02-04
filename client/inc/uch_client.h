@@ -21,6 +21,9 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+#define DARK_THEME 1
+#define LIGHT_THEME 2
+
 extern t_client cur_client;
 extern pthread_mutex_t cl_mutex;
 
@@ -41,6 +44,10 @@ struct
     GtkWidget *sticker_panel;
     GtkWidget *sticker_scroll_box;
     GtkWidget *sticker_scroll_window;
+    GtkWidget *message_input_view;
+
+    int message_change_id;
+    t_list *message_widgets_list;
 
     t_list *search_users_list;
     bool loaded;
@@ -117,5 +124,9 @@ char *get_db_name(char *login);
 //SSLing
 SSL_CTX *CTX_initialize_client();
 void open_client_connection(char* server_IP, int port);
+
+//themes
+void on_light_theme();
+void on_dark_theme();
 
 #endif

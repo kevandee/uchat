@@ -42,6 +42,7 @@ gboolean add_msg(gpointer data) {
     t_message *message = data;
     char *total_msg = message->data;
     GtkWidget *incoming_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    GtkWidget *incoming_msg = gtk_label_new(total_msg);
     bool is_sender = false;
     if (mx_strcmp(message->sender, cur_client.login) != 0){
         gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_START);
@@ -54,14 +55,22 @@ gboolean add_msg(gpointer data) {
         GtkGesture *gesture = gtk_gesture_click_new();
         gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
         gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
-        g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), incoming_msg_box);
+        GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
+        arr[0] = incoming_msg;
+        arr[1] = incoming_msg_box;
+        int *mes_id = (int *)malloc(sizeof(int));
+        *mes_id = message->id;
+        t_list *gesture_data = NULL;
+        mx_push_back(&gesture_data, arr);
+        mx_push_back(&gesture_data, mes_id);
+        g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), gesture_data);
         gtk_widget_add_controller(incoming_msg_box, GTK_EVENT_CONTROLLER(gesture));
 
         is_sender = true;
     }
     gtk_widget_set_margin_end(incoming_msg_box, 5);
     gtk_widget_set_margin_bottom(incoming_msg_box, 5);
-    GtkWidget *incoming_msg = gtk_label_new(total_msg);
+   
     if (!is_sender)
         gtk_widget_set_name(GTK_WIDGET(incoming_msg), "incoming-message");
     else 
@@ -107,6 +116,7 @@ gboolean add_msg(gpointer data) {
     else 
         gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
     t_main.last_mes = incoming_msg_box;
+    mx_push_back(&t_main.message_widgets_list, incoming_msg);
     pthread_mutex_unlock(&cl_mutex);
 
     return FALSE;
@@ -243,22 +253,28 @@ void *rec_func(void *param) {
                 char *total_msg = mx_strdup(mx_strchr(message, '>') + 1);     // сообщение
                                                                    // время надо получить локально на клиенте
                 printf("%s\n", total_msg);
-                t_message mes = {
-                    .c_id = chat_id,
-                    .prev = prev,
-                    .id = message_id
-                };
-                mx_strcpy(mes.sender, sender);
-                mx_strcpy(mes.data, total_msg);
+                
                 if (cur_client.cur_chat.id == chat_id) {
+                    t_message *mes = (t_message *)malloc(sizeof(t_message));
+                    mes->c_id = chat_id;
+                    mes->prev = prev;
+                    mes->id = message_id;
+                    mx_strcpy(mes->sender, sender);
+                    mx_strcpy(mes->data, total_msg);
                     pthread_mutex_lock(&cl_mutex);
-                    g_idle_add(add_msg, &mes);
+                    g_idle_add(add_msg, mes);
                     pthread_mutex_lock(&cl_mutex);
                     if (prev) {
-                        cur_client.cur_chat.last_mes_id = mes.id;
+                        cur_client.cur_chat.last_mes_id = mes->id;
                         int status = 1;
                         SSL_write(cur_client.ssl, &status, sizeof(int));
+                        mx_push_back(&cur_client.cur_chat.messages, mes);
                     }
+                    else {
+                        mx_push_front(&cur_client.cur_chat.messages, mes);
+                    }
+                    
+                    
                     pthread_mutex_unlock(&cl_mutex);
                 }
                 else if (prev) {
@@ -286,6 +302,74 @@ void *rec_func(void *param) {
                     pthread_create(&display_thread, NULL, scroll_func, NULL);  
                     t_main.first_load_mes = false;
                 }  
+            }
+            else if(mx_strncmp(message, "<delete mes chat_id=", 20) == 0) { // "<delete mes chat_id=%d, mes_id=%d>"
+                char *temp = message + 20;
+                int len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *c_id = mx_strndup(temp, len);
+                printf("%s\n", c_id);
+                int chat_id = mx_atoi(c_id);
+                mx_strdel(&c_id);
+                if (cur_client.cur_chat.id == chat_id) {
+                    // найти и удалить
+                    temp = mx_strstr(temp, "mes_id=") + 7;
+                    len = 0;
+                    while (*(temp + len) != '>') {
+                        len++;
+                    }
+                    char *m_id = mx_strndup(temp, len);
+                    printf("%s\n", m_id);
+                    int mes_id = mx_atoi(m_id);
+                    mx_strdel(&m_id);
+
+                    t_list *temp_mes = cur_client.cur_chat.messages;
+                    t_list *temp_widgets = t_main.message_widgets_list;
+                    t_list *prev_m = NULL;
+                    t_list *prev_w = NULL;
+                    while(temp_mes) {
+                        t_message *mes = (t_message *)temp_mes->data;
+                        if (mes->id == mes_id) {
+                            break;
+                        }
+                        prev_m = temp_mes;
+                        prev_w = temp_widgets;
+
+                        temp_widgets = temp_widgets->next;
+                        temp_mes = temp_mes->next;
+                    }
+
+                    gtk_widget_hide(GTK_WIDGET (temp_widgets->data));
+
+                    if (temp_mes){
+                        prev_m->next = temp_mes->next;
+                        free(temp_mes->data);
+                    }
+                    if (temp_widgets)
+                        prev_w->next = temp_widgets->next;
+
+                    
+                    free(temp_mes);
+                    free(temp_widgets);
+                    temp_mes = NULL;
+                    temp_widgets = NULL;
+                } 
+            }
+            if(mx_strncmp(message, "<edit msg, chat_id=", 21) == 0) { // "<edit msg, chat_id=%d, mes_id=%d>%s"
+                char *temp = message + 19;
+                int len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *c_id = mx_strndup(temp, len);
+                printf("%s\n", c_id);
+                int chat_id = mx_atoi(c_id);
+                mx_strdel(&c_id);
+                if (cur_client.cur_chat.id == chat_id) {
+                    // найти и изменить
+                } 
             }
             else if(mx_strcmp(mx_strtrim(message), "<setting avatar>") == 0) {
                 printf("a\n");

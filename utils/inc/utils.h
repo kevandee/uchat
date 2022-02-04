@@ -79,6 +79,8 @@ typedef struct s_client {
     char surname[32];
     char bio[256];
 
+    int theme;
+
     int chat_count;
     t_list *chats;
 

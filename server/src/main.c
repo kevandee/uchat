@@ -464,6 +464,10 @@ void *client_work(void *param) {
             send_all(cur->ssl, buf, 544);
             send_avatar(avatar, cur->ssl);
         }
+        else if (mx_strncmp(message, "<delete mes chat_id=", 20) == 0) {
+            printf("%s\n", message);
+            send_message(message, cur->login, NULL);
+        }
         else if (mes_stat > 0) {
             printf("Message Received from %s | %s |\n", login, message);
 		    if(cur->cur_chat.id != 0){
