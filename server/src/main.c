@@ -563,8 +563,8 @@ int main(int argc, char *argv[]) {
     pthread_mutex_init(&send_mutex, NULL);
 
     //char *weather = get_weather("Kharkov");
-    char *facts = get_facts();
-    printf("%s\n", facts);
+    //char *facts = get_facts();
+    //printf("%s\n", facts);
     int client_id = 0;
     int client_fd;
 

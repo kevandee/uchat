@@ -293,6 +293,7 @@ static void send_settings(GtkWidget *widget, gpointer data) {
 
 void show_settings() 
 {
+    cur_client.cur_chat.id = -1;
     if(t_main.sticker_panel)
     {
         gtk_widget_hide(t_main.sticker_panel);

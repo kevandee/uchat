@@ -289,7 +289,7 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         gtk_label_set_wrap(GTK_LABEL(msg), TRUE);
         gtk_label_set_wrap_mode(GTK_LABEL(msg), PANGO_WRAP_WORD_CHAR);
         gtk_label_set_max_width_chars(GTK_LABEL(msg), 50);
-        gtk_label_set_selectable(GTK_LABEL(msg), TRUE);
+        gtk_label_set_selectable(GTK_LABEL(msg), FALSE);
 
         gtk_box_append(GTK_BOX(my_msg_box), msg);
         if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {

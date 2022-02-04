@@ -53,8 +53,8 @@ gboolean add_msg(gpointer data) {
 
         GtkGesture *gesture = gtk_gesture_click_new();
         gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
-         gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
-        g_signal_connect_swapped(gesture, "pressed", G_CALLBACK(show_message_menu), incoming_msg_box);
+        gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
+        g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), incoming_msg_box);
         gtk_widget_add_controller(incoming_msg_box, GTK_EVENT_CONTROLLER(gesture));
 
         is_sender = true;

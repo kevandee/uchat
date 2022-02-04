@@ -14,6 +14,10 @@ install:
 	@cp uchat kevandee/
 	@cp uchat Dima123/
 	@cp uchat Fibbs123/
+client:
+	@make -sC client 
+	@mv client/uchat .
+
 clean:
 	@make clean -sC server
 	@make clean -sC client 

@@ -99,7 +99,7 @@ cairo_surface_t *scale_to_half(cairo_surface_t *s, int orig_width, int orig_heig
 GtkWidget *get_circle_widget_from_png(const char *filename);
 GtkWidget *get_circle_widget_from_png_custom(const char *filename, gint width, gint height);
 GtkWidget *get_circle_widget_current_user_avatar();
-void show_message_menu(gpointer data);
+void show_message_menu(GtkGestureClick *gesture, int n_press, double x, double y, gpointer data);
 GtkWidget *get_circle_widget_from_png_avatar(t_avatar *avatar, gint width, gint height, bool must_update);
 t_list *get_chat_users_avatars(t_chat *chat);
 
