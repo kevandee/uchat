@@ -19,10 +19,9 @@ void *client_work(void *param) {
     bool err_msg = true;
     
     // Proverka svazy
-    char buf[6];
+    /*char buf[6];
     SSL_read(cur->ssl, buf, 6);
-    bool temperror = true;
-    SSL_write(cur->ssl, &temperror, sizeof(bool));
+    SSL_write(cur->ssl, buf, 6);*/
     // Procerka svazy
 
     while (err_msg) {
@@ -579,11 +578,9 @@ int main(int argc, char *argv[]) {
         client_work_wrapper(context, client_fd, &thread, new_client);
         sleep(1);
     }
-    close (serv_fd);
-    SSL_CTX_free(context);
-    //  SSLing ends here
+
     close(client_fd);
-    close(serv_fd);
+    close_server(pkey, x509, context);
     //  SSLing
 
     return 0;

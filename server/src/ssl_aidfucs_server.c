@@ -169,3 +169,9 @@ void close_connection(SSL *ssl) {
     SSL_free(ssl);
     close(socket);
 }
+
+void close_server(EVP_PKEY *pkey, X509 *x509, SSL_CTX *context) {
+    EVP_PKEY_free(pkey);
+    X509_free(x509);
+    SSL_CTX_free(context);
+}

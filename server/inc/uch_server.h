@@ -64,5 +64,6 @@ void load_certs(SSL_CTX* context, char* cert_name, char* key_name);
 int open_server_connection(int port, struct sockaddr_in *adr, socklen_t adrlen);
 void certificate_ckeck(SSL *ssl);
 void close_connection(SSL *ssl);
+void close_server(EVP_PKEY *pkey, X509 *x509, SSL_CTX *context);
 //SSLing
 #endif

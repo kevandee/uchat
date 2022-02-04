@@ -379,23 +379,16 @@ static void load_css() {
     }
 
     char message[32] = {0};
-    printf("err1\n");
     // Отправка данных для авторизации на сервер
     SSL_write(cur_client.ssl, "i", 1);
     sprintf(message, "%s", cur_client.login);
-    printf("err2\n");
     SSL_write(cur_client.ssl, message, 32);
     clear_message(message, 32);
-    printf("err3\n");
     sprintf(message, "%s", cur_client.passwd);
     SSL_write(cur_client.ssl, message, 16);
-    printf("err4\n");
 
     bool err_aut;
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     SSL_read(cur_client.ssl, &err_aut, sizeof(bool)); // Ожидание ответа от сервера об успешности входа или регистрации
-    printf("err5\n");
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     if (err_aut) {
         mx_strdel(&cur_client.login);
@@ -491,9 +484,9 @@ int main(int argc, char *argv[]) {
     SSL *ssl;
     SSL_library_init();
 
-    context = CTX_initialize_client();
     open_client_connection(argv[1], mx_atoi(argv[2]));
 
+    context = CTX_initialize_client();
     ssl = SSL_new(context);
     if (SSL_set_fd(ssl, cur_client.serv_fd) == 0) {
         perror("ERROR: socket descriptor attachment failed!\n");
@@ -510,7 +503,7 @@ int main(int argc, char *argv[]) {
     printf("SSL: chipher: %s\n", SSL_get_cipher(ssl));
     X509 *cert = SSL_get_peer_certificate(ssl);
     if (cert == NULL) {
-        printf("SSL: No client certificates configured.\n");
+        printf("SSL: No certificates configured.\n");
     }
     else {
         printf("SSL: Server certificates:\n");
@@ -524,13 +517,12 @@ int main(int argc, char *argv[]) {
     }
 
     //      echo server check
-    const char *check_request = "Pablo";
+    /*const char *check_request = "Pablo";
     int check_len = mx_strlen(check_request);
     SSL_write(ssl, check_request, check_len);
-    //char check_reply[6] = {0};
-    bool tempbool;
+    char check_reply[6] = {0};
     SSL_read(ssl, &tempbool, sizeof(bool));
-    printf("SSL: request - %s\nSSL: reply   - %d\n", check_request, tempbool);
+    printf("SSL: request - %s\nSSL: reply   - %d\n", check_request, tempbool);*/
     //      =====   SSLing    =====
 
     // Запуск потоков для приёма и отправки сообщений, будем смотреть. Может, придётся переделать под события из гтк
@@ -552,6 +544,8 @@ int main(int argc, char *argv[]) {
     pthread_join(rec_th, NULL);
 
     close(cur_client.serv_fd);
+    SSL_free(ssl);
+    SSL_CTX_free(context);
 
     return 0;//status;
 }

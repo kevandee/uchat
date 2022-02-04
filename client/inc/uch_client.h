@@ -71,6 +71,7 @@ struct
 
 struct
 { 
+    GtkWidget *search_box;
     GtkWidget *home;
     GtkWidget *settings;
 } t_actives;
