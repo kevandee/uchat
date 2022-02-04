@@ -11,9 +11,7 @@ install:
 	@mv client/uchat .
 	@mv server/uchat_server .
 	@mkdir -p kevandee Dima123 Fibbs123
-	@cp uchat kevandee/
-	@cp uchat Dima123/
-	@cp uchat Fibbs123/
+
 client:
 	@make -sC client 
 	@mv client/uchat .

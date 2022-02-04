@@ -584,7 +584,18 @@ void show_chat_history(GtkWidget *widget, gpointer data)
 
 void chat_show_main_screen(GtkWidget *window) 
 {
-    gtk_css_provider_load_from_path(t_screen.provider,"client/themes/dark_chat.css");
+    switch(cur_client.theme) {
+        case DARK_THEME:
+            on_dark_theme();
+            break;
+        case LIGHT_THEME:
+            on_light_theme();
+            break;
+        default:
+            on_dark_theme();
+            break;
+    }
+    //gtk_css_provider_load_from_path(t_screen.provider,"client/themes/dark_chat.css");
     t_main.grid = gtk_grid_new();
 
     t_main.left_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);

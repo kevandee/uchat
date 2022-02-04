@@ -291,6 +291,7 @@ static void send_settings(GtkWidget *widget, gpointer data) {
     show_settings();
 }
 
+
 void show_settings() 
 {
     cur_client.cur_chat.id = -1;
@@ -458,7 +459,7 @@ void show_settings()
     GtkWidget *user_image_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(user_image_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(user_image_box), GTK_ALIGN_CENTER);
-    GtkWidget *user_image = get_circle_widget_from_png_avatar(&cur_client.avatar, 120, 120, false);
+    GtkWidget *user_image = get_circle_widget_from_png_avatar(&cur_client.avatar, 120, 120,  true);
     gtk_box_append(GTK_BOX(user_image_box), user_image);
     GtkWidget *user_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(user_name_box), GTK_ALIGN_CENTER);
@@ -532,15 +533,32 @@ void show_settings()
     gtk_box_set_spacing(GTK_BOX(radio_buttons_box), 6);
     gtk_widget_set_halign(GTK_WIDGET(radio_buttons_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(radio_buttons_box), GTK_ALIGN_START);
+
     GtkWidget *radio_button_dark = gtk_check_button_new_with_label("Dark");
     gtk_widget_set_name(GTK_WIDGET(radio_button_dark), "radio_button_dark");
     load_css_main(t_screen.provider, radio_button_dark);
+    g_signal_connect(radio_button_dark, "toggled", G_CALLBACK(on_dark_theme), NULL);
     gtk_box_append(GTK_BOX(radio_buttons_box), radio_button_dark);
+
     GtkWidget *radio_button_light = gtk_check_button_new_with_label("Light");
     gtk_widget_set_name(GTK_WIDGET(radio_button_light), "radio_button_light");
     load_css_main(t_screen.provider, radio_button_light);
     gtk_box_append(GTK_BOX(radio_buttons_box), radio_button_light);
+    g_signal_connect(radio_button_light, "toggled", G_CALLBACK(on_light_theme), NULL);
     gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_button_dark), GTK_CHECK_BUTTON(radio_button_light));
+
+    switch(cur_client.theme) {
+        case DARK_THEME:
+            gtk_check_button_set_active(GTK_CHECK_BUTTON (radio_button_dark), TRUE);
+            break;
+        case LIGHT_THEME:
+            gtk_check_button_set_active(GTK_CHECK_BUTTON (radio_button_light), TRUE);
+            break;
+        default:
+            gtk_check_button_set_active(GTK_CHECK_BUTTON (radio_button_dark), TRUE);
+            break;
+    }
+
     GtkWidget *delete_box_and_exit = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_set_spacing(GTK_BOX(delete_box_and_exit), 20);
     gtk_widget_set_halign(GTK_WIDGET(delete_box_and_exit), GTK_ALIGN_CENTER);

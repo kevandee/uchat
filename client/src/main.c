@@ -42,6 +42,7 @@ gboolean add_msg(gpointer data) {
     t_message *message = data;
     char *total_msg = message->data;
     GtkWidget *incoming_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    GtkWidget *incoming_msg = gtk_label_new(total_msg);
     bool is_sender = false;
     if (mx_strcmp(message->sender, cur_client.login) != 0){
         gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_START);
@@ -54,14 +55,14 @@ gboolean add_msg(gpointer data) {
         GtkGesture *gesture = gtk_gesture_click_new();
         gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
         gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
-        g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), incoming_msg_box);
+        g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), incoming_msg);
         gtk_widget_add_controller(incoming_msg_box, GTK_EVENT_CONTROLLER(gesture));
 
         is_sender = true;
     }
     gtk_widget_set_margin_end(incoming_msg_box, 5);
     gtk_widget_set_margin_bottom(incoming_msg_box, 5);
-    GtkWidget *incoming_msg = gtk_label_new(total_msg);
+   
     if (!is_sender)
         gtk_widget_set_name(GTK_WIDGET(incoming_msg), "incoming-message");
     else 

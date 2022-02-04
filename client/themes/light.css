@@ -1,0 +1,424 @@
+headerbar{
+  min-height: 26px;
+  padding-left: 8px;
+  background: transparent;
+  border-color: transparent;
+  /* Name of the window */
+  color: transparent;
+  font-size: 13px;
+  font-family: 'Helvetica Neue';
+}
+
+/* #write_message  class */
+textview text {
+  background-color: #212D38;
+}
+
+scrolledwindow {
+  background: transparent;
+}
+
+button {
+  border: 2px #fff;
+}
+
+#close{
+  -gtk-icon-size: 12px;
+}
+#minimize{
+  -gtk-icon-size: 12px;
+}
+#maximize{
+  -gtk-icon-size: 12px;
+}
+
+/*MAIN WINDOW*/
+.AUTH_window
+{
+  font-family: cursive;
+  background-image: linear-gradient(to right, #212D38 27.5%, rgb(22, 33, 44) 25%, rgb(22, 33, 44) 75%);
+  border-radius: 10px;
+  border-color: #ffffff;
+  opacity: 1;
+}
+
+/*Container with user avatar left-side main window*/
+#search_field {
+  background: #BEBEBE;
+  border:none;
+  border-radius: 20px;
+  margin-left: 10px;
+  min-height: 28px;
+}
+
+#home_icon {
+  -gtk-icon-size: 20px;
+  margin-left: 12px;
+}
+
+#settings_icon{
+  -gtk-icon-size: 22px;
+  margin-left: 12px;
+}
+
+#recent_text {
+  font-family: Arial, asns-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+}
+
+#left_panel {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  padding-right: 8px;
+  padding-left: 8px;
+  padding-top: 8px;
+}
+
+/* Add chat container */
+#create_chat_group_name_text {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #C0C0C0;
+  margin-top: 10px;
+}
+
+#add_member_text{
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #C0C0C0;
+  margin-top: 5px; 
+}
+
+#input_field_add_group{
+  border-radius: 10px;
+}
+
+#right_panel{
+  color: white;
+  font-size: 20px;
+  font-family: 'Bradley Hand';
+  min-height: 100px;
+  min-width: 828px;
+}
+
+#right_scroll{
+  background-color: red;
+}
+
+#add_chat{
+  font-size: 30px;
+  font-weight: 700;
+  padding: 1px 1px 1px 1px;
+  background: #212D38;
+  color: white;
+  border-color: #212D38;
+  background-image: none;
+}
+
+#submit_button {
+  background:rgb(236, 179, 101);
+  font-family: 'Helvetica Neue';
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  border: 10px;
+  border-radius: 10px;
+}
+
+/*MAIN AUTH BUTTON HOVER*/
+#submit_button:hover {
+  background:rgb(237, 168, 74);
+}
+
+#chat_box{
+  margin-left: -5px;
+}
+
+#change_data_right_box
+{
+  background: red;
+  padding: 15px 10px 20px;
+  border-radius: 10px;
+}
+
+/*------------------------- SETTINGS PANEL -------------------------*/
+
+/* Heading */
+#account_sett_text {
+  font-family: Arial, sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  color: #fff;
+  padding-top: 28px;
+}
+
+/* Change Photo Section */
+#photo_label {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #B6B6B6;
+}
+
+#change_photo_btn {
+  background:rgb(236, 179, 101);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  border-radius: 5px;
+  border: none;
+}
+
+#delete_btn {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: transparent;
+  border-radius: 5px;
+  border: none;
+}
+
+/* Change Name Section */
+#name_label {
+  margin-top: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #B6B6B6;
+}
+
+#entry_field_name {
+  border: none;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+#entry_field_surname {
+  border: none;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* BIO Section */
+#bio_label {
+  margin-top: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #B6B6B6;
+}
+
+#entry_field_bio {
+  border: none;
+  border-radius: 10px;
+}
+
+#apply_btn {
+  background:rgb(230, 25, 25);
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  border-radius: 5px;
+  border: none;
+}
+
+/*------------------------- THEMES HEADING -------------------------*/
+#themes_label {
+  font-family: Arial, sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  color: #fff;
+}
+
+#radio_button_dark {
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  padding: 8px 179px 8px 9px;
+  border-radius: 10px;
+}
+
+#radio_button_dark:checked {
+  background-color: #121b24;
+}
+
+#radio_button_light {
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  padding: 8px 179px 8px 9px;
+  border-radius: 10px;
+}
+
+#radio_button_light:checked {
+  background-color: #121b24;
+}
+
+/*------------------------- DELETE ACCOUNT -------------------------*/
+#delete_account_btn {
+  background: transparent;
+  border: solid 1px #ff2c2c;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  border-radius: 10px;
+  color: #ff2c2c;
+}
+
+/*------------------------- LOG OUT FROM ACCOUNT -------------------------*/
+
+#logOut_btn {
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  background: transparent;
+  border-radius: 5px;
+  border: none;
+}
+
+/*------------------------- PREVIEW BOX -------------------------*/
+
+#change_data_right_box {
+  background-color: #141b22;
+}
+
+#user_name {
+  font-family: Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+}
+
+#user_bio {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #8e8e8e;
+}
+
+#scroll_buttons {
+  background:transparent;
+}
+
+#scroll_buttons_border {
+  background:transparent;
+  border: transparent;
+}
+
+#chat_name {
+  color:#fff;
+  margin-left: 14px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 700;
+}
+#users_check_boxes{
+  color: white;
+}
+#check_button {
+  color:white;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+#message_scroll {
+  background: transparent;
+}
+
+#write_message {
+  border-radius: 13px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  font-size: 16px; 
+  padding-top: 12px;
+  padding-left: 12px;
+  padding-bottom: 9px;
+  line-height:  20px;
+  background-color: #212D38;
+  caret-color: #fff;
+  color: #fff;
+}
+
+#message {
+  border-radius: 10px 0px 10px 10px;
+  background: #ECB365;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px; 
+
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+#incoming-message{
+  border-radius: 0px 10px 10px 10px;
+  background: #233649;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px; 
+
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+#my_msg text {
+  background-color: #ECB365;
+}
+
+
+/*------------------------- CHAT HEADER -------------------------*/
+
+#chat_name_inside_label {
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: #fff;
+}
+
+#last_online {
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: #fff;
+  opacity: 0.5;
+}
+
+#mute_img {
+  -gtk-icon-size: 33px;
+}
+
+#block_img {
+  -gtk-icon-size: 33px;
+}
