@@ -55,6 +55,7 @@ struct
     bool scroll_mes;
     bool first_load_mes;
     GtkWidget *last_mes;
+    int send_mes_id;
     t_list *check_buttons_user_list;
     t_avatar default_avatar;
     t_avatar default_group_avatar;

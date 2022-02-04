@@ -267,7 +267,7 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         gtk_text_buffer_get_start_iter(buffer, &start);
         gtk_text_buffer_get_end_iter(buffer, &end);
         //gint n_chars = gtk_text_buffer_get_char_count (buffer);
-
+        bool is_edit = false;
         const char *buf_str = gtk_text_buffer_get_text(buffer, &start, &end, true);
 
         if (!buf_str || buf_str[0] == '\n') {
@@ -276,22 +276,25 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         char *str = mx_strnew(1024);
         str = mx_strncpy(str, buf_str, mx_strlen(buf_str) - 1);
         char message[512 + 32] = {0};
+        GtkWidget *my_msg_box = NULL;
+        GtkWidget *msg = NULL;
         if (!t_main.message_change_id) {
             sprintf(message, "<msg, chat_id= %d>%s", cur_client.cur_chat.id, str);
 
-            GtkWidget *my_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+            my_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
             
             gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
             gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
             gtk_widget_set_margin_end(my_msg_box, 5);
             gtk_widget_set_margin_bottom(my_msg_box, 5);
-            GtkWidget *msg = gtk_label_new(str);
+            msg = gtk_label_new(str);
             gtk_widget_set_name(GTK_WIDGET(msg), "message");
             load_css_main(t_screen.provider, msg);
             gtk_label_set_wrap(GTK_LABEL(msg), TRUE);
             gtk_label_set_wrap_mode(GTK_LABEL(msg), PANGO_WRAP_WORD_CHAR);
             gtk_label_set_max_width_chars(GTK_LABEL(msg), 50);
             gtk_label_set_selectable(GTK_LABEL(msg), FALSE);
+            mx_push_front(&t_main.message_widgets_list, msg);
 
             gtk_box_append(GTK_BOX(my_msg_box), msg);
             if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
@@ -305,10 +308,57 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         }
         else {
             sprintf(message, "<edit msg, chat_id=%d, mes_id=%d>%s", cur_client.cur_chat.id, t_main.message_change_id, str);
+            is_edit = true;
+
+            // найти и изменить
+            t_list *temp_mes = cur_client.cur_chat.messages;
+            t_list *temp_widgets = t_main.message_widgets_list;
+
+            while(temp_mes) {
+                t_message *mes = (t_message *)temp_mes->data;
+                if (mes->id == t_main.message_change_id) {
+                    break;
+                }
+
+                temp_widgets = temp_widgets->next;
+                temp_mes = temp_mes->next;
+            }
+
+            gtk_label_set_text(GTK_LABEL (temp_widgets->data), str);
+
+            t_main.message_change_id = 0;
         }           
 
         send_all(cur_client.ssl, message, 512+32);
         gtk_text_buffer_set_text (buffer, "", 0);
+
+        ////////////////
+        if (!is_edit) {
+            GtkGesture *gesture = gtk_gesture_click_new();
+            gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
+            gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
+            GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
+            arr[0] = msg;
+            arr[1] = my_msg_box;
+            int *mes_id = (int *)malloc(sizeof(int));
+            char buf[544] = {0};
+            sprintf(buf, "<get last mes id>");
+            send_all(cur_client.ssl, buf, 544);
+            t_main.loaded = false;
+            while (!t_main.loaded) {
+                usleep(50);
+            }
+            *mes_id = t_main.send_mes_id;
+            t_message *mes = (t_message *)malloc(sizeof(t_message));
+            mes->id = *mes_id;
+            mx_push_front(&cur_client.cur_chat.messages, mes);
+            t_list *gesture_data = NULL;
+            mx_push_back(&gesture_data, arr);
+            mx_push_back(&gesture_data, mes_id);
+            g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), gesture_data);
+            gtk_widget_add_controller(my_msg_box, GTK_EVENT_CONTROLLER(gesture));
+        }
+        /////////////// 
     }
 }
 

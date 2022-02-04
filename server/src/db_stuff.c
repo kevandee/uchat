@@ -314,3 +314,12 @@ void db_delete_message(int m_id) {
     asprintf(&query, sql_pattern, m_id);
     sqlite3_exec_db(query, 2);
 }
+
+int get_message_max_id(int user_id, int chat_id) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT max(id) FROM messages WHERE (user_id = %d AND chat_id = %d);";
+    asprintf(&query, sql_pattern, user_id, chat_id);
+    t_list *list = sqlite3_exec_db(query, 1);
+    int u_id = mx_atoi(list->data);
+    return u_id;
+}
