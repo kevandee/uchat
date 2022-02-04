@@ -9,11 +9,6 @@ headerbar{
   font-family: 'Helvetica Neue';
 }
 
-/* #write_message  class */
-textview text {
-  background-color: #212D38;
-}
-
 button {
   border: 2px #fff;
 }
@@ -185,6 +180,19 @@ scrolledwindow {
   border: none;
 }
 
+/* Button under choosing area of img */
+#apply_button {
+  background:rgb(236, 179, 101);
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  border-radius: 5px;
+  border: none;
+  margin-bottom: 10px;
+  margin-top: 5px;
+}
+
 /* Change Name Section */
 #name_label {
   margin-top: 10px;
@@ -323,7 +331,7 @@ scrolledwindow {
 #chat_name {
   color:#fff;
   margin-left: 14px;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
   font-size: 16px;
   font-weight: 700;
 }
@@ -355,13 +363,23 @@ scrolledwindow {
   color: #fff;
 }
 
+#write_message text{
+  background-color: #212D38;
+}
+
+/* #write_message  class */
+/* textview text {
+  background-color: #212D38;
+} */
+
 #message {
   border-radius: 10px 0px 10px 10px;
-  background: #ECB365;
+  background: #d59b49;
   color: #fff;
   font-family: Arial, sans-serif;
   font-weight: 400;
-  font-size: 14px; 
+  font-size: 14px;
+
 
   padding-left: 10px;
   padding-right: 10px;
@@ -395,4 +413,29 @@ scrolledwindow {
 
 #my_msg text {
   background-color: #ECB365;
+}
+
+/*------------------------- CHAT HEADER -------------------------*/
+
+#chat_name_inside_label {
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: #fff;
+}
+
+#last_online {
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: #fff;
+  opacity: 0.5;
+}
+
+#mute_img {
+  -gtk-icon-size: 37px;
+}
+
+#block_img {
+  -gtk-icon-size: 37px;
 }
