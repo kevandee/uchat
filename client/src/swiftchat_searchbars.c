@@ -41,8 +41,8 @@ void text_changed_main_screen(GObject *object, GParamSpec *pspec, gpointer data)
 
     if(has_text) {
         t_main.scroll_box_left = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-        gtk_widget_set_size_request(GTK_WIDGET(t_main.scroll_box_left), 310, 0);
-        gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_left), 310, 590);
+        gtk_widget_set_size_request(GTK_WIDGET(t_main.scroll_box_left), 200, 0);
+        gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_left), 200, 600);
         const char *entry_text = gtk_entry_buffer_get_text(gtk_entry_get_buffer(entry));
         t_list *res = NULL;
         t_list *search = t_main.search_users_list;

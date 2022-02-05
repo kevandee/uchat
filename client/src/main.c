@@ -3,13 +3,6 @@
 t_client cur_client;
 pthread_mutex_t cl_mutex;
 
-static void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
-{
-    GtkStyleContext *context = gtk_widget_get_style_context(widget);
-    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-
-}
-
 void *sender_func(void *param) {
     (void)param;
     char *message = (char *)malloc(512);
@@ -66,6 +59,7 @@ gboolean add_msg(gpointer data) {
         g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), gesture_data);
         gtk_widget_add_controller(incoming_msg_box, GTK_EVENT_CONTROLLER(gesture));
 
+        
         is_sender = true;
     }
     gtk_widget_set_margin_end(incoming_msg_box, 5);
@@ -111,12 +105,16 @@ gboolean add_msg(gpointer data) {
     gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
     if (is_sender && mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0)
         gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
-    if (!message->prev) 
+    if (!message->prev) {
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
-    else 
+        mx_push_front(&t_main.message_widgets_list, incoming_msg);
+    }
+    else {
         gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
+        mx_push_back(&t_main.message_widgets_list, incoming_msg);
+    }
     t_main.last_mes = incoming_msg_box;
-    mx_push_back(&t_main.message_widgets_list, incoming_msg);
+    
     pthread_mutex_unlock(&cl_mutex);
 
     return FALSE;
@@ -302,6 +300,10 @@ void *rec_func(void *param) {
                     pthread_create(&display_thread, NULL, scroll_func, NULL);  
                     t_main.first_load_mes = false;
                 }  
+            } // "<get last mes id>"
+            else if (mx_strncmp(message, "<get last mes id>", 17) == 0) {
+                SSL_read(cur_client.ssl, &t_main.send_mes_id, sizeof(int));
+                t_main.loaded = true;
             }
             else if(mx_strncmp(message, "<delete mes chat_id=", 20) == 0) { // "<delete mes chat_id=%d, mes_id=%d>"
                 char *temp = message + 20;
@@ -329,6 +331,7 @@ void *rec_func(void *param) {
                     t_list *temp_widgets = t_main.message_widgets_list;
                     t_list *prev_m = NULL;
                     t_list *prev_w = NULL;
+
                     while(temp_mes) {
                         t_message *mes = (t_message *)temp_mes->data;
                         if (mes->id == mes_id) {
@@ -341,23 +344,31 @@ void *rec_func(void *param) {
                         temp_mes = temp_mes->next;
                     }
 
-                    gtk_widget_hide(GTK_WIDGET (temp_widgets->data));
-
-                    if (temp_mes){
+                    GtkWidget *box = gtk_widget_get_parent(GTK_WIDGET (temp_widgets->data));
+                    gtk_widget_hide(box);
+    
+                    if (temp_mes && prev_m){
                         prev_m->next = temp_mes->next;
                         free(temp_mes->data);
+                        free(temp_mes);
+                        temp_mes = NULL;
                     }
-                    if (temp_widgets)
+                    if (temp_widgets && prev_w) {
                         prev_w->next = temp_widgets->next;
+                        free(temp_widgets);
+                        temp_widgets = NULL;
+                    }
+                    if (!prev_w) {
+                        mx_pop_front(&t_main.message_widgets_list);
+                    }
+                    if(!prev_m) {
+                        mx_pop_front(&cur_client.cur_chat.messages);
 
-                    
-                    free(temp_mes);
-                    free(temp_widgets);
-                    temp_mes = NULL;
-                    temp_widgets = NULL;
+                    }
+
                 } 
             }
-            if(mx_strncmp(message, "<edit msg, chat_id=", 21) == 0) { // "<edit msg, chat_id=%d, mes_id=%d>%s"
+            if(mx_strncmp(message, "<edit msg, chat_id=", 19) == 0) { // "<edit msg, chat_id=%d, mes_id=%d>%s"
                 char *temp = message + 19;
                 int len = 0;
                 while (*(temp + len) != ',') {
@@ -369,6 +380,31 @@ void *rec_func(void *param) {
                 mx_strdel(&c_id);
                 if (cur_client.cur_chat.id == chat_id) {
                     // найти и изменить
+                    temp = mx_strstr(temp, "mes_id=") + 7;
+                    len = 0;
+                    while (*(temp + len) != '>') {
+                        len++;
+                    }
+                    char *m_id = mx_strndup(temp, len);
+                    printf("%s\n", m_id);
+                    int mes_id = mx_atoi(m_id);
+                    mx_strdel(&m_id);
+
+                    t_list *temp_mes = cur_client.cur_chat.messages;
+                    t_list *temp_widgets = t_main.message_widgets_list;
+
+                    while(temp_mes) {
+                        t_message *mes = (t_message *)temp_mes->data;
+                        if (mes->id == mes_id) {
+                            break;
+                        }
+
+                        temp_widgets = temp_widgets->next;
+                        temp_mes = temp_mes->next;
+                    }
+
+                    const char *text = mx_strchr(message, '>') + 1;
+                    gtk_label_set_text(GTK_LABEL (temp_widgets->data), text);
                 } 
             }
             else if(mx_strcmp(mx_strtrim(message), "<setting avatar>") == 0) {

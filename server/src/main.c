@@ -120,7 +120,7 @@ void *client_work(void *param) {
     sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
     printf("%s", buff_out);
     sprintf(buff_out, "%s has joined\n", cur->login);
-    send_message(buff_out,login, NULL);
+    send_message(buff_out,login, NULL, true);
     char message[MAX_LEN + NAME_LEN];
     while (is_run) {
         int mes_stat = SSL_read(cur->ssl, message, MAX_LEN + NAME_LEN);
@@ -371,7 +371,7 @@ void *client_work(void *param) {
             int *mes_id = sqlite3_exec_db(query, 2);
 
             cur->cur_chat.last_mes_id = *mes_id;
-            send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat);
+            send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat, true);
             clear_message(message, MAX_LEN + NAME_LEN);
         }
         else if (mx_strncmp(message, "<chat users avatars>", 20) == 0){
@@ -465,16 +465,73 @@ void *client_work(void *param) {
             send_avatar(avatar, cur->ssl);
         }
         else if (mx_strncmp(message, "<delete mes chat_id=", 20) == 0) {
-            printf("%s\n", message);
-            send_message(message, cur->login, NULL);
+            char *temp = message + 20;
+            int len = 0;
+            while (*(temp + len) != ',') {
+                len++;
+            }
+            char *c_id = mx_strndup(temp, len);
+            printf("%s\n", c_id);
+            int chat_id = mx_atoi(c_id);
+            mx_strdel(&c_id);
+            if (chat_id != cur->cur_chat.id) {
+                printf("change chat\n");
+                change_chat_by_id(chat_id, cur);
+            }
+            temp = mx_strstr(temp, "mes_id=") + 7;
+            len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            char *m_id = mx_strndup(temp, len);
+            printf("%s\n", m_id);
+            int mes_id = mx_atoi(m_id);
+            mx_strdel(&m_id);
+            
+            db_delete_message(mes_id);
+
+            send_message(message, cur->login, &cur->cur_chat, false);
+        }
+        else if (mx_strncmp(message, "<edit msg, chat_id=", 19) == 0) { // "<edit msg, chat_id=%d, mes_id=%d>%s"
+            char *temp = message + 19;
+            int len = 0;
+            while (*(temp + len) != ',') {
+                len++;
+            }
+            char *c_id = mx_strndup(temp, len);
+            printf("%s\n", c_id);
+            int chat_id = mx_atoi(c_id);
+            mx_strdel(&c_id);
+            if (chat_id != cur->cur_chat.id) {
+                printf("change chat\n");
+                change_chat_by_id(chat_id, cur);
+            }
+            temp = mx_strstr(temp, "mes_id=") + 7;
+            len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            char *m_id = mx_strndup(temp, len);
+            printf("%s\n", m_id);
+            int mes_id = mx_atoi(m_id);
+            mx_strdel(&m_id);
+            
+            message_changer(mes_id, mx_strchr(message, '>') + 1);
+
+            send_message(message, cur->login, &cur->cur_chat, false);
+        }
+        else if (mx_strncmp(message, "<get last mes id>", 17) == 0) { // "<get last mes id>"
+            send_all(cur->ssl, message, 544);
+            int mes_id = get_message_max_id(cur->id, cur->cur_chat.id);
+            SSL_write(cur->ssl, &mes_id, sizeof(int));
         }
         else if (mes_stat > 0) {
             printf("Message Received from %s | %s |\n", login, message);
 		    if(cur->cur_chat.id != 0){
-                send_message(message, cur->login, &cur->cur_chat);
+                send_message(message, cur->login, &cur->cur_chat, true);
             }
             else {
-                send_message(message, cur->login, NULL);
+                send_message(message, cur->login, NULL, true);
             }
             clear_message(message, MAX_LEN + NAME_LEN);
         }

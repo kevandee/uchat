@@ -29,7 +29,7 @@ extern pthread_mutex_t send_mutex;
 
 void send_all_user_data(t_client *client);
 
-void send_message(char *mes, char *sender, t_chat *chat);
+void send_message(char *mes, char *sender, t_chat *chat, bool is_text_message);
 void clear_message(char *mes, const int size);
 void send_new_chat(t_chat *new_chat);
 void send_avatar(t_avatar *avatar, SSL *client_ssl);
@@ -54,6 +54,9 @@ t_avatar *parse_avatar_info(char *avatar_info);
 char *get_user_avatar(int id);
 char  *get_chat_avatar(int id);
 t_list *db_messages_sender(int c_id, int prev);
+void message_changer(int m_id, char *new_text);
+void db_delete_message(int m_id);
+int get_message_max_id(int user_id, int chat_id);
 
 //SSling
 SSL_CTX *CTX_initialize_server();
