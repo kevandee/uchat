@@ -503,6 +503,9 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     }
     mx_clear_ldata(&cur_client.cur_chat.messages);
     mx_clear_list(&cur_client.cur_chat.messages);
+    cur_client.cur_chat.messages = NULL;
+    mx_clear_list(&t_main.message_widgets_list);
+    t_main.message_widgets_list = NULL;
 
     printf("id of chat %d\n", ((t_chat *)data)->id);
     cur_client.cur_chat = *((t_chat *)data);
