@@ -97,4 +97,7 @@ int recv_all(SSL *sockfd, char * buf, int len);
 
 void clear_message(char *mes, const int size);
 
+void send_file(SSL *socket, char *file, const char *mode);
+int recv_file(SSL *socket, char *path, const char *mode) ;
+
 #endif

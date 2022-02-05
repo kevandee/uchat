@@ -375,6 +375,40 @@ void *client_work(void *param) {
             send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat, true);
             clear_message(message, MAX_LEN + NAME_LEN);
         }
+        else if(mx_strncmp(message, "<file chat_id=", 14) == 0) { //"<file chat_id=%d, name=%s, mode=%s>"
+            printf("%s\n", message);
+            char *temp = message + 15;
+            int len = 0;
+            while (*(temp + len) != ',') {
+                len++;
+            }
+            char *c_id = mx_strndup(temp, len);
+            printf("%s\n", c_id);
+            int chat_id = mx_atoi(c_id);
+            mx_strdel(&c_id);
+            if (chat_id != cur->cur_chat.id) {
+                printf("change chat\n");
+                change_chat_by_id(chat_id, cur);
+            }
+
+            temp = mx_strstr(temp, "name=") + 5;
+            len = 0;
+            while (*(temp + len) != ',') {
+                len++;
+            }
+            char *name = mx_strndup(temp, len);
+            char *path = mx_strjoin("data/", name);
+           
+            temp = mx_strstr(temp, "mode=") + 5;
+            len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+
+            char *mode = mx_strndup(temp, len);
+            printf("name %s\npath %s\nmode %s\n", name, path, mode); 
+            recv_file(cur->ssl, path, mode);
+        }
         else if (mx_strncmp(message, "<chat users avatars>", 20) == 0){
             printf("%s\n", message);
             char *id_str = message + 20;

@@ -696,6 +696,11 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_widget_set_size_request(attach, 27, 27);
     gtk_box_append(GTK_BOX(attach_box), attach);
     
+    GtkGesture *click_attach = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_attach, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_attach, "pressed", G_CALLBACK(choise_file), NULL);
+    gtk_widget_add_controller(attach, GTK_EVENT_CONTROLLER(click_attach));
+
     GtkWidget **resize = (GtkWidget **)malloc(7 * sizeof(GtkWidget *));
     resize[0] = write_message;
     resize[1] = chat_headerbar;

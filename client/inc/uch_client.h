@@ -115,7 +115,7 @@ void show_message_menu(GtkGestureClick *gesture, int n_press, double x, double y
 GtkWidget *get_circle_widget_from_png_avatar(t_avatar *avatar, gint width, gint height, bool must_update);
 t_list *get_chat_users_avatars(t_chat *chat);
 
-
+void choise_file();
 void get_all_user_data();
 void get_messages_from_server(int c_id, int mes_id);
 t_avatar *get_avatar(t_avatar *avatar);
