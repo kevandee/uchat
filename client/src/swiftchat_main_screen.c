@@ -720,14 +720,20 @@ void show_home() {
     gtk_widget_set_halign(GTK_WIDGET(note_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(note_box), GTK_ALIGN_START);
     gtk_box_set_spacing(GTK_BOX(note_box), 10);
+
     GtkWidget *note_text_writer = gtk_text_view_new();
     gtk_widget_set_name(GTK_WIDGET(note_text_writer), "note_writer");
     gtk_widget_set_size_request(note_text_writer, 300, 100);
     load_css_main(t_screen.provider, note_text_writer);
-    //GtkTextBuffer *note_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (note_text_writer));
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(note_text_writer), GTK_WRAP_WORD_CHAR);
     t_main.message_input_view = note_text_writer;
+
+    GtkTextBuffer *note_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (note_text_writer));
+    g_signal_connect_after(note_text_buffer, "insert-text", G_CALLBACK(insert_text_bio), NULL);
+
+    //GTK_EVENT_CONTROLLER();
     
+
     gtk_box_append(GTK_BOX(note_box), note_text_writer);
     gtk_box_append(GTK_BOX(t_main.right_panel), note_box);
 
