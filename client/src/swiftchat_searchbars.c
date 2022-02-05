@@ -110,36 +110,49 @@ void text_changed_add_chat(GObject *object, GParamSpec *pspec, gpointer data) {
         const char *entry_text = gtk_entry_buffer_get_text(gtk_entry_get_buffer(entry));
 
         t_list *temp = t_main.check_buttons_user_list;
-
+        int row = 0;
         while (temp) {
-            GtkCheckButton *cur_button = GTK_CHECK_BUTTON (temp->data);
-            const char *label = gtk_check_button_get_label(cur_button);
+
+            
+            GtkWidget *parent = gtk_grid_get_child_at(GTK_GRID (t_main.add_users_grid), 1, row);
+            GtkWidget *cur_button = gtk_widget_get_last_child (parent);
+            const char *label = gtk_label_get_text (GTK_LABEL (cur_button));
+            printf("%s\n", label);
             if (mx_strcmp(cur_client.login, label) != 0) {
                 if (mx_strncmp(entry_text, label, mx_strlen(entry_text)) == 0) {
-                    if (!gtk_widget_get_visible(GTK_WIDGET (cur_button))) {
-                        gtk_widget_show(GTK_WIDGET (cur_button));
+                    if (!gtk_widget_get_visible(GTK_WIDGET (parent))) {
+                        gtk_widget_show(GTK_WIDGET(gtk_grid_get_child_at(GTK_GRID (t_main.add_users_grid), 0, row)));
+                        gtk_widget_show(GTK_WIDGET (parent));
+                        gtk_widget_show(GTK_WIDGET(gtk_grid_get_child_at(GTK_GRID (t_main.add_users_grid), 2, row)));
                     }
                 }
                 else {
-                    if (gtk_widget_get_visible(GTK_WIDGET (cur_button))) {
-                        gtk_widget_hide(GTK_WIDGET (cur_button));
+                    if (gtk_widget_get_visible(GTK_WIDGET (parent))) {
+                        gtk_widget_hide(GTK_WIDGET(gtk_grid_get_child_at(GTK_GRID (t_main.add_users_grid), 0, row)));
+                        gtk_widget_hide(GTK_WIDGET (parent));
+                        gtk_widget_hide(GTK_WIDGET(gtk_grid_get_child_at(GTK_GRID (t_main.add_users_grid), 2, row)));
                     }
                 }
             }
+            row++;
             temp = temp->next;
         }
     }
     else {
         t_list *temp = t_main.check_buttons_user_list;
-
+        int row = 0;
         while (temp) {
-            GtkCheckButton *cur_button = GTK_CHECK_BUTTON (temp->data);
-            const char *label = gtk_check_button_get_label(cur_button);
+            GtkWidget *parent = gtk_grid_get_child_at(GTK_GRID (t_main.add_users_grid), 1, row);
+            GtkWidget *cur_button = gtk_widget_get_last_child (parent);
+            const char *label = gtk_label_get_text (GTK_LABEL (cur_button));
             if (mx_strcmp(cur_client.login, label) != 0) {
-                if (!gtk_widget_get_visible(GTK_WIDGET (cur_button))) {
-                    gtk_widget_show(GTK_WIDGET (cur_button));
+                if (!gtk_widget_get_visible(GTK_WIDGET (parent))) {
+                    gtk_widget_show(GTK_WIDGET(gtk_grid_get_child_at(GTK_GRID (t_main.add_users_grid), 0, row)));
+                    gtk_widget_show(GTK_WIDGET (parent));
+                    gtk_widget_show(GTK_WIDGET(gtk_grid_get_child_at(GTK_GRID (t_main.add_users_grid), 2, row)));
                 }
             }
+            row++;
             temp = temp->next;
         }
     }

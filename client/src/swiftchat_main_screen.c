@@ -179,8 +179,23 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
     while (temp) {
         if (mx_strcmp(cur_client.login, temp->data) != 0) 
         {
+            char buf[544] = {0};
+            t_main.loaded = false;
+            sprintf(buf, "<get user avatar>%s",temp->data);
+            printf("buf %s\n", buf);
+            send_all(cur_client.ssl, buf, 544);
+            while(!t_main.loaded) {
+                usleep(50);
+            }
+            t_avatar *avatar = t_main.loaded_avatar;
+            //printf("%s\n", avatar.name);
+            if (mx_strcmp(avatar->name, "default") == 0) {
+                *avatar = t_main.default_avatar;
+            }
             GtkWidget *user_img_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-            GtkWidget *user_img = get_circle_widget_from_png_custom("test_circle.png", 45, 45);
+            gtk_widget_set_size_request(user_img_box, 40, 40);
+            GtkWidget *user_img = get_circle_widget_from_png_avatar(avatar, 40, 40, false);
+            gtk_widget_set_size_request(user_img, 40, 40);
             gtk_box_append(GTK_BOX(user_img_box), user_img);
             GtkWidget *user_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
             gtk_widget_set_margin_start(user_name_box, 10);
@@ -204,6 +219,7 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
         }
         temp = temp->next;
     }
+    t_main.add_users_grid = users_grid;
     gtk_box_append(GTK_BOX (scroll_box), users_grid);
     /*while (temp) {
         if (mx_strcmp(cur_client.login, temp->data) != 0) {
@@ -572,12 +588,26 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_widget_set_halign(GTK_WIDGET(chat_headerbar_left), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(chat_headerbar_left), GTK_ALIGN_CENTER);
     GtkWidget *photo_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *photo = get_circle_widget_from_png_custom("client/media/default_groupchat.png", 50, 50);
+    GtkWidget *photo = get_circle_widget_from_png_avatar(&cur_client.cur_chat.avatar, 50, 50, false);
     gtk_box_append(GTK_BOX(photo_box), photo);
     GtkWidget *info_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_widget_set_halign(GTK_WIDGET(info_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(info_box), GTK_ALIGN_CENTER);
-    GtkWidget *group_or_user_name = gtk_label_new("Name Surname");
+    GtkWidget *group_or_user_name = NULL;
+    if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) == 0) {
+        t_list *logins = cur_client.cur_chat.users;
+        while (logins) {
+            if (mx_strcmp(logins->data, cur_client.login) != 0) {
+                group_or_user_name = gtk_label_new(logins->data);
+                break;
+            }
+            logins = logins->next;
+        }
+    }
+    else {
+        group_or_user_name = gtk_label_new(cur_client.cur_chat.name);
+    }
+
     gtk_widget_set_name(GTK_WIDGET(group_or_user_name), "chat_name_inside_label");
     load_css_main(t_screen.provider, group_or_user_name);
     GtkWidget *status = gtk_label_new("last seen 13 minutes ago");
@@ -652,7 +682,8 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     GtkWidget *attach = NULL;
     if(cur_client.theme == DARK_THEME)
         attach = gtk_image_new_from_file("client/media/attach_img.png");
-    else attach = gtk_image_new_from_file("client/media/search_ico_grey.png");
+    else 
+        attach = gtk_image_new_from_file("client/media/search_ico_grey.png");
     gtk_widget_set_size_request(attach, 27, 27);
     gtk_box_append(GTK_BOX(attach_box), attach);
     

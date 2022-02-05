@@ -60,8 +60,9 @@ GtkWidget *get_circle_widget_from_png(const char *filename) {
 GtkWidget *get_circle_widget_from_png_avatar(t_avatar *avatar, gint width, gint height, bool must_update){
     GtkWidget *darea = NULL;
     gint org_width, org_height;
-
+    printf("1\n");
     if (must_update || !avatar->image || (avatar->prev_w != width && avatar->prev_h != height)) {
+        printf("2\n");
         cairo_surface_t *image = get_surface_from_jpg(avatar->path);
         org_width = cairo_image_surface_get_width(image);
         org_height = cairo_image_surface_get_height(image);
@@ -70,12 +71,14 @@ GtkWidget *get_circle_widget_from_png_avatar(t_avatar *avatar, gint width, gint 
         avatar->image=scaled_image;
         avatar->prev_w = width;
         avatar->prev_h = height;
+        printf("3\n");
     }
 
     darea = gtk_drawing_area_new();
     gtk_drawing_area_set_content_width(GTK_DRAWING_AREA (darea), width);
     gtk_drawing_area_set_content_height(GTK_DRAWING_AREA (darea), height);
     gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA (darea), draw_circle_avatar, avatar, NULL);
+    printf("4\n");
 
     return GTK_WIDGET (darea);
 

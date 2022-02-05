@@ -350,6 +350,7 @@ void *client_work(void *param) {
             }
         }
         else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0) {
+            printf("%s\n", message);
             char *temp = message + 15;
             int len = 0;
             while (*(temp + len) != '>') {
@@ -465,6 +466,7 @@ void *client_work(void *param) {
             send_avatar(avatar, cur->ssl);
         }
         else if (mx_strncmp(message, "<delete mes chat_id=", 20) == 0) {
+            printf("%s\n", message);
             char *temp = message + 20;
             int len = 0;
             while (*(temp + len) != ',') {
