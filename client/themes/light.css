@@ -1,3 +1,5 @@
+/*------------------------- GLOBAL CSS NODES -------------------------*/
+
 headerbar{
   min-height: 26px;
   padding-left: 8px;
@@ -9,17 +11,16 @@ headerbar{
   font-family: 'Helvetica Neue';
 }
 
-/* #write_message  class */
-textview text {
-  background-color: #212D38;
+button{
+  background: transparent;
+  outline-color: transparent;
+  border-color: transparent;
+  color: transparent;
+  box-shadow: none;
 }
 
 scrolledwindow {
   background: transparent;
-}
-
-button {
-  border: 2px #fff;
 }
 
 #close{
@@ -32,11 +33,15 @@ button {
   -gtk-icon-size: 12px;
 }
 
+menubar popover{
+  background: red;
+}
+
 /*MAIN WINDOW*/
 .AUTH_window
 {
   font-family: cursive;
-  background-image: linear-gradient(to right, #212D38 27.5%, rgb(22, 33, 44) 25%, rgb(22, 33, 44) 75%);
+  background-image: linear-gradient(to right, #F1F1F1 27.5%, #E1E1E1 25%, #E1E1E1 75%);
   border-radius: 10px;
   border-color: #ffffff;
   opacity: 1;
@@ -44,7 +49,7 @@ button {
 
 /*Container with user avatar left-side main window*/
 #search_field {
-  background: #BEBEBE;
+  background: #fff;
   border:none;
   border-radius: 20px;
   margin-left: 10px;
@@ -62,10 +67,10 @@ button {
 }
 
 #recent_text {
-  font-family: Arial, asns-serif;
+  font-family: Arial, sans-serif;
   font-size: 24px;
   font-weight: 800;
-  color: #fff;
+  color: #474747;
 }
 
 #left_panel {
@@ -82,7 +87,7 @@ button {
   font-family: Arial, sans-serif;
   font-size: 16px;
   font-weight: 600;
-  color: #C0C0C0;
+  color: #474747;
   margin-top: 10px;
 }
 
@@ -90,7 +95,7 @@ button {
   font-family: Arial, sans-serif;
   font-size: 16px;
   font-weight: 600;
-  color: #C0C0C0;
+  color: #474747;
   margin-top: 5px; 
 }
 
@@ -114,10 +119,10 @@ button {
   font-size: 30px;
   font-weight: 700;
   padding: 1px 1px 1px 1px;
-  background: #212D38;
-  color: white;
-  border-color: #212D38;
-  background-image: none;
+  background: transparent;
+  color: #474747;
+  border-color: transparent;
+  border: 0px;
 }
 
 #submit_button {
@@ -153,7 +158,7 @@ button {
   font-family: Arial, sans-serif;
   font-size: 30px;
   font-weight: 800;
-  color: #fff;
+  color: #474747;
   padding-top: 28px;
 }
 
@@ -162,7 +167,7 @@ button {
   font-family: Arial, sans-serif;
   font-size: 16px;
   font-weight: 800;
-  color: #B6B6B6;
+  color: #474747;
 }
 
 #change_photo_btn {
@@ -179,10 +184,24 @@ button {
   font-family: Arial, sans-serif;
   font-size: 12px;
   font-weight: 600;
-  color: #fff;
+  color: #474747;
   background: transparent;
   border-radius: 5px;
   border: none;
+}
+
+/* Choosing area button */
+
+#apply_button_avatar {
+  background:rgb(236, 179, 101);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  border-radius: 5px;
+  border: none;
+  margin-top: 10px;
+  margin-bottom: 15px;
 }
 
 /* Change Name Section */
@@ -191,7 +210,7 @@ button {
   font-family: Arial, sans-serif;
   font-size: 16px;
   font-weight: 800;
-  color: #B6B6B6;
+  color: #474747;
 }
 
 #entry_field_name {
@@ -216,7 +235,7 @@ button {
   font-family: Arial, sans-serif;
   font-size: 16px;
   font-weight: 800;
-  color: #B6B6B6;
+  color: #474747;
 }
 
 #entry_field_bio {
@@ -225,7 +244,7 @@ button {
 }
 
 #apply_btn {
-  background:rgb(230, 25, 25);
+  background:rgb(236, 179, 101);
   font-family: Arial, sans-serif;
   font-size: 14px;
   font-weight: 600;
@@ -239,20 +258,20 @@ button {
   font-family: Arial, sans-serif;
   font-size: 30px;
   font-weight: 800;
-  color: #fff;
+  color: #474747;
 }
 
 #radio_button_dark {
   font-family: Arial, sans-serif;
   font-weight: 600;
   font-size: 14px;
-  color: #fff;
+  color: #686869;
   padding: 8px 179px 8px 9px;
   border-radius: 10px;
 }
 
 #radio_button_dark:checked {
-  background-color: #121b24;
+  background-color: #9D9D9F;
 }
 
 #radio_button_light {
@@ -265,7 +284,7 @@ button {
 }
 
 #radio_button_light:checked {
-  background-color: #121b24;
+  background-color: #9D9D9F;
 }
 
 /*------------------------- DELETE ACCOUNT -------------------------*/
@@ -285,7 +304,7 @@ button {
   font-family: Arial, sans-serif;
   font-size: 18px;
   font-weight: 600;
-  color: #fff;
+  color: #474747;
   background: transparent;
   border-radius: 5px;
   border: none;
@@ -294,7 +313,7 @@ button {
 /*------------------------- PREVIEW BOX -------------------------*/
 
 #change_data_right_box {
-  background-color: #141b22;
+  background-color: #9D9D9F;
 }
 
 #user_name {
@@ -308,27 +327,32 @@ button {
   font-family: Arial, sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #8e8e8e;
+  color: #D1D1D1;
 }
+
+/* ---------------------------------- */
 
 #scroll_buttons {
   background:transparent;
 }
 
 #scroll_buttons_border {
-  background:transparent;
-  border: transparent;
+  background: transparent;
+  outline-color: transparent;
+  border-color: transparent;
+  color: transparent;
+  box-shadow: none;
 }
 
 #chat_name {
-  color:#fff;
+  color:#474747;
   margin-left: 14px;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
   font-size: 16px;
   font-weight: 700;
 }
 #users_check_boxes{
-  color: white;
+  color: #474747;
 }
 #check_button {
   color:white;
@@ -350,18 +374,26 @@ button {
   padding-left: 12px;
   padding-bottom: 9px;
   line-height:  20px;
-  background-color: #212D38;
-  caret-color: #fff;
-  color: #fff;
+  background-color: #fff;
 }
+
+#write_message text{
+  background-color: #fff;
+}
+
+/* #write_message  class */
+/* textview text {
+  background-color: #212D38;
+} */
 
 #message {
   border-radius: 10px 0px 10px 10px;
-  background: #ECB365;
+  background: #d59b49;
   color: #fff;
   font-family: Arial, sans-serif;
   font-weight: 400;
-  font-size: 14px; 
+  font-size: 14px;
+
 
   padding-left: 10px;
   padding-right: 10px;
@@ -376,8 +408,8 @@ button {
 
 #incoming-message{
   border-radius: 0px 10px 10px 10px;
-  background: #233649;
-  color: #fff;
+  background: #fff;
+  color: #303030;
   font-family: Arial, sans-serif;
   font-weight: 400;
   font-size: 14px; 
@@ -397,28 +429,27 @@ button {
   background-color: #ECB365;
 }
 
-
 /*------------------------- CHAT HEADER -------------------------*/
 
 #chat_name_inside_label {
   font-family: Arial, sans-serif;
   font-weight: 700;
   font-size: 18px;
-  color: #fff;
+  color: #474747;
 }
 
 #last_online {
   font-family: Arial, sans-serif;
   font-weight: 400;
   font-size: 12px;
-  color: #fff;
+  color: #474747;
   opacity: 0.5;
 }
 
 #mute_img {
-  -gtk-icon-size: 33px;
+  -gtk-icon-size: 37px;
 }
 
 #block_img {
-  -gtk-icon-size: 33px;
+  -gtk-icon-size: 37px;
 }
