@@ -395,8 +395,8 @@ static void hide_stickers(gpointer data)
     gtk_box_remove(GTK_BOX(change[2]), change[3]);
     change[3] = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     if(cur_client.theme == DARK_THEME)
-        change[4] = gtk_image_new_from_file("client/media/sticker.png");
-    else change[4] = gtk_image_new_from_file("client/media/search_ico_grey.png");
+        change[4] = gtk_image_new_from_file("client/media/sticker_dark.png");
+    else change[4] = gtk_image_new_from_file("client/media/sticker_light.png");
     gtk_widget_set_size_request(change[4], 27, 27);
     gtk_box_append(GTK_BOX(change[3]), change[4]);
 
@@ -592,12 +592,21 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     GtkWidget *chat_headerbar_right = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 20);
     gtk_widget_set_halign(GTK_WIDGET(chat_headerbar_right), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(chat_headerbar_right), GTK_ALIGN_CENTER);
-    GtkWidget *block_img = gtk_image_new_from_file("client/media/block_btn.png");
-    gtk_widget_set_name(GTK_WIDGET(block_img), "block_img");
-    load_css_main(t_screen.provider, block_img);
-    GtkWidget *mute_img = gtk_image_new_from_file("client/media/mute_inactive.png");
-    gtk_widget_set_name(GTK_WIDGET(mute_img), "mute_img");
-    load_css_main(t_screen.provider, mute_img);
+    //GtkWidget *block_img_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *block_img = NULL;
+    if(cur_client.theme == DARK_THEME)
+        block_img = gtk_image_new_from_file("client/media/block_btn.png");
+    else block_img = gtk_image_new_from_file("client/media/block_btn_light.png");
+    //GtkWidget *block_img = gtk_image_new_from_file("client/media/block_btn.png");
+    gtk_widget_set_size_request(block_img, 40, 40);
+
+    //GtkWidget *mute_img_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *mute_img = NULL;
+    if(cur_client.theme == DARK_THEME)
+        mute_img = gtk_image_new_from_file("client/media/mute_btn.png");
+    else mute_img = gtk_image_new_from_file("client/media/mute_btn_light.png");
+    //GtkWidget *mute_img = gtk_image_new_from_file("client/media/mute_inactive.png");
+    gtk_widget_set_size_request(mute_img, 40, 40);
     gtk_box_append(GTK_BOX(chat_headerbar_right), block_img);
     gtk_box_append(GTK_BOX(chat_headerbar_right), mute_img); 
 
@@ -644,15 +653,15 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     GtkWidget *stickers_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     GtkWidget *stickers = NULL;
     if(cur_client.theme == DARK_THEME)
-        stickers = gtk_image_new_from_file("client/media/sticker.png");
-    else stickers = gtk_image_new_from_file("client/media/search_ico_grey.png");
+        stickers = gtk_image_new_from_file("client/media/sticker_dark.png");
+    else stickers = gtk_image_new_from_file("client/media/sticker_light.png");
     //GtkWidget *stickers = gtk_image_new_from_file("client/media/sticker.png");
     gtk_widget_set_size_request(stickers, 27, 27);
     GtkWidget *attach_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     GtkWidget *attach = NULL;
     if(cur_client.theme == DARK_THEME)
-        attach = gtk_image_new_from_file("client/media/attach_img.png");
-    else attach = gtk_image_new_from_file("client/media/search_ico_grey.png");
+        attach = gtk_image_new_from_file("client/media/attach_img_dark.png");
+    else attach = gtk_image_new_from_file("client/media/attach_img_light.png");
     gtk_widget_set_size_request(attach, 27, 27);
     gtk_box_append(GTK_BOX(attach_box), attach);
     
