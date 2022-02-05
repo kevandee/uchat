@@ -536,7 +536,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
 
     g_signal_connect(t_main.scrolled_window_right, "edge-reached", G_CALLBACK(load_more_messages), &cur_client.cur_chat);
 
-    GtkWidget *write_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);////
+    GtkWidget *write_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);////findme
     gtk_widget_set_name(GTK_WIDGET(write_box), "write_message_box");
     load_css_main(t_screen.provider, write_box);
     gtk_widget_set_halign(GTK_WIDGET(write_box), GTK_ALIGN_START);
@@ -607,6 +607,23 @@ static void show_home() {
     gtk_widget_set_halign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
     gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 50);
+
+    GtkWidget *note_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(note_box), "note_box");
+    load_css_main(t_screen.provider, note_box);
+    gtk_widget_set_halign(GTK_WIDGET(note_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(note_box), GTK_ALIGN_START);
+    gtk_box_set_spacing(GTK_BOX(note_box), 10);
+    GtkWidget *note_text_writer = gtk_text_view_new();
+    gtk_widget_set_name(GTK_WIDGET(note_text_writer), "note_writer");
+    gtk_widget_set_size_request(note_text_writer, 300, 100);
+    load_css_main(t_screen.provider, note_text_writer);
+    //GtkTextBuffer *note_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (note_text_writer));
+    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(note_text_writer), GTK_WRAP_WORD_CHAR);
+    t_main.message_input_view = note_text_writer;
+    
+    gtk_box_append(GTK_BOX(note_box), note_text_writer);
+    gtk_box_append(GTK_BOX(t_main.right_panel), note_box);
 
 
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
