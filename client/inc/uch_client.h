@@ -55,6 +55,7 @@ struct
     bool scroll_mes;
     bool first_load_mes;
     GtkWidget *last_mes;
+    int send_mes_id;
     t_list *check_buttons_user_list;
     t_avatar default_avatar;
     t_avatar default_group_avatar;
@@ -78,6 +79,7 @@ struct
 
 struct
 { 
+    GtkWidget *search_box;
     GtkWidget *home;
     GtkWidget *settings;
 } t_actives;
@@ -85,7 +87,9 @@ struct
 void chat_show_reg_screen();
 void chat_show_auth_screen();
 void chat_decorate_headerbar();
+void load_css_main(GtkCssProvider *provider, GtkWidget *widget);
 void show_settings();
+void show_home();
 void show_chat_history(GtkWidget *widget, gpointer data);
 void return_to_chatlist(GtkWidget *widget, gpointer data);
 void add_chat_dialog(GtkWidget *widget, gpointer data);

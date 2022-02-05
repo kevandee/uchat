@@ -3,3 +3,4 @@
 *.db
 uchat
 uchat_server
+*.pem

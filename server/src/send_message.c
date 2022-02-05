@@ -4,14 +4,16 @@ t_list *users_list;
 pthread_mutex_t send_mutex;
 
 
-void send_message(char *mes, char *sender, t_chat *chat) {
+void send_message(char *mes, char *sender, t_chat *chat, bool is_text_message) {
     if (mx_list_size(users_list) == 1) {
         return;
     }
 
     char buf[512 + 32] = {0};
-    if (chat)
+    if (chat && is_text_message)
         sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, prev=0>%s", chat->id, chat->last_mes_id, sender, mes);
+    else 
+        sprintf(buf, "%s", mes);
     pthread_mutex_lock(&send_mutex);
     int count = 0;
     
