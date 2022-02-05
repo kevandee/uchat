@@ -501,8 +501,6 @@ void show_settings()
     gtk_box_append(GTK_BOX(user_name_box), user_name);
     GtkWidget *user_bio_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_size_request(user_bio_box, 230, 0);
-    gtk_widget_set_halign(GTK_WIDGET(user_bio_box), GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(GTK_WIDGET(user_bio_box), GTK_ALIGN_CENTER);
     char *bio_str = NULL;
     if (mx_strcmp(cur_client.bio, ".clear") != 0) {
         bio_str = mx_strdup(cur_client.bio);
