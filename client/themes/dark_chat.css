@@ -443,7 +443,7 @@ scrolledwindow {
 #chat_name_inside_label {
   font-family: Arial, sans-serif;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 16px;
   color: #fff;
 }
 
@@ -453,12 +453,4 @@ scrolledwindow {
   font-size: 12px;
   color: #fff;
   opacity: 0.5;
-}
-
-#mute_img {
-  -gtk-icon-size: 37px;
-}
-
-#block_img {
-  -gtk-icon-size: 37px;
 }

@@ -46,6 +46,7 @@ struct
     GtkWidget *sticker_scroll_window;
     GtkWidget *message_input_view;
     GtkWidget *add_users_grid;
+    GtkWidget *note_input;
 
     int message_change_id;
     t_list *message_widgets_list;

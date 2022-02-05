@@ -581,8 +581,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_box_set_spacing (GTK_BOX(t_main.right_panel), 8);
 
     GtkWidget *chat_headerbar = gtk_grid_new();
-    gtk_grid_set_column_spacing (GTK_GRID(chat_headerbar), 535);
-
+    gtk_grid_set_column_spacing (GTK_GRID(chat_headerbar), 515); //535
 
     GtkWidget *chat_headerbar_left = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     gtk_widget_set_halign(GTK_WIDGET(chat_headerbar_left), GTK_ALIGN_START);
@@ -590,8 +589,8 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     GtkWidget *photo_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *photo = get_circle_widget_from_png_avatar(&cur_client.cur_chat.avatar, 50, 50, false);
     gtk_box_append(GTK_BOX(photo_box), photo);
-    GtkWidget *info_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_widget_set_halign(GTK_WIDGET(info_box), GTK_ALIGN_CENTER);
+    GtkWidget *info_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(info_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(info_box), GTK_ALIGN_CENTER);
     GtkWidget *group_or_user_name = NULL;
     if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) == 0) {
@@ -619,7 +618,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_box_append(GTK_BOX(chat_headerbar_left), photo_box);
     gtk_box_append(GTK_BOX(chat_headerbar_left), info_box);
 
-    GtkWidget *chat_headerbar_right = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 20);
+    GtkWidget *chat_headerbar_right = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     gtk_widget_set_halign(GTK_WIDGET(chat_headerbar_right), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(chat_headerbar_right), GTK_ALIGN_CENTER);
     //GtkWidget *block_img_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -628,7 +627,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
         block_img = gtk_image_new_from_file("client/media/block_btn.png");
     else block_img = gtk_image_new_from_file("client/media/block_btn_light.png");
     //GtkWidget *block_img = gtk_image_new_from_file("client/media/block_btn.png");
-    gtk_widget_set_size_request(block_img, 40, 40);
+    gtk_widget_set_size_request(block_img, 35, 35);
 
     //GtkWidget *mute_img_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     GtkWidget *mute_img = NULL;
@@ -636,7 +635,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
         mute_img = gtk_image_new_from_file("client/media/mute_btn.png");
     else mute_img = gtk_image_new_from_file("client/media/mute_btn_light.png");
     //GtkWidget *mute_img = gtk_image_new_from_file("client/media/mute_inactive.png");
-    gtk_widget_set_size_request(mute_img, 40, 40);
+    gtk_widget_set_size_request(mute_img, 35, 35);
     gtk_box_append(GTK_BOX(chat_headerbar_right), block_img);
     gtk_box_append(GTK_BOX(chat_headerbar_right), mute_img); 
 
@@ -656,7 +655,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
 
     g_signal_connect(t_main.scrolled_window_right, "edge-reached", G_CALLBACK(load_more_messages), &cur_client.cur_chat);
 
-    GtkWidget *write_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);////
+    GtkWidget *write_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);////findme
     gtk_widget_set_name(GTK_WIDGET(write_box), "write_message_box");
     load_css_main(t_screen.provider, write_box);
     gtk_widget_set_halign(GTK_WIDGET(write_box), GTK_ALIGN_START);
@@ -728,39 +727,6 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     
     get_messages_from_server(cur_client.cur_chat.id, -1);
     t_main.first_load_mes = true;
-}
-
-void show_home() {
-    gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.settings);
-    if(cur_client.theme == DARK_THEME)
-        t_actives.settings = gtk_image_new_from_file("client/media/settings.png");
-    else t_actives.settings = gtk_image_new_from_file("client/media/setting_light.png");
-    gtk_widget_set_name(GTK_WIDGET(t_actives.settings), "settings_icon");
-    load_css_main(t_screen.provider, t_actives.settings);
-    GtkGesture *click_settings = gtk_gesture_click_new();
-    gtk_gesture_set_state(click_settings, GTK_EVENT_SEQUENCE_CLAIMED);
-    g_signal_connect_swapped(click_settings, "pressed", G_CALLBACK(show_settings), NULL);
-    gtk_widget_add_controller(t_actives.settings, GTK_EVENT_CONTROLLER(click_settings));
-    gtk_box_append(GTK_BOX(t_main.search_panel), t_actives.settings);
-    if(t_main.sticker_panel)
-    {
-        gtk_widget_hide(t_main.sticker_panel);
-    }
-    gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.home);
-    t_actives.home = gtk_image_new_from_file("client/media/home_active.png");
-    gtk_widget_set_name(GTK_WIDGET(t_actives.home), "home_icon");
-    load_css_main(t_screen.provider, t_actives.home);
-    //gtk_box_append(GTK_BOX(t_main.search_panel), t_actives.home);
-    gtk_box_insert_child_after(GTK_BOX(t_main.search_panel), t_actives.home, t_actives.search_box);
-
-    gtk_grid_remove(GTK_GRID(t_main.grid), t_main.right_panel);
-    t_main.right_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_halign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
-    gtk_widget_set_valign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
-    gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 50);
-
-
-    gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
 }
 
 void chat_show_main_screen(GtkWidget *window) 
