@@ -1,3 +1,5 @@
+/*------------------------- GLOBAL CSS NODES -------------------------*/
+
 headerbar{
   min-height: 26px;
   padding-left: 8px;
@@ -21,6 +23,10 @@ button {
 }
 #maximize{
   -gtk-icon-size: 12px;
+}
+
+menubar popover{
+  background: red;
 }
 
 /*MAIN WINDOW*/
@@ -178,6 +184,20 @@ scrolledwindow {
   background: transparent;
   border-radius: 5px;
   border: none;
+}
+
+/* Choosing area button */
+
+#apply_button_avatar {
+  background:rgb(236, 179, 101);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  border-radius: 5px;
+  border: none;
+  margin-top: 10px;
+  margin-bottom: 15px;
 }
 
 /* Button under choosing area of img */

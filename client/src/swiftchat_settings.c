@@ -171,7 +171,9 @@ static void avatar_range(GFile *file) {
     gtk_widget_set_valign(GTK_WIDGET(darea), GTK_ALIGN_CENTER);
     
     GtkWidget *apply_button = gtk_button_new_with_label("Apply");
-    gtk_widget_set_size_request(GTK_WIDGET (apply_button), 200, 0);
+    gtk_widget_set_name(GTK_WIDGET(apply_button), "apply_button_avatar");
+    load_css_main(t_screen.provider, apply_button);
+    gtk_widget_set_size_request(GTK_WIDGET (apply_button), 160, 0);
     gtk_widget_set_halign(GTK_WIDGET(apply_button), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(apply_button), GTK_ALIGN_CENTER);
 
