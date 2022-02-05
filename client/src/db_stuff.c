@@ -14,7 +14,7 @@ void create_user_db(t_client cur_client) {
             exit(EXIT_FAILURE);
         }
         sql = mx_strrejoin(sql, "PRAGMA encoding = \"UTF-8\";");
-        sql = mx_strrejoin(sql, "CREATE TABLE user (id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, name TEXT DEFAULT \".clear\", surname TEXT DEFAULT \".clear\", bio TEXT DEFAULT \".clear\");");
+        sql = mx_strrejoin(sql, "CREATE TABLE user (id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, name TEXT DEFAULT \".clear\", surname TEXT DEFAULT \".clear\", bio TEXT DEFAULT \".clear\", note TEXT DEFAULT \".clear\");");
         rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
         if (rc != SQLITE_OK) {
             fprintf(stderr, "Failed to select data\n");
@@ -25,6 +25,10 @@ void create_user_db(t_client cur_client) {
         }
         mx_strdel(&sql);
         sqlite3_close(db);
+        char *query = NULL;
+        char *sql_pattern = "INSERT INTO user (login, password) VALUES ('%s', '%s');";
+        asprintf(&query, sql_pattern, cur_client.login, cur_client.passwd);
+        user_exec_db(cur_client.login, query, 2);
     }
 }
 
@@ -67,6 +71,13 @@ void *user_exec_db(char *login, char *query, int type) {
     return NULL;
 }
 
+/*
+char *query = NULL;
+char *sql_pattern = "UPDATE user SET Что тебе надо = '%s');";
+asprintf(&query, sql_pattern, Переменная);
+user_exec_db(cur_client.login, query, 2);
+*/
+
 char *get_db_name(char *login) {
     struct stat st = {0};
     if (stat(login, &st) == -1) {
@@ -78,61 +89,3 @@ char *get_db_name(char *login) {
     
     return db_name;
 }
-
-
-void update_user_db(t_client cur_client) {
-    user_exec_db(cur_client.login, "DELETE FROM user;", 2);
-    char *query = NULL;
-    char *sql_pattern = "INSERT INTO user (login, password, name, surname, bio) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');";
-    asprintf(&query, sql_pattern, cur_client.login, cur_client.passwd, cur_client.name, cur_client.surname, cur_client.bio);
-    user_exec_db(cur_client.login, query, 2);
-}
-
-/*void update_user_db(t_client cur_client) {
-    char *query = NULL;
-    //USER INFO UPDATE
-    char *sql_pattern = "UPDATE user SET login = '%s', password = '%s', name = '%s', surname = '%s', bio = '%s';";
-    asprintf(&query, sql_pattern, cur_client.login, cur_client.passwd, cur_client.name, cur_client.surname, cur_client.bio);
-    user_exec_db(cur_client.login, query, 2);
-    //USER CHATS INFO UPDATE OR INSERT
-    t_list *temp = cur_client.chats;
-    while(temp != NULL && temp->data != NULL) {
-        sql_pattern = "ƒEXISTS (SELECT id FROM chats WHERE id = (%d));";
-        asprintf(&query, sql_pattern, ((t_chat *)(temp->data))->id);
-        t_list *list = sqlite3_exec_db(query, 1);
-        if (strcmp(list->data, "1") == 0) {
-            //USER CHATS INFO UPDATE
-            char *chat_name = mx_strdup(((t_chat *)(temp->data))->name);
-            sql_pattern = "UPDATE chats SET name = '%s', members = (%d) WHERE id = (%d);";
-            asprintf(&query, sql_pattern, chat_name, ((t_chat *)(temp->data))->count_users, ((t_chat *)(temp->data))->id);
-            user_exec_db(cur_client.login, query, 2);
-        }
-        else {
-            //USER CHATS INFO INSERT
-            char *chat_name = mx_strdup(((t_chat *)(temp->data))->name);
-            sql_pattern = "INSERT INTO chats (id, name, members) VALUES (%d, '%s', %d);";
-            asprintf(&query, sql_pattern, ((t_chat *)(temp->data))->id, chat_name, ((t_chat *)(temp->data))->count_users);
-            user_exec_db(cur_client.login, query, 2);
-        }
-
-        t_list *users = ((t_chat *)(temp->data))->users;
-            while(users != NULL && users->data != NULL) {
-                //USER CHAT MEMBERS INFO UPDATE
-                sql_pattern = "SELECT EXISTS (SELECT id FROM members WHERE chat_id = (%d) AND user_name = ('%s'));";
-                asprintf(&query, sql_pattern, ((t_chat *)(temp->data))->id);
-                t_list *list = sqlite3_exec_db(query, 1);
-                if (strcmp(list->data, "0") == 0) {
-                    //USER CHAT MEMBERS INFO INSERT
-                    sql_pattern = "INSERT INTO members (chat_id, user_name) VALUES (%d, '%s');";
-                    asprintf(&query, sql_pattern, ((t_chat *)(temp->data))->id, users->data);
-                    user_exec_db(cur_client.login, query, 2);
-                }
-                
-                DELETE FROM members
-                users = users->next;
-            }
-        temp = temp->next;
-    }
-
-}*/
-

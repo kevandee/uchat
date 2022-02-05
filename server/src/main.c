@@ -367,8 +367,9 @@ void *client_work(void *param) {
 
             char *query = NULL;
             char *sql_pattern = NULL;
+            char *mess = sql_protection(mx_strchr(message, '>') + 1);
             sql_pattern = "INSERT INTO messages (chat_id, user_id, text) VALUES (%d, %d, '%s');";
-            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, mx_strchr(message, '>') + 1);
+            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, mess);
             int *mes_id = sqlite3_exec_db(query, 2);
             cur->cur_chat.last_mes_id = *mes_id;
             send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat, true);
@@ -686,4 +687,29 @@ int main(int argc, char *argv[]) {
     //  SSLing
 
     return 0;
+}
+
+char *sql_protection(char *message) {
+    int problem = 0;
+    for(int i = 0; message[i]; i++) {
+        if (message[i] == '\'') {
+            problem++;
+        }
+    }
+    char *temp = mx_strnew(mx_strlen(message) + problem);
+    int i = 0;
+    int j = 0;
+    while (message[i]) {
+        if (message[i] =='\'' && message[i-1] !='\'') {
+            temp[j] = message[i];
+            temp[j+1] = message[i];
+            j++;
+        }
+        else {
+            temp[j] = message[i];
+        }
+        j++;
+        i++;
+    }
+    return temp;
 }
