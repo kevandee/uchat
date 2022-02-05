@@ -122,8 +122,8 @@ void get_messages_from_server(int c_id, int mes_id);
 t_avatar *get_avatar(t_avatar *avatar);
 
 void create_user_db(t_client cur_client);
-void insert_user_db(t_client cur_client);
-void *user_exec_db(char *query, int type);
+void update_user_db(t_client cur_client);
+void *user_exec_db(char *login, char *query, int type);
 char *get_db_name(char *login);
 
 //SSLing

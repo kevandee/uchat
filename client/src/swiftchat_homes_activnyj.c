@@ -18,6 +18,7 @@ static void insert_text_note(GtkTextBuffer *buffer, GtkTextIter *location)
 
     /////// VVV delete this VVV
     printf("\nnote : %s\n", buf_str);
+    
 }
 
 

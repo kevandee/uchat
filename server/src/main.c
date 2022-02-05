@@ -370,7 +370,6 @@ void *client_work(void *param) {
             sql_pattern = "INSERT INTO messages (chat_id, user_id, text) VALUES (%d, %d, '%s');";
             asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, mx_strchr(message, '>') + 1);
             int *mes_id = sqlite3_exec_db(query, 2);
-
             cur->cur_chat.last_mes_id = *mes_id;
             send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat, true);
             clear_message(message, MAX_LEN + NAME_LEN);
@@ -406,7 +405,13 @@ void *client_work(void *param) {
             }
 
             char *mode = mx_strndup(temp, len);
-            printf("name %s\npath %s\nmode %s\n", name, path, mode); 
+            printf("name %s\npath %s\nmode %s\n", name, path, mode);
+            char *query = NULL;
+            char *sql_pattern = NULL;
+            sql_pattern = "INSERT INTO messages (chat_id, user_id, text, type) VALUES (%d, %d, '%s', '%s');";
+            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, path, "file");
+            int *mes_id = sqlite3_exec_db(query, 2);
+            cur->cur_chat.last_mes_id = *mes_id;
             recv_file(cur->ssl, path, mode);
         }
         else if (mx_strncmp(message, "<chat users avatars>", 20) == 0){
