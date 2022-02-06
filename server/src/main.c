@@ -128,6 +128,9 @@ void *client_work(void *param) {
         if (mes_stat == 0 || (mx_strcmp(message, "exit") == 0)) {
             sprintf(buff_out, "%s has left\n", cur->login);
 			printf("%s", buff_out);
+
+
+
             is_run = false;
         }
         else if (mx_strcmp(message, "<users list>") == 0) {
@@ -673,8 +676,9 @@ void *client_work(void *param) {
         
     }
 
+
     // отключение клиента от сервера
-    close(cur->cl_socket);
+    close_connection(cur->ssl);
     free_client(&cur, &users_list);
     return NULL;
 }
