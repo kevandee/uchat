@@ -204,7 +204,7 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
             load_css_main(t_screen.provider, user_name);
             gtk_box_append(GTK_BOX(user_name_box), user_name);
             GtkWidget *user_button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-            gtk_widget_set_margin_start(user_button_box, 150);
+            gtk_widget_set_margin_start(user_button_box, 180);
             GtkWidget *user_button = gtk_check_button_new();
             gtk_widget_set_name(GTK_WIDGET(user_button), gtk_label_get_text(GTK_LABEL(user_name)));
             load_css_main(t_screen.provider, user_button);
@@ -258,6 +258,7 @@ void add_chat_dialog(GtkWidget *widget, gpointer data) {
     g_signal_connect(button_success, "clicked", G_CALLBACK(send_chat), swapped);
     gtk_box_append(GTK_BOX (buttons_box), button_success);
 
+    gtk_widget_set_margin_start(add_chat_box, 5);
     gtk_box_append(GTK_BOX (add_chat_box), chat_name_box);
     gtk_box_append(GTK_BOX (add_chat_box), chat_name_entry_box);
     gtk_box_append(GTK_BOX (add_chat_box), add_member_box);
@@ -294,11 +295,10 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         char message[512 + 32] = {0};
         GtkWidget *my_msg_box = NULL;
         GtkWidget *msg = NULL;
-        if (!t_main.message_change_id) {
+        if (!t_main.message_change_id) 
+        {
             sprintf(message, "<msg, chat_id= %d>%s", cur_client.cur_chat.id, str);
-
             my_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
-            
             gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
             gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
             gtk_widget_set_margin_end(my_msg_box, 5);
@@ -312,18 +312,67 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
             gtk_label_set_selectable(GTK_LABEL(msg), FALSE);
             mx_push_front(&t_main.message_widgets_list, msg);
 
-            gtk_box_append(GTK_BOX(my_msg_box), msg);
-            if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
+            if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) 
+            {
+                GtkWidget *message_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+                gtk_widget_set_halign(GTK_WIDGET(message_box), GTK_ALIGN_END);
+                gtk_widget_set_valign(GTK_WIDGET(message_box), GTK_ALIGN_END);
+                gtk_widget_set_margin_bottom(message_box, 5);
+                gtk_widget_set_margin_end(message_box, 5);
+                gtk_box_set_spacing(GTK_BOX(message_box), 10);
+
+                GtkWidget* message_content = gtk_grid_new();
+                gtk_grid_set_row_spacing(GTK_GRID(message_content), 3);
+                gtk_grid_set_column_spacing(GTK_GRID(message_content), 5);
+
+                GtkWidget *user_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+                gtk_widget_set_halign(GTK_WIDGET(user_name_box), GTK_ALIGN_START);
+                gtk_widget_set_valign(GTK_WIDGET(user_name_box), GTK_ALIGN_START);
+                GtkWidget *user_name = gtk_label_new("Dimas");
+                gtk_widget_set_name(user_name, "user_name_chat");
+                load_css_main(t_screen.provider, user_name);
+                gtk_box_append(GTK_BOX(user_name_box), user_name);
+
+                my_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+                gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_CENTER);
+                gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_CENTER);
+                gtk_box_append(GTK_BOX(my_msg_box), msg);
+
                 GtkWidget *user_logo_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+                gtk_widget_set_halign(GTK_WIDGET(user_logo_box), GTK_ALIGN_CENTER);
+                gtk_widget_set_valign(GTK_WIDGET(user_logo_box), GTK_ALIGN_CENTER);
                 GtkWidget *user_logo = get_circle_widget_current_user_avatar();
                 gtk_box_append(GTK_BOX(user_logo_box), user_logo);
-                gtk_box_append(GTK_BOX(my_msg_box), user_logo_box);
+
+                GtkWidget *user_action_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+                gtk_widget_set_halign(GTK_WIDGET(user_action_box), GTK_ALIGN_END);
+                gtk_widget_set_valign(GTK_WIDGET(user_action_box), GTK_ALIGN_END);
+                GtkWidget *user_action = gtk_label_new("edited");
+                gtk_widget_set_name(user_action, "user_action");
+                load_css_main(t_screen.provider, user_action);
+                gtk_box_append(GTK_BOX(user_action_box), user_action);
+
+
+                gtk_grid_attach(GTK_GRID(message_content), user_name_box, 1, 1, 1, 1);
+                gtk_grid_attach(GTK_GRID(message_content), my_msg_box, 1, 2, 1, 1);
+                gtk_grid_attach(GTK_GRID(message_content), user_logo_box, 2, 1, 1, 3);
+                gtk_grid_attach(GTK_GRID(message_content), user_action_box, 1, 3, 1, 1);
+
+                gtk_box_append(GTK_BOX(message_box), message_content);
+                gtk_box_append(GTK_BOX(t_main.scroll_box_right), message_box);
+
             }
-            gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
+
+            else
+            {
+                gtk_box_append(GTK_BOX(my_msg_box), msg);
+                gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
+            }
 
             pthread_t display_thread = NULL;
             pthread_create(&display_thread, NULL, scroll_func, NULL);
         }
+
         else {
             sprintf(message, "<edit msg, chat_id=%d, mes_id=%d>%s", cur_client.cur_chat.id, t_main.message_change_id, str);
             is_edit = true;
@@ -476,14 +525,23 @@ static void show_stickers(gpointer data)
     t_main.sticker_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(t_main.sticker_panel), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(t_main.sticker_panel), GTK_ALIGN_CENTER);
-    gtk_widget_set_margin_top(t_main.sticker_panel, 10);
+    gtk_widget_set_margin_top(t_main.sticker_panel, 27);
+    gtk_box_set_spacing(GTK_BOX(t_main.sticker_panel), 10);
+    GtkWidget *stickers_label_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(stickers_label_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(stickers_label_box), GTK_ALIGN_CENTER);
+    GtkWidget *stickers_label = gtk_label_new("Stickers");
+    gtk_widget_set_name(stickers_label, "recent_text");
+    load_css_main(t_screen.provider, stickers_label);
+    gtk_box_append(GTK_BOX(stickers_label_box), stickers_label);
 
     t_main.sticker_scroll_window = gtk_scrolled_window_new();
-    gtk_widget_set_size_request(GTK_WIDGET(t_main.sticker_scroll_window), 295, 588);
+    gtk_widget_set_size_request(GTK_WIDGET(t_main.sticker_scroll_window), 295, 655);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.sticker_scroll_window), t_main.sticker_scroll_box);
     gtk_widget_set_name(GTK_WIDGET(t_main.sticker_scroll_window), "sticker_panel");
     load_css_main(t_screen.provider, t_main.sticker_scroll_window);
 
+    gtk_box_append(GTK_BOX(t_main.sticker_panel),  stickers_label_box);
     gtk_box_append(GTK_BOX(t_main.sticker_panel),  t_main.sticker_scroll_window);
 
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.sticker_panel, 2, 0, 1, 2);

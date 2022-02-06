@@ -434,6 +434,14 @@ scrolledwindow {
   margin-top: 0px;
 }
 
+#user_name_chat{
+  color: white;
+}
+
+#user_action{
+  color: white;
+}
+
 #my_msg text {
   background-color: #ECB365;
 }
@@ -454,3 +462,5 @@ scrolledwindow {
   color: #fff;
   opacity: 0.5;
 }
+
+/*----------GROUP MESSAGES--------------*/
