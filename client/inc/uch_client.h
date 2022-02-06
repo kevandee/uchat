@@ -30,6 +30,15 @@ extern pthread_mutex_t cl_mutex;
 
 void clear_message(char *mes, const int size);
 
+typedef struct s_file_mes {
+    char *name;
+    char *sender;
+    char *date;
+
+    int id;
+    bool prev;
+}               t_file_mes;
+
 struct
 {
     GtkWidget *grid;
@@ -63,6 +72,9 @@ struct
     t_avatar default_avatar;
     t_avatar default_group_avatar;
     t_avatar *loaded_avatar;
+
+    char *choosed_dir;
+    t_file_mes *choosed_file;
 }   t_main;
 
 struct
@@ -111,21 +123,24 @@ void text_changed_add_chat(GObject *object, GParamSpec *pspec, gpointer data);
 
 cairo_surface_t *get_surface_from_jpg(const char *filename);
 cairo_surface_t *scale_to_half(cairo_surface_t *s, int orig_width, int orig_height, int scaled_width, int scaled_height);
+
 GtkWidget *get_circle_widget_from_png(const char *filename);
 GtkWidget *get_circle_widget_from_png_custom(const char *filename, gint width, gint height);
 GtkWidget *get_circle_widget_current_user_avatar();
+GtkWidget *get_icon_from_filename(const char *name);
 void show_message_menu(GtkGestureClick *gesture, int n_press, double x, double y, gpointer data);
 GtkWidget *get_circle_widget_from_png_avatar(t_avatar *avatar, gint width, gint height, bool must_update);
 t_list *get_chat_users_avatars(t_chat *chat);
 
 
+void choise_file();
+void choise_dir();
 void get_all_user_data();
 void get_messages_from_server(int c_id, int mes_id);
 t_avatar *get_avatar(t_avatar *avatar);
 
 void create_user_db(t_client cur_client);
-void insert_user_db(t_client cur_client);
-void *user_exec_db(char *query, int type);
+void *user_exec_db(char *login, char *query, int type);
 char *get_db_name(char *login);
 
 //SSLing

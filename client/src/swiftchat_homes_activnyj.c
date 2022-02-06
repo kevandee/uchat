@@ -18,6 +18,10 @@ static void insert_text_note(GtkTextBuffer *buffer, GtkTextIter *location)
 
     /////// VVV delete this VVV
     printf("\nnote : %s\n", buf_str);
+    char *query = NULL;
+    char *sql_pattern = "UPDATE user SET note = '%s');";
+    asprintf(&query, sql_pattern, buf_str);
+    user_exec_db(cur_client.login, query, 2);
 }
 
 

@@ -321,7 +321,7 @@ void chat_show_auth_screen()
     gtk_widget_set_size_request(LOGIN_entry_field2, 310, 36);
     gtk_entry_set_placeholder_text(GTK_ENTRY(LOGIN_entry_field2),"Password");
     gtk_entry_set_visibility(GTK_ENTRY(LOGIN_entry_field2),FALSE);
-    struct stat c_buffer;
+    /*struct stat c_buffer;
     int exist = stat("client_data/client.db", &c_buffer);
     if (exist == 0) {
         t_list *temp = user_exec_db("SELECT login, password FROM user;", 1);
@@ -329,7 +329,7 @@ void chat_show_auth_screen()
         GtkEntryBuffer* entry_password = gtk_entry_buffer_new (temp->next->data, -1);
         gtk_entry_set_buffer (GTK_ENTRY(LOGIN_entry_field1), GTK_ENTRY_BUFFER(entry_login));
         gtk_entry_set_buffer (GTK_ENTRY(LOGIN_entry_field2), GTK_ENTRY_BUFFER(entry_password));
-    }
+    }*/
     LOGIN_text_under_logo= gtk_label_new("LOG IN TO YOUR ACCOUNT TO CONTINUE");
     gtk_widget_set_margin_bottom(LOGIN_text_under_logo, 40);
     gtk_widget_set_name(GTK_WIDGET(LOGIN_text_under_logo), "login_label");

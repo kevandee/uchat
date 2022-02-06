@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "ush.h": "c",
+        "job_launch": "c",
+        "temp_env_create": "c"
+    }
+}

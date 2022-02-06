@@ -120,6 +120,106 @@ gboolean add_msg(gpointer data) {
     return FALSE;
 }
 
+gboolean add_file_msg(gpointer data) {
+    t_file_mes *file_mes = (t_file_mes *)data;
+
+    GtkWidget *incoming_file_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    GtkWidget *incoming_file_name = gtk_label_new(file_mes->name);
+    bool is_sender = false;
+    if (mx_strcmp(file_mes->sender, cur_client.login) != 0){
+        gtk_widget_set_halign(GTK_WIDGET(incoming_file_box), GTK_ALIGN_START);
+        gtk_widget_set_valign(GTK_WIDGET(incoming_file_box), GTK_ALIGN_START);
+    }   
+    else {
+        gtk_widget_set_halign(GTK_WIDGET(incoming_file_box), GTK_ALIGN_END);
+        gtk_widget_set_valign(GTK_WIDGET(incoming_file_box), GTK_ALIGN_END);
+        
+        is_sender = true;
+    }
+    gtk_widget_set_margin_end(incoming_file_box, 5);
+    gtk_widget_set_margin_bottom(incoming_file_box, 5);
+   
+    if (!is_sender)
+        gtk_widget_set_name(GTK_WIDGET(incoming_file_name), "incoming-message");
+    else 
+        gtk_widget_set_name(GTK_WIDGET(incoming_file_name), "message");
+    load_css_main(t_screen.provider, incoming_file_name);
+    
+    gtk_label_set_selectable(GTK_LABEL(incoming_file_name), FALSE);
+    GtkWidget *User_logo = NULL;
+    if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
+        if (!is_sender) {
+            t_list *avatars = cur_client.cur_chat.users_avatars;
+            t_list *user_list = cur_client.cur_chat.users;
+            while (mx_strcmp(user_list->data, file_mes->sender) != 0 && user_list) {
+                if (mx_strcmp(user_list->data, cur_client.login) == 0) {
+                    user_list = user_list->next;
+                    continue;
+                }
+                avatars = avatars->next;
+                user_list = user_list->next;
+            }
+
+            if (avatars) {
+                t_avatar *draw = avatars->data;
+                if (mx_strcmp (draw->name, "default") == 0) {
+                    draw = &t_main.default_avatar;
+                }
+                User_logo = get_circle_widget_from_png_avatar(draw, 45, 45, false);
+                gtk_box_append(GTK_BOX(incoming_file_box), User_logo);
+            }
+        }
+        else {
+            User_logo = get_circle_widget_current_user_avatar();
+        }
+    }
+
+    gtk_box_append(GTK_BOX(incoming_file_box), incoming_file_name);
+
+    GtkWidget *file_icon = get_icon_from_filename(file_mes->name); 
+    
+    gtk_widget_set_size_request(file_icon, 45, 45);
+
+//icon
+    GtkGesture *gesture = gtk_gesture_click_new();
+    gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
+    //gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
+    //GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
+    //arr[0] = incoming_msg;
+    //arr[1] = incoming_msg_box;
+    //int *mes_id = (int *)malloc(sizeof(int));
+    //*mes_id = message->id;
+    //t_list *gesture_data = NULL;
+    //mx_push_back(&gesture_data, arr);
+    //mx_push_back(&gesture_data, mes_id);
+    g_signal_connect_after(gesture, "pressed", G_CALLBACK(choise_dir), file_mes);
+    gtk_widget_add_controller(file_icon, GTK_EVENT_CONTROLLER(gesture));
+//icon
+
+    if (is_sender) {
+        gtk_box_prepend(GTK_BOX(incoming_file_box), file_icon);
+    }
+    else {
+        gtk_box_append(GTK_BOX(incoming_file_box), file_icon);
+    }
+
+    if (is_sender && mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0)
+        gtk_box_append(GTK_BOX(incoming_file_name), User_logo);
+    if (!file_mes->prev) {
+        gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_file_box);
+        //mx_push_front(&t_main.message_widgets_list, incoming_msg);
+    }
+    else {
+        gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_file_box);
+        //mx_push_back(&t_main.message_widgets_list, incoming_msg);
+    }
+    //t_main.last_mes = incoming_msg_box;
+    
+    pthread_mutex_unlock(&cl_mutex);
+
+    return FALSE;
+}
+
 void *rec_func(void *param) {
     while(!t_main.loaded) {
         sleep(1);
@@ -288,6 +388,91 @@ void *rec_func(void *param) {
                 printf("%s\n", total_msg);
                 printf("> ");
                 fflush(stdout);
+            }
+            else if (mx_strncmp(message, "<file chat_id=", 14) == 0) { 
+                char *temp = message + 14;
+                int len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *c_id = mx_strndup(temp, len);
+                printf("%s\n", c_id);
+                int chat_id = mx_atoi(c_id);                        // ид чата, в который надо вставить сообщение
+                (void)chat_id; // избавляюсь от unused variable
+                mx_strdel(&c_id);
+                temp = mx_strstr(message, "mes_id=") + 7;
+                len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *mes_id = mx_strndup(temp, len);
+                printf("%s\n", mes_id);
+                int message_id = mx_atoi(mes_id);
+                mx_strdel(&c_id);
+                temp = mx_strstr(message, "from=") + 5;
+                len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *sender = mx_strndup(temp, len);              // отправитель
+                printf("%s\n", sender);
+                temp = mx_strstr(message, "prev=") + 5;
+                bool prev = *temp == '0' ? false : true; 
+                printf("bool %i %c\n", prev, *temp);
+
+                char *name = mx_strchr(message, '>') + 1;
+
+                if (cur_client.cur_chat.id == chat_id) {
+                    t_file_mes *new_file = (t_file_mes *)malloc(sizeof(t_file_mes));
+                    new_file->name = mx_strdup(name);
+                    new_file->sender = mx_strdup(sender);
+                    new_file->date = NULL;
+                    new_file->prev = prev;
+                    new_file->id = message_id;
+                    pthread_mutex_lock(&cl_mutex);
+                    g_idle_add(add_file_msg, new_file);
+                    pthread_mutex_lock(&cl_mutex);
+                    if (prev) {
+                        cur_client.cur_chat.last_mes_id = new_file->id;
+                        int status = 1;
+                        SSL_write(cur_client.ssl, &status, sizeof(int));
+                        //mx_push_back(&cur_client.cur_chat.messages, mes);
+                    }
+                    /*else {
+                        mx_push_front(&cur_client.cur_chat.messages, mes);
+                    }*/
+                    
+                    pthread_mutex_unlock(&cl_mutex);
+                }
+                else if (prev) {
+                    int status = 0;
+                    SSL_write(cur_client.ssl, &status, sizeof(int));        
+                }
+                
+                if (!prev || t_main.scroll_mes) {           
+                    pthread_t display_thread = NULL;
+                    pthread_create(&display_thread, NULL, scroll_func, NULL);  
+                }
+        
+                printf("%s\n", message);
+                printf("> ");
+                fflush(stdout);                
+            }
+            else if(mx_strncmp(message, "<get file>", 10) == 0) { // "<get file chat_id=%d, mes_id=%d>"
+                char *path = mx_strjoin(t_main.choosed_dir, "/");
+                path = mx_strrejoin(path, t_main.choosed_file->name);
+
+                char *mode = "wb";
+                if (mx_strstr(path, ".txt")) {
+                    mode = "w";
+                }
+
+                printf("load\n");
+                pthread_mutex_lock(&cl_mutex);
+                recv_file(cur_client.ssl, path, mode);
+                t_main.choosed_file = NULL;
+                t_main.choosed_dir = NULL;
+                pthread_mutex_unlock(&cl_mutex);
             }
             else if(mx_strncmp(message, "<last message>", 14) == 0) {
                 if (!t_main.first_load_mes){
@@ -534,19 +719,10 @@ static void activate(GtkApplication *application) {
     gtk_window_set_title (GTK_WINDOW ( t_screen.main_window), "Swiftchat");
     gtk_window_set_default_size (GTK_WINDOW ( t_screen.main_window), 1200, 760);
     gtk_window_set_resizable (GTK_WINDOW ( t_screen.main_window), FALSE);
-
-    /*struct stat c_buffer;
-    int exist = stat("client_data/client.db", &c_buffer);
-    if (exist == 0) {
-        t_list *temp = user_exec_db("SELECT login, password FROM user;", 1);
-    }*/
-    //РОМА ТУТ НАДО ЗАПУСТИТЬ ГЛАВНЫЙ ЭКРАН ПО КОНКРЕТНОМУ ПОЛЬЗОВАТЕЛЮ (ДАННЫЕ В temp) ИГНОРИРУЮ АВТОРИЗАЦИЮ/РЕГИСТРАЦИЮ
-    //else {
-        load_css();
-        chat_show_auth_screen();
-        chat_decorate_headerbar();
-        gtk_widget_show(t_screen.main_window);
-    //}
+    load_css();
+    chat_show_auth_screen();
+    chat_decorate_headerbar();
+    gtk_widget_show(t_screen.main_window);
 }
 
 int main(int argc, char *argv[]) {

@@ -57,6 +57,7 @@ t_list *db_messages_sender(int c_id, int prev);
 void message_changer(int m_id, char *new_text);
 void db_delete_message(int m_id);
 int get_message_max_id(int user_id, int chat_id);
+char* get_message_data_by_id(int id, int chat_id);
 
 //SSling
 SSL_CTX *CTX_initialize_server();
@@ -69,4 +70,7 @@ void certificate_ckeck(SSL *ssl);
 void close_connection(SSL *ssl);
 void close_server(EVP_PKEY *pkey, X509 *x509, SSL_CTX *context);
 //SSLing
+
+char *sql_protection(char *message);
+
 #endif

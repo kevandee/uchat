@@ -10,7 +10,6 @@ install:
 	@make -sC client 
 	@mv client/uchat .
 	@mv server/uchat_server .
-	@mkdir -p kevandee Dima123 Fibbs123
 
 client:
 	@make -sC client 

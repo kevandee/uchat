@@ -323,3 +323,12 @@ int get_message_max_id(int user_id, int chat_id) {
     int u_id = mx_atoi(list->data);
     return u_id;
 }
+
+char* get_message_data_by_id(int id, int chat_id) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT text FROM messages WHERE (id = %d AND chat_id = %d);";
+    asprintf(&query, sql_pattern, id, chat_id);
+    t_list *list = sqlite3_exec_db(query, 1);
+
+    return list->data;
+}
