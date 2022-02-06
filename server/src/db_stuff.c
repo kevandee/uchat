@@ -16,7 +16,7 @@ void sqlite3_create_db() {
         sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, login TEXT NOT NULL, password TEXT NOT NULL, name TEXT DEFAULT \".clear\", surname TEXT DEFAULT \".clear\", bio TEXT DEFAULT \".clear\", avatar TEXT DEFAULT \"default\", theme TEXT DEFAULT dark);");
         sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, members INTEGER NOT NULL, avatar TEXT DEFAULT \"default\");");
         sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT, chat_id INTEGER NOT NULL, user_id INTEGER NOT NULL, admin BOOLEAN NOT NULL DEFAULT FALSE);");
-        sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, chat_id INTEGER NOT NULL, user_id INTEGER NOT NULL, text TEXT DEFAULT NULL, type TEXT DEFAULT text);");
+        sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, chat_id INTEGER NOT NULL, user_id INTEGER NOT NULL, text TEXT DEFAULT NULL, time DATETIME NOT NULL, type TEXT DEFAULT text);");
         sql = mx_strrejoin(sql, "INSERT INTO users (login, password) VALUES ('Dima123', 'Dimapassword');");
         sql = mx_strrejoin(sql, "INSERT INTO users (login, password) VALUES ('Fibbs123', 'Mafilirkan');");
         rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
@@ -331,4 +331,36 @@ char* get_message_data_by_id(int id, int chat_id) {
     t_list *list = sqlite3_exec_db(query, 1);
 
     return list->data;
+}
+
+void update_user_avatar(char *path, int id) {
+    char *query = NULL;
+    char *sql_pattern = NULL;
+    sql_pattern = "UPDATE users SET avatar = '%s' WHERE id = %d;";
+    asprintf(&query, sql_pattern, path, id);
+    sqlite3_exec_db(query, 2);
+}
+
+void update_user_name(char *name, int id) {
+    char *query = NULL;
+    char *sql_pattern = NULL;
+    sql_pattern = "UPDATE users SET name = '%s' WHERE id = %d;";
+    asprintf(&query, sql_pattern, name, id);
+    sqlite3_exec_db(query, 2);
+}
+
+void update_user_surname(char *surname, int id) {
+    char *query = NULL;
+    char *sql_pattern = NULL;
+    sql_pattern = "UPDATE users SET surname = '%s' WHERE id = %d;";
+    asprintf(&query, sql_pattern, surname, id);
+    sqlite3_exec_db(query, 2);
+}
+
+void update_user_bio(char *bio, int id) {
+    char *query = NULL;
+    char *sql_pattern = NULL;
+    sql_pattern = "UPDATE users SET bio = '%s' WHERE id = %d;";
+    asprintf(&query, sql_pattern, bio, id);
+    sqlite3_exec_db(query, 2);
 }

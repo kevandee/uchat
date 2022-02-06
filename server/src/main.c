@@ -290,11 +290,7 @@ void *client_work(void *param) {
 
             sprintf(buf, "path=%s scaled_w=%f scaled_h=%f x=%f y=%f ", recv_avatar.path,recv_avatar.scaled_w, recv_avatar.scaled_h,recv_avatar.x, recv_avatar.y);
             printf("buf %s\n", buf);
-            char *query = NULL;
-            char *sql_pattern = NULL;
-            sql_pattern = "UPDATE users SET avatar = '%s' WHERE id = %d;";
-            asprintf(&query, sql_pattern, buf, cur->id);
-            sqlite3_exec_db(query, 2);
+            update_user_avatar(buf, cur->id);
 
         }
         else if (mx_strncmp(mx_strtrim(message), "<setting, name=", 15) == 0) {
@@ -320,34 +316,19 @@ void *client_work(void *param) {
 
             if (mx_strcmp(name, ".not_changed") != 0) {
                 mx_strcpy(cur->name, name);
-                
-                char *query = NULL;
-                char *sql_pattern = NULL;
-                sql_pattern = "UPDATE users SET name = '%s' WHERE id = %d;";
-                asprintf(&query, sql_pattern, cur->name, cur->id);
-                sqlite3_exec_db(query, 2);
+                update_user_name(cur->name, cur->id);
 
                 // изменяешь name
             }
             if (mx_strcmp(surname, ".not_changed") != 0) {
                 mx_strcpy(cur->surname, surname);
-
-                char *query = NULL;
-                char *sql_pattern = NULL;
-                sql_pattern = "UPDATE users SET surname = '%s' WHERE id = %d;";
-                asprintf(&query, sql_pattern, cur->surname, cur->id);
-                sqlite3_exec_db(query, 2);
-
+                update_user_surname(cur->surname, cur->id);
                 // изменяешь surname
             }
             if (mx_strcmp(bio, ".not_changed") != 0) {
                 mx_strcpy(cur->bio, bio);
                 printf("receive bio: %s\n", bio);
-                char *query = NULL;
-                char *sql_pattern = NULL;
-                sql_pattern = "UPDATE users SET bio = '%s' WHERE id = %d;";
-                asprintf(&query, sql_pattern, cur->bio, cur->id);
-                sqlite3_exec_db(query, 2);
+                update_user_bio(cur->bio, cur->id);
 
                 // изменяешь bio
             }
@@ -371,8 +352,9 @@ void *client_work(void *param) {
             char *query = NULL;
             char *sql_pattern = NULL;
             char *mess = sql_protection(mx_strchr(message, '>') + 1);
-            sql_pattern = "INSERT INTO messages (chat_id, user_id, text) VALUES (%d, %d, '%s');";
-            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, mess);
+            
+            sql_pattern = "INSERT INTO messages (chat_id, user_id, text, time) VALUES (%d, %d, '%s', '%s');";
+            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, mess, get_time());
             int *mes_id = sqlite3_exec_db(query, 2);
             cur->cur_chat.last_mes_id = *mes_id;
             send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat, true);
@@ -417,8 +399,10 @@ void *client_work(void *param) {
             //printf("name %s\npath %s\nmode %s\n", name, path, mode);
             char *query = NULL;
             char *sql_pattern = NULL;
-            sql_pattern = "INSERT INTO messages (chat_id, user_id, text, type) VALUES (%d, %d, '%s', '%s');";
-            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, path, "file");
+            time_t t;
+            time(&t);
+            sql_pattern = "INSERT INTO messages (chat_id, user_id, text, time, type) VALUES (%d, %d, '%s', '%s', '%s');";
+            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, path, get_time(), "file");
             int *mes_id = sqlite3_exec_db(query, 2);
             
             cur->cur_chat.last_mes_id = *mes_id;
@@ -809,4 +793,10 @@ char *sql_protection(char *message) {
         i++;
     }
     return temp;
+}
+
+char *get_time() {
+    time_t t;
+    time(&t);
+    return ctime(&t);
 }

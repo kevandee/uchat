@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <signal.h>
 #include <string.h>
+#include <time.h>
 
 #include "../../libmx/inc/libmx.h"
 #include "../../frameworks/SQLite3/inc/sqlite3.h"
@@ -59,6 +60,11 @@ void db_delete_message(int m_id);
 int get_message_max_id(int user_id, int chat_id);
 char* get_message_data_by_id(int id, int chat_id);
 
+void update_user_avatar(char *path, int id);
+void update_user_name(char *name, int id);
+void update_user_surname(char *surname, int id);
+void update_user_bio(char *bio, int id);
+
 //SSling
 SSL_CTX *CTX_initialize_server();
 EVP_PKEY *create_key();
@@ -72,5 +78,5 @@ void close_server(EVP_PKEY *pkey, X509 *x509, SSL_CTX *context);
 //SSLing
 
 char *sql_protection(char *message);
-
+char *get_time();
 #endif
