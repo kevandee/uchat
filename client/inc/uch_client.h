@@ -39,6 +39,15 @@ typedef struct s_file_mes {
     bool prev;
 }               t_file_mes;
 
+typedef struct s_sticker{
+    int sticker_num;
+    char *sender;
+    char *date;
+
+    int id;
+    bool prev;
+}               t_sticker;
+
 struct
 {
     GtkWidget *grid;
