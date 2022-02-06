@@ -39,6 +39,199 @@ void return_to_chatlist(GtkWidget *widget, gpointer data) {
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left),t_main.scroll_box_left);
 }
 
+
+
+static void show_group_settings(GtkWidget *widget, gpointer data)
+{
+    (void)widget;
+    cur_client.cur_chat.id = -1;
+    if(t_main.sticker_panel)
+    {
+        gtk_widget_hide(t_main.sticker_panel);
+    }
+
+    gtk_grid_remove(GTK_GRID(t_main.grid), t_main.right_panel);
+    t_main.right_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
+    gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 50);
+
+    GtkWidget *group_sett_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 550);//<----------
+    gtk_widget_set_halign(GTK_WIDGET(group_sett_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(group_sett_box), GTK_ALIGN_START);
+    gtk_widget_set_margin_bottom(group_sett_box, 20);
+    gtk_widget_set_margin_top(group_sett_box, 28);
+    GtkWidget *group_sett_label_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(group_sett_label_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(group_sett_label_box), GTK_ALIGN_CENTER);
+    GtkWidget *group_sett_label = gtk_label_new("Group settings");
+    gtk_widget_set_name(GTK_WIDGET(group_sett_label), "account_sett_text");
+    load_css_main(t_screen.provider, group_sett_label);
+    gtk_box_append(GTK_BOX(group_sett_label_box), group_sett_label);
+    GtkWidget *return_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(return_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(return_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_margin_top(return_box, 5);
+    GtkWidget *return_button = NULL;
+    if(cur_client.theme == DARK_THEME) 
+        return_button = gtk_image_new_from_file("client/media/return_settings.png");
+    else
+        return_button = gtk_image_new_from_file("client/media/return_settings_light.png");
+
+    GtkGesture *click_back = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_back, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(click_back, "pressed", G_CALLBACK(show_chat_history), data);
+    gtk_widget_add_controller(return_button, GTK_EVENT_CONTROLLER(click_back));
+
+    gtk_widget_set_size_request(return_button, 25, 25);
+    gtk_box_append(GTK_BOX(return_box), return_button);
+
+    gtk_box_append(GTK_BOX(group_sett_box), group_sett_label_box);
+    gtk_box_append(GTK_BOX(group_sett_box), return_box);
+
+    GtkWidget *сhange_data_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);//<---------
+    gtk_box_set_spacing(GTK_BOX(сhange_data_box), 100);
+    gtk_widget_set_halign(GTK_WIDGET(сhange_data_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(сhange_data_box), GTK_ALIGN_START);
+
+    GtkWidget *change_data_left_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(change_data_left_box), 20);
+    gtk_widget_set_halign(GTK_WIDGET(change_data_left_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(change_data_left_box), GTK_ALIGN_START);
+    GtkWidget *photo_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(photo_box), 8);
+    gtk_widget_set_halign(GTK_WIDGET(photo_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(photo_box), GTK_ALIGN_START);
+    GtkWidget *photo_label_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(photo_label_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(photo_label_box), GTK_ALIGN_START);
+    GtkWidget *photo_label = gtk_label_new("PHOTO");
+    gtk_widget_set_name(GTK_WIDGET(photo_label), "photo_label");
+    load_css_main(t_screen.provider, photo_label);
+    gtk_box_append(GTK_BOX(photo_label_box), photo_label);
+    GtkWidget *photo_buttons_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(photo_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(photo_box), GTK_ALIGN_START);
+    GtkWidget *change_photo = gtk_button_new_with_label("Change photo");
+    //g_signal_connect(change_photo, "clicked", G_CALLBACK(choise_photo_file), NULL);
+    gtk_widget_set_name(GTK_WIDGET(change_photo), "change_photo_btn");
+    load_css_main(t_screen.provider, change_photo);
+    gtk_box_append(GTK_BOX(photo_buttons_box), change_photo);
+    GtkWidget *delete = gtk_button_new_with_label("Delete");
+    gtk_widget_set_name(GTK_WIDGET(delete), "delete_btn");
+    load_css_main(t_screen.provider, delete);
+    gtk_box_append(GTK_BOX(photo_buttons_box), delete);
+
+    gtk_box_append(GTK_BOX(photo_box), photo_label_box);
+    gtk_box_append(GTK_BOX(photo_box), photo_buttons_box);
+
+    gtk_box_append(GTK_BOX(change_data_left_box), photo_box);
+
+    GtkWidget *name_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(name_box), 8);
+    gtk_widget_set_halign(GTK_WIDGET(name_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(name_box), GTK_ALIGN_START);
+    GtkWidget *name_label_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(name_label_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(name_label_box), GTK_ALIGN_START);
+    GtkWidget *name_label = gtk_label_new("NAME");
+    gtk_widget_set_name(GTK_WIDGET(name_label), "name_label");
+    load_css_main(t_screen.provider, name_label);
+    gtk_box_append(GTK_BOX(name_label_box), name_label);
+    GtkWidget *name_entry_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(name_entry_box), 8);
+    gtk_widget_set_halign(GTK_WIDGET(name_entry_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(name_entry_box), GTK_ALIGN_START);
+    GtkWidget *entry_field_name = gtk_entry_new();
+    gtk_entry_set_max_length(GTK_ENTRY(entry_field_name), 32);
+    gtk_widget_set_name(GTK_WIDGET(entry_field_name), "entry_field_name");
+    load_css_main(t_screen.provider, entry_field_name);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_field_name), "New gruup name");
+    gtk_widget_set_size_request(entry_field_name, 240, 30);
+    gtk_box_append(GTK_BOX(name_entry_box), entry_field_name);
+    GtkWidget *apply_button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(apply_button_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(apply_button_box), GTK_ALIGN_CENTER);
+    GtkWidget *apply_button = gtk_button_new_with_label("Apply");
+    gtk_widget_set_name(GTK_WIDGET(apply_button), "apply_btn");
+    load_css_main(t_screen.provider, apply_button);
+    gtk_widget_set_size_request(apply_button, 160, 30);
+    gtk_widget_set_margin_start(apply_button, 0);
+    gtk_box_append(GTK_BOX(apply_button_box), apply_button);
+
+    gtk_box_append(GTK_BOX(name_box), name_label_box);
+    gtk_box_append(GTK_BOX(name_box), name_entry_box);
+    gtk_box_append(GTK_BOX(name_box), apply_button_box);
+
+    gtk_box_append(GTK_BOX(change_data_left_box), name_box);
+
+    GtkWidget *change_data_right_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_name(change_data_right_box, "change_data_right_box");
+    gtk_widget_set_size_request(change_data_right_box, 230, 230);
+    load_css_main(t_screen.provider, change_data_right_box);
+    gtk_box_set_spacing(GTK_BOX(change_data_right_box), 10);
+    gtk_widget_set_halign(GTK_WIDGET(change_data_right_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(change_data_right_box), GTK_ALIGN_CENTER);
+
+    GtkWidget *group_image_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(group_image_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(group_image_box), GTK_ALIGN_CENTER);
+    GtkWidget *group_image = get_circle_widget_from_png_avatar(&cur_client.avatar, 120, 120,  true);
+    gtk_box_append(GTK_BOX(group_image_box), group_image);
+    GtkWidget *group_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(group_name_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(group_name_box), GTK_ALIGN_CENTER);
+    GtkWidget *group_name = gtk_label_new("BEBRA LOVERS");
+    gtk_widget_set_size_request(group_name, 230, 0);
+    gtk_label_set_max_width_chars(GTK_LABEL (group_name), 32);
+    gtk_label_set_wrap(GTK_LABEL(group_name), true);
+    gtk_label_set_wrap_mode(GTK_LABEL(group_name), PANGO_WRAP_WORD);
+    gtk_widget_set_name(group_name, "user_name");
+    load_css_main(t_screen.provider, group_name);
+    gtk_box_append(GTK_BOX(group_name_box), group_name);
+
+    gtk_box_append(GTK_BOX(change_data_right_box), group_image_box);
+    gtk_box_append(GTK_BOX(change_data_right_box), group_name_box);
+
+    gtk_box_append(GTK_BOX(сhange_data_box), change_data_left_box);
+    gtk_box_append(GTK_BOX(сhange_data_box), change_data_right_box);
+
+    //gtk_widget_set_margin_bottom(сhange_data_box, 45);
+
+    GtkWidget *members_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_set_spacing(GTK_BOX(members_box), 15);
+    gtk_widget_set_halign(GTK_WIDGET(members_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(members_box), GTK_ALIGN_START);
+
+    GtkWidget *members_label_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(members_label_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(members_label_box), GTK_ALIGN_START);
+    GtkWidget *members_label = gtk_label_new("MEMBERS LIST");
+    gtk_widget_set_name(GTK_WIDGET(members_label), "name_label");
+    load_css_main(t_screen.provider, members_label);
+    gtk_box_append(GTK_BOX(members_label_box), members_label);
+
+    GtkWidget *members_list_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(members_list_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(members_list_box), GTK_ALIGN_START);
+    GtkWidget *members_scroll_window = gtk_scrolled_window_new();
+    gtk_widget_set_size_request(GTK_WIDGET(members_scroll_window), 320, 350);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(members_scroll_window), members_list_box);
+    gtk_widget_set_name(members_scroll_window, "test");
+    load_css_main(t_screen.provider, members_scroll_window);
+
+    gtk_box_append(GTK_BOX(members_box), members_label_box);
+    gtk_box_append(GTK_BOX(members_box), members_scroll_window);
+
+
+    gtk_box_append(GTK_BOX(t_main.right_panel), group_sett_box);
+    gtk_box_append(GTK_BOX(t_main.right_panel), сhange_data_box);
+    gtk_box_append(GTK_BOX(t_main.right_panel), members_box);
+
+    gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
+    
+}
+
 static void send_chat(GtkWidget *widget, gpointer data) {
     (void)widget;
     GtkWidget **swapped = data;
@@ -328,6 +521,7 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
                 GtkWidget *user_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
                 gtk_widget_set_halign(GTK_WIDGET(user_name_box), GTK_ALIGN_START);
                 gtk_widget_set_valign(GTK_WIDGET(user_name_box), GTK_ALIGN_START);
+
                 GtkWidget *user_name = gtk_label_new("Dimas");
                 gtk_widget_set_name(user_name, "user_name_chat");
                 load_css_main(t_screen.provider, user_name);
@@ -559,7 +753,7 @@ static void show_stickers(gpointer data)
     gtk_widget_set_name(stickers_label, "recent_text");
     load_css_main(t_screen.provider, stickers_label);
     gtk_box_append(GTK_BOX(stickers_label_box), stickers_label);
-
+/**/
     t_main.sticker_scroll_window = gtk_scrolled_window_new();
     gtk_widget_set_size_request(GTK_WIDGET(t_main.sticker_scroll_window), 295, 655);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.sticker_scroll_window), t_main.sticker_scroll_box);
@@ -728,11 +922,24 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_widget_set_valign(GTK_WIDGET(chat_headerbar_right), GTK_ALIGN_CENTER);
     //GtkWidget *block_img_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     GtkWidget *block_img = NULL;
-    if(cur_client.theme == DARK_THEME)
-        block_img = gtk_image_new_from_file("client/media/block_btn.png");
-    else block_img = gtk_image_new_from_file("client/media/block_btn_light.png");
-    //GtkWidget *block_img = gtk_image_new_from_file("client/media/block_btn.png");
-    gtk_widget_set_size_request(block_img, 35, 35);
+    if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) == 0) 
+    {
+        if(cur_client.theme == DARK_THEME)
+            block_img = gtk_image_new_from_file("client/media/block_btn.png");
+        else block_img = gtk_image_new_from_file("client/media/block_btn_light.png");
+        gtk_widget_set_size_request(block_img, 35, 35);
+    }
+    else
+    {
+        if(cur_client.theme == DARK_THEME)
+            block_img = gtk_image_new_from_file("client/media/settings_group.png");
+        else block_img = gtk_image_new_from_file("client/media/settings_group_light.png");
+        gtk_widget_set_size_request(block_img, 35, 35);
+        GtkGesture *settings_group = gtk_gesture_click_new();
+        gtk_gesture_set_state(settings_group, GTK_EVENT_SEQUENCE_CLAIMED);
+        g_signal_connect_swapped(settings_group, "pressed", G_CALLBACK(show_group_settings), data);
+        gtk_widget_add_controller(block_img, GTK_EVENT_CONTROLLER(settings_group));
+    }
 
     //GtkWidget *mute_img_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     GtkWidget *mute_img = NULL;

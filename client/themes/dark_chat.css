@@ -155,7 +155,6 @@ scrolledwindow {
   font-size: 30px;
   font-weight: 800;
   color: #fff;
-  padding-top: 28px;
 }
 
 /* Change Photo Section */
@@ -388,6 +387,10 @@ scrolledwindow {
 
 #write_message text{
   background-color: #212D38;
+}
+
+#test{
+  background-color: red;
 }
 
 /* #write_message  class */
