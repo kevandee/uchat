@@ -332,3 +332,35 @@ char* get_message_data_by_id(int id, int chat_id) {
 
     return list->data;
 }
+
+void update_user_avatar(char *path, int id) {
+    char *query = NULL;
+    char *sql_pattern = NULL;
+    sql_pattern = "UPDATE users SET avatar = '%s' WHERE id = %d;";
+    asprintf(&query, sql_pattern, path, id);
+    sqlite3_exec_db(query, 2);
+}
+
+void update_user_name(char *name, int id) {
+    char *query = NULL;
+    char *sql_pattern = NULL;
+    sql_pattern = "UPDATE users SET name = '%s' WHERE id = %d;";
+    asprintf(&query, sql_pattern, name, id);
+    sqlite3_exec_db(query, 2);
+}
+
+void update_user_surname(char *surname, int id) {
+    char *query = NULL;
+    char *sql_pattern = NULL;
+    sql_pattern = "UPDATE users SET surname = '%s' WHERE id = %d;";
+    asprintf(&query, sql_pattern, surname, id);
+    sqlite3_exec_db(query, 2);
+}
+
+void update_user_bio(char *bio, int id) {
+    char *query = NULL;
+    char *sql_pattern = NULL;
+    sql_pattern = "UPDATE users SET bio = '%s' WHERE id = %d;";
+    asprintf(&query, sql_pattern, bio, id);
+    sqlite3_exec_db(query, 2);
+}
