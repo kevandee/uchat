@@ -17,6 +17,7 @@
 #include "../../frameworks/SQLite3/inc/sqlite3.h"
 #include "../../utils/inc/utils.h"
 
+#include <curl/curl.h>
 #include <gtk/gtk.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -113,6 +114,7 @@ void chat_decorate_headerbar();
 void load_css_main(GtkCssProvider *provider, GtkWidget *widget);
 void show_settings();
 void show_home();
+char **weather_parse(char *city);
 void show_chat_history(GtkWidget *widget, gpointer data);
 void return_to_chatlist(GtkWidget *widget, gpointer data);
 void add_chat_dialog(GtkWidget *widget, gpointer data);
