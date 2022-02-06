@@ -36,14 +36,17 @@ gboolean add_msg(gpointer data) {
     char *total_msg = message->data;
     GtkWidget *incoming_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     GtkWidget *incoming_msg = gtk_label_new(total_msg);
+
     bool is_sender = false;
     if (mx_strcmp(message->sender, cur_client.login) != 0){
         gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_START);
         gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_START);
+        //gtk_widget_set_margin_start(incoming_msg_box, 5);
     }   
     else {
         gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
         gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
+        //ыgtk_widget_set_margin_end(incoming_msg_box, 5);
 
         GtkGesture *gesture = gtk_gesture_click_new();
         gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
@@ -62,21 +65,29 @@ gboolean add_msg(gpointer data) {
         
         is_sender = true;
     }
-    gtk_widget_set_margin_end(incoming_msg_box, 5);
     gtk_widget_set_margin_bottom(incoming_msg_box, 5);
    
+
+   //для цсс--------------------------------------------------------------
     if (!is_sender)
         gtk_widget_set_name(GTK_WIDGET(incoming_msg), "incoming-message");
     else 
         gtk_widget_set_name(GTK_WIDGET(incoming_msg), "message");
     load_css_main(t_screen.provider, incoming_msg);
+   //для цсс--------------------------------------------------------------
+
+
     gtk_label_set_wrap(GTK_LABEL(incoming_msg), TRUE);
     gtk_label_set_wrap_mode(GTK_LABEL(incoming_msg), PANGO_WRAP_WORD_CHAR);
     gtk_label_set_max_width_chars(GTK_LABEL(incoming_msg), 50);
     gtk_label_set_selectable(GTK_LABEL(incoming_msg), FALSE);
     GtkWidget *User_logo = NULL;
-    if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
-        if (!is_sender) {
+
+
+    if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) 
+    {
+        if (!is_sender) 
+        {
             t_list *avatars = cur_client.cur_chat.users_avatars;
             t_list *user_list = cur_client.cur_chat.users;
             while (mx_strcmp(user_list->data, message->sender) != 0 && user_list) {
@@ -88,29 +99,162 @@ gboolean add_msg(gpointer data) {
                 user_list = user_list->next;
             }
 
-            if (avatars) {
+            if (avatars)
+            {
                 t_avatar *draw = avatars->data;
-                if (mx_strcmp (draw->name, "default") == 0) {
+                if (mx_strcmp (draw->name, "default") == 0) 
+                {
                     draw = &t_main.default_avatar;
                 }
                 User_logo = get_circle_widget_from_png_avatar(draw, 45, 45, false);
-                gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
             }
         }
+
         else {
             User_logo = get_circle_widget_current_user_avatar();
         }
     }
 
-    gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
-    if (is_sender && mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0)
-        gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
+    GtkWidget *message_box = NULL;
+    if(mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0)
+    {   
+        message_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+        if(is_sender) 
+        {
+            gtk_widget_set_halign(GTK_WIDGET(message_box), GTK_ALIGN_END);
+            gtk_widget_set_valign(GTK_WIDGET(message_box), GTK_ALIGN_END);
+            gtk_widget_set_margin_end(message_box, 5);
+        }
+        else
+        {
+            gtk_widget_set_halign(GTK_WIDGET(message_box), GTK_ALIGN_START);
+            gtk_widget_set_valign(GTK_WIDGET(message_box), GTK_ALIGN_START);
+            gtk_widget_set_margin_start(message_box, 5);
+        }
+        gtk_widget_set_margin_bottom(message_box, 5);
+        gtk_box_set_spacing(GTK_BOX(message_box), 10);
+
+        GtkWidget* message_content = gtk_grid_new();
+        gtk_grid_set_row_spacing(GTK_GRID(message_content), 1);
+        gtk_grid_set_column_spacing(GTK_GRID(message_content), 5);
+
+        GtkWidget *user_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        if(is_sender) 
+        {
+            gtk_widget_set_halign(GTK_WIDGET(user_name_box), GTK_ALIGN_END);
+            gtk_widget_set_valign(GTK_WIDGET(user_name_box), GTK_ALIGN_END);
+            gtk_widget_set_margin_end(user_name_box, 15);
+        }
+        else
+        {
+            gtk_widget_set_halign(GTK_WIDGET(user_name_box), GTK_ALIGN_START);
+            gtk_widget_set_valign(GTK_WIDGET(user_name_box), GTK_ALIGN_START);
+            gtk_widget_set_margin_start(user_name_box, 15);
+        }
+
+        GtkWidget *user_name = gtk_label_new(message->sender);
+        gtk_widget_set_name(user_name, "user_name_chat");
+        load_css_main(t_screen.provider, user_name);
+        gtk_box_append(GTK_BOX(user_name_box), user_name);
+
+        incoming_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
+        gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_CENTER);
+        gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_CENTER);
+        gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
+
+        GtkWidget *user_logo_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+        gtk_widget_set_halign(GTK_WIDGET(user_logo_box), GTK_ALIGN_CENTER);
+        gtk_widget_set_valign(GTK_WIDGET(user_logo_box), GTK_ALIGN_CENTER);
+        GtkWidget *user_logo = User_logo;
+        gtk_box_append(GTK_BOX(user_logo_box), user_logo);
+
+        GtkWidget *user_action_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
+        gtk_widget_set_halign(GTK_WIDGET(user_action_box), GTK_ALIGN_CENTER);
+        gtk_widget_set_valign(GTK_WIDGET(user_action_box), GTK_ALIGN_CENTER);
+        GtkWidget *user_action = gtk_label_new("edited");
+        gtk_widget_set_name(user_action, "user_action");
+        load_css_main(t_screen.provider, user_action);
+        GtkWidget *user_action_time = gtk_label_new("13:45");
+        gtk_widget_set_name(user_action_time, "user_action");
+        load_css_main(t_screen.provider, user_action_time);
+
+        gtk_box_append(GTK_BOX(user_action_box), user_action);
+        gtk_box_append(GTK_BOX(user_action_box), user_action_time);
+        gtk_widget_hide(user_action);
+
+        if(is_sender)
+        {
+            gtk_box_prepend(GTK_BOX(incoming_msg_box), user_action_box);
+            gtk_grid_attach(GTK_GRID(message_content), user_name_box, 1, 1, 1, 1);
+            gtk_grid_attach(GTK_GRID(message_content), incoming_msg_box, 1, 2, 1, 1);
+            gtk_grid_attach(GTK_GRID(message_content), user_logo_box, 2, 1, 1, 2);
+        }
+        else
+        {
+            gtk_box_append(GTK_BOX(incoming_msg_box), user_action_box);
+            gtk_grid_attach(GTK_GRID(message_content), user_logo_box, 1, 1, 1, 2);
+            gtk_grid_attach(GTK_GRID(message_content), user_name_box, 2, 1, 1, 1);
+            gtk_grid_attach(GTK_GRID(message_content), incoming_msg_box, 2, 2, 1, 1);            
+        }
+
+        gtk_box_append(GTK_BOX(message_box), message_content);
+        //gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
+    }
+    else
+    {
+        message_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+        if(is_sender) 
+        {
+            gtk_widget_set_halign(GTK_WIDGET(message_box), GTK_ALIGN_END);
+            gtk_widget_set_valign(GTK_WIDGET(message_box), GTK_ALIGN_END);
+            gtk_widget_set_margin_end(message_box, 5);
+        }
+        else
+        {
+            gtk_widget_set_halign(GTK_WIDGET(message_box), GTK_ALIGN_START);
+            gtk_widget_set_valign(GTK_WIDGET(message_box), GTK_ALIGN_START);
+            gtk_widget_set_margin_start(message_box, 5);
+        }
+        gtk_widget_set_margin_bottom(message_box, 5);
+        gtk_box_set_spacing(GTK_BOX(message_box), 10);
+
+        incoming_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
+        gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_CENTER);
+        gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_CENTER);
+        gtk_box_append(GTK_BOX(incoming_msg_box), incoming_msg);
+
+        GtkWidget *user_action_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
+        gtk_widget_set_halign(GTK_WIDGET(user_action_box), GTK_ALIGN_CENTER);
+        gtk_widget_set_valign(GTK_WIDGET(user_action_box), GTK_ALIGN_CENTER);
+        GtkWidget *user_action = gtk_label_new("edited");
+        gtk_widget_set_name(user_action, "user_action");
+        load_css_main(t_screen.provider, user_action);
+        GtkWidget *user_action_time = gtk_label_new("13:45");
+        gtk_widget_set_name(user_action_time, "user_action");
+        load_css_main(t_screen.provider, user_action_time);
+
+        gtk_box_append(GTK_BOX(user_action_box), user_action);
+        gtk_box_append(GTK_BOX(user_action_box), user_action_time);
+        gtk_widget_hide(user_action);
+
+        if(is_sender)
+        {
+            gtk_box_prepend(GTK_BOX(incoming_msg_box), user_action_box);
+        }
+        else
+        {
+            gtk_box_append(GTK_BOX(incoming_msg_box), user_action_box);         
+        }
+        gtk_box_append(GTK_BOX(message_box), incoming_msg_box);
+        //gtk_box_append(GTK_BOX(incoming_msg_box), User_logo);
+    }
+
     if (!message->prev) {
-        gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
+        gtk_box_append(GTK_BOX(t_main.scroll_box_right), message_box);
         mx_push_front(&t_main.message_widgets_list, incoming_msg);
     }
     else {
-        gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_msg_box);
+        gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), message_box);
         mx_push_back(&t_main.message_widgets_list, incoming_msg);
     }
     t_main.last_mes = incoming_msg_box;
