@@ -620,20 +620,20 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    printf("SSL: chipher: %s\n", SSL_get_cipher(ssl));
+    printf("SSL: Connecte to server with chipher: %s\n", SSL_get_cipher(ssl));
     X509 *cert = SSL_get_peer_certificate(ssl);
     if (cert == NULL) {
         printf("SSL: No certificates configured.\n");
     }
     else {
-        printf("SSL: Server certificates:\n");
+        /*printf("SSL: Server certificates:\n");
         char *line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
         printf("SSL: Subject: %s\n", line);
         free(line);
         line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
         printf("SSL: Issuer: %s\n", line);
         free(line);
-        X509_free(cert);
+        X509_free(cert);*/
     }
 
     //      echo server check
