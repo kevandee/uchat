@@ -15,6 +15,7 @@ static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
     char buf[512 + 32] = {0};
     cur_client.sender_new_chat = true;
     sprintf(buf, "<add chat, name=.dialog>%s", users);
+    
     send_all(cur_client.ssl, buf, 512+32);
     while (!t_main.loaded) {
         usleep(50);
@@ -23,6 +24,7 @@ static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
     while (temp->next) {
         temp = temp->next;
     }
+    
     gtk_widget_hide(widget);
     show_chat_history(widget, temp->data);
     //return_to_chatlist(NULL, NULL);
