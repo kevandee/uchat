@@ -36,8 +36,11 @@ gboolean user_function (GtkEventControllerScroll *controller, double dx, double 
     double scaled_h = cur_client.avatar.orig_h+(cur_client.avatar.d_width + 5*dy) * (cur_client.avatar.orig_h/cur_client.avatar.orig_w);
     if (cur_client.avatar.x + scaled_w > 500 && cur_client.avatar.y + scaled_h > 500) {
         cur_client.avatar.d_width += 5*dy;
+        cur_client.avatar.scaled_w = scaled_w;
+        cur_client.avatar.scaled_h = scaled_h;
     }
     gtk_widget_queue_draw(GTK_WIDGET (user_data));
+    
     return TRUE;
 }
 
@@ -142,13 +145,21 @@ static void send_avatar() {
 
     SSL_write(cur_client.ssl, &cur_client.avatar.x, sizeof(double));
     SSL_write(cur_client.ssl, &cur_client.avatar.y, sizeof(double));
-
+    t_avatar *new = (t_avatar *)malloc(sizeof(t_avatar));
+    new->image = cur_client.avatar.image;
+    new->path = cur_client.avatar.path;
+    new->x = cur_client.avatar.x;
+    new->y = cur_client.avatar.y;
+    new->scaled_h = cur_client.avatar.scaled_h;
+    new->scaled_w = cur_client.avatar.scaled_w;
     t_main.loaded = false;
     while (!t_main.loaded) {
         usleep(50);
     }
-    gtk_widget_hide(t_main.logo);
-    t_main.logo = get_circle_widget_from_png_avatar(&cur_client.avatar, 45, 45, true);
+    gtk_box_remove(GTK_BOX (t_main.search_panel), t_main.logo);
+
+    t_main.logo = get_circle_widget_from_png_avatar(new, 45, 45, false);
+    gtk_widget_set_size_request(t_main.logo, 45, 45);
     gtk_widget_set_name(GTK_WIDGET(t_main.logo), "account_avatar");
     load_css_main(t_screen.provider, t_main.logo);
     gtk_box_prepend(GTK_BOX (t_main.search_panel), t_main.logo);
