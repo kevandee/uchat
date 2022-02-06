@@ -29,6 +29,15 @@ extern pthread_mutex_t cl_mutex;
 
 void clear_message(char *mes, const int size);
 
+typedef struct s_file_mes {
+    char *name;
+    char *sender;
+    char *date;
+
+    int id;
+    bool prev;
+}               t_file_mes;
+
 struct
 {
     GtkWidget *grid;
@@ -109,12 +118,15 @@ void text_changed_add_chat(GObject *object, GParamSpec *pspec, gpointer data);
 
 cairo_surface_t *get_surface_from_jpg(const char *filename);
 cairo_surface_t *scale_to_half(cairo_surface_t *s, int orig_width, int orig_height, int scaled_width, int scaled_height);
+
 GtkWidget *get_circle_widget_from_png(const char *filename);
 GtkWidget *get_circle_widget_from_png_custom(const char *filename, gint width, gint height);
 GtkWidget *get_circle_widget_current_user_avatar();
+GtkWidget *get_icon_from_filename(const char *name);
 void show_message_menu(GtkGestureClick *gesture, int n_press, double x, double y, gpointer data);
 GtkWidget *get_circle_widget_from_png_avatar(t_avatar *avatar, gint width, gint height, bool must_update);
 t_list *get_chat_users_avatars(t_chat *chat);
+
 
 void choise_file();
 void get_all_user_data();

@@ -377,7 +377,7 @@ void *client_work(void *param) {
         }
         else if(mx_strncmp(message, "<file chat_id=", 14) == 0) { //"<file chat_id=%d, name=%s, mode=%s>"
             printf("%s\n", message);
-            char *temp = message + 15;
+            char *temp = message + 14;
             int len = 0;
             while (*(temp + len) != ',') {
                 len++;
@@ -397,8 +397,13 @@ void *client_work(void *param) {
                 len++;
             }
             char *name = mx_strndup(temp, len);
-            char *path = mx_strjoin("data/", name);
-           
+            char *path = mx_strjoin("data/", mx_itoa(chat_id));
+            struct stat st = {0};
+            if (stat(path, &st) == -1) {
+                mkdir(path, 0777);
+            }
+            path = mx_strrejoin(path, "/");
+            path = mx_strrejoin(path, name);           
             temp = mx_strstr(temp, "mode=") + 5;
             len = 0;
             while (*(temp + len) != '>') {
@@ -406,14 +411,20 @@ void *client_work(void *param) {
             }
 
             char *mode = mx_strndup(temp, len);
-            printf("name %s\npath %s\nmode %s\n", name, path, mode);
+            //printf("name %s\npath %s\nmode %s\n", name, path, mode);
             char *query = NULL;
             char *sql_pattern = NULL;
             sql_pattern = "INSERT INTO messages (chat_id, user_id, text, type) VALUES (%d, %d, '%s', '%s');";
             asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, path, "file");
             int *mes_id = sqlite3_exec_db(query, 2);
+            
             cur->cur_chat.last_mes_id = *mes_id;
             recv_file(cur->ssl, path, mode);
+
+            char buf[544] = {0};
+            sprintf(buf, "<file chat_id=%d, mes_id=%d, from=%s, prev=0>%s", chat_id, *mes_id, cur->login, name);
+
+            send_message(buf, cur->login, &cur->cur_chat, false);
         }
         else if (mx_strncmp(message, "<chat users avatars>", 20) == 0){
             printf("%s\n", message);
