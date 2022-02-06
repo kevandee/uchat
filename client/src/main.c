@@ -133,21 +133,6 @@ gboolean add_file_msg(gpointer data) {
     else {
         gtk_widget_set_halign(GTK_WIDGET(incoming_file_box), GTK_ALIGN_END);
         gtk_widget_set_valign(GTK_WIDGET(incoming_file_box), GTK_ALIGN_END);
-/*
-        GtkGesture *gesture = gtk_gesture_click_new();
-        gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
-        gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
-        GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
-        arr[0] = incoming_msg;
-        arr[1] = incoming_msg_box;
-        int *mes_id = (int *)malloc(sizeof(int));
-        *mes_id = message->id;
-        t_list *gesture_data = NULL;
-        mx_push_back(&gesture_data, arr);
-        mx_push_back(&gesture_data, mes_id);
-        g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), gesture_data);
-        gtk_widget_add_controller(incoming_msg_box, GTK_EVENT_CONTROLLER(gesture));
-*/
         
         is_sender = true;
     }
@@ -472,6 +457,22 @@ void *rec_func(void *param) {
                 printf("%s\n", message);
                 printf("> ");
                 fflush(stdout);                
+            }
+            else if(mx_strncmp(message, "<get file>", 10) == 0) { // "<get file chat_id=%d, mes_id=%d>"
+                char *path = mx_strjoin(t_main.choosed_dir, "/");
+                path = mx_strrejoin(path, t_main.choosed_file->name);
+
+                char *mode = "wb";
+                if (mx_strstr(path, ".txt")) {
+                    mode = "w";
+                }
+
+                printf("load\n");
+                pthread_mutex_lock(&cl_mutex);
+                recv_file(cur_client.ssl, path, mode);
+                t_main.choosed_file = NULL;
+                t_main.choosed_dir = NULL;
+                pthread_mutex_unlock(&cl_mutex);
             }
             else if(mx_strncmp(message, "<last message>", 14) == 0) {
                 if (!t_main.first_load_mes){

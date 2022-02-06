@@ -73,6 +73,7 @@ struct
     t_avatar *loaded_avatar;
 
     char *choosed_dir;
+    t_file_mes *choosed_file;
 }   t_main;
 
 struct

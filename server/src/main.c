@@ -525,6 +525,41 @@ void *client_work(void *param) {
             send_all(cur->ssl, buf, 544);
             send_avatar(avatar, cur->ssl);
         }
+        else if (mx_strncmp(message, "<get file chat_id=", 18) == 0) { // "<get file chat_id=%d, mes_id=%d>"
+            char *temp = message + 18;
+            int len = 0;
+            while (*(temp + len) != ',') {
+                len++;
+            }
+            char *c_id = mx_strndup(temp, len);
+            printf("%s\n", c_id);
+            int chat_id = mx_atoi(c_id);
+            mx_strdel(&c_id);
+            if (chat_id != cur->cur_chat.id) {
+                printf("change chat\n");
+                change_chat_by_id(chat_id, cur);
+            }
+            temp = mx_strstr(temp, "mes_id=") + 7;
+            len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            char *m_id = mx_strndup(temp, len);
+            printf("%s\n", m_id);
+            int mes_id = mx_atoi(m_id);
+            mx_strdel(&m_id);
+
+            char *path = get_message_data_by_id(mes_id, chat_id);
+
+            char buf[544] = {0};
+            sprintf(buf, "<get file>");
+            send_all(cur->ssl, buf, 544);
+            char *mode = "rb";
+            if (mx_strstr(path, ".txt")) {
+                mode = "r";
+            }
+            send_file(cur->ssl, path, mode);
+        }
         else if (mx_strncmp(message, "<delete mes chat_id=", 20) == 0) {
             printf("%s\n", message);
             char *temp = message + 20;

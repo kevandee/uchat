@@ -645,11 +645,8 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_widget_set_valign(GTK_WIDGET(chat_headerbar_left), GTK_ALIGN_CENTER);
     GtkWidget *photo_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *photo =  NULL;
-
-    if (cur_client.cur_chat.is_avatar) {
-        photo = get_circle_widget_from_png_avatar(&cur_client.cur_chat.avatar, 50, 50, true);
-    }
-    else if(mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) == 0) {
+   
+    if(mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) == 0) {
         char buf[544] = {0};
         t_main.loaded = false;
         t_list *temp = cur_client.cur_chat.users;
@@ -666,6 +663,9 @@ void show_chat_history(GtkWidget *widget, gpointer data)
             *avatar = t_main.default_avatar;
         }
         photo = get_circle_widget_from_png_avatar(avatar, 50, 50, true);
+    }
+    else {
+        photo = get_circle_widget_from_png_avatar(&cur_client.cur_chat.avatar, 50, 50, true);
     }
 
     gtk_box_append(GTK_BOX(photo_box), photo);
