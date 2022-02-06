@@ -69,4 +69,7 @@ void certificate_ckeck(SSL *ssl);
 void close_connection(SSL *ssl);
 void close_server(EVP_PKEY *pkey, X509 *x509, SSL_CTX *context);
 //SSLing
+
+char *sql_protection(char *message);
+
 #endif
