@@ -371,8 +371,10 @@ void *client_work(void *param) {
             char *query = NULL;
             char *sql_pattern = NULL;
             char *mess = sql_protection(mx_strchr(message, '>') + 1);
-            sql_pattern = "INSERT INTO messages (chat_id, user_id, text) VALUES (%d, %d, '%s');";
-            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, mess);
+            time_t t;
+            time(&t);
+            sql_pattern = "INSERT INTO messages (chat_id, user_id, text, time) VALUES (%d, %d, '%s', '%s');";
+            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, mess, ctime(&t));
             int *mes_id = sqlite3_exec_db(query, 2);
             cur->cur_chat.last_mes_id = *mes_id;
             send_message(mx_strchr(message, '>') + 1, cur->login, &cur->cur_chat, true);
@@ -417,8 +419,10 @@ void *client_work(void *param) {
             //printf("name %s\npath %s\nmode %s\n", name, path, mode);
             char *query = NULL;
             char *sql_pattern = NULL;
-            sql_pattern = "INSERT INTO messages (chat_id, user_id, text, type) VALUES (%d, %d, '%s', '%s');";
-            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, path, "file");
+            time_t t;
+            time(&t);
+            sql_pattern = "INSERT INTO messages (chat_id, user_id, text, time, type) VALUES (%d, %d, '%s', '%s', '%s');";
+            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, path, ctime(&t), "file");
             int *mes_id = sqlite3_exec_db(query, 2);
             
             cur->cur_chat.last_mes_id = *mes_id;

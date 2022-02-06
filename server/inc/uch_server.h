@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <signal.h>
 #include <string.h>
+#include <time.h>
 
 #include "../../libmx/inc/libmx.h"
 #include "../../frameworks/SQLite3/inc/sqlite3.h"
