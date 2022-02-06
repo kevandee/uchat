@@ -486,12 +486,21 @@ void *client_work(void *param) {
             mx_strdel(&m_id);
 
             t_list *mes_list = db_messages_sender(chat_id, mes_id); //DODELAI
+
             printf("chat_id %d\n", chat_id);
             char buf[512 + 32] = {0};
             while(mes_list) {
                 t_message *mes_send = (t_message *)mes_list->data;
-                sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, mes_send->data);
-
+                if (mx_strcmp(mes_send->type, "file") == 0) {
+                    char *name = mes_send->data;
+                    while (mx_strchr(name, '/')) {
+                        name = mx_strchr(name, '/') + 1;
+                    }
+                    sprintf(buf, "<file chat_id=%d, mes_id=%d, from=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, name);
+                }
+                else {
+                    sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, mes_send->data);
+                }
                 send_all(cur->ssl, buf, 512 + 32);
 
                 clear_message(buf, 544);

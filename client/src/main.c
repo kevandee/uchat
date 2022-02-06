@@ -195,6 +195,21 @@ gboolean add_file_msg(gpointer data) {
     
     gtk_widget_set_size_request(file_icon, 45, 45);
 
+//icon
+    GtkGesture *gesture = gtk_gesture_click_new();
+    gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
+    //gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
+    //GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
+    //arr[0] = incoming_msg;
+    //arr[1] = incoming_msg_box;
+    //int *mes_id = (int *)malloc(sizeof(int));
+    //*mes_id = message->id;
+    //t_list *gesture_data = NULL;
+    //mx_push_back(&gesture_data, arr);
+    //mx_push_back(&gesture_data, mes_id);
+    g_signal_connect_after(gesture, "pressed", G_CALLBACK(choise_dir), file_mes);
+    gtk_widget_add_controller(file_icon, GTK_EVENT_CONTROLLER(gesture));
+//icon
 
     if (is_sender) {
         gtk_box_prepend(GTK_BOX(incoming_file_box), file_icon);
@@ -389,7 +404,7 @@ void *rec_func(void *param) {
                 printf("> ");
                 fflush(stdout);
             }
-            else if (mx_strncmp(message, "<file chat_id=", 14) == 0) { // "<file chat_id=%d, sender=%s, mes_id=%d>"
+            else if (mx_strncmp(message, "<file chat_id=", 14) == 0) { 
                 char *temp = message + 14;
                 int len = 0;
                 while (*(temp + len) != ',') {

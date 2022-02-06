@@ -71,6 +71,8 @@ struct
     t_avatar default_avatar;
     t_avatar default_group_avatar;
     t_avatar *loaded_avatar;
+
+    char *choosed_dir;
 }   t_main;
 
 struct
@@ -129,6 +131,7 @@ t_list *get_chat_users_avatars(t_chat *chat);
 
 
 void choise_file();
+void choise_dir();
 void get_all_user_data();
 void get_messages_from_server(int c_id, int mes_id);
 t_avatar *get_avatar(t_avatar *avatar);
