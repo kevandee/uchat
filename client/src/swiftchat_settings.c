@@ -159,6 +159,7 @@ static void send_avatar() {
     gtk_box_remove(GTK_BOX (t_main.search_panel), t_main.logo);
 
     t_main.logo = get_circle_widget_from_png_avatar(new, 45, 45, false);
+
     gtk_widget_set_size_request(t_main.logo, 45, 45);
     gtk_widget_set_name(GTK_WIDGET(t_main.logo), "account_avatar");
     load_css_main(t_screen.provider, t_main.logo);

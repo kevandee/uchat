@@ -141,7 +141,7 @@ void show_message_menu(GtkGestureClick *gesture, int n_press, double x, double y
 GtkWidget *get_circle_widget_from_png_avatar(t_avatar *avatar, gint width, gint height, bool must_update);
 t_list *get_chat_users_avatars(t_chat *chat);
 
-
+void choise_chatphoto_file();
 void choise_file();
 void choise_dir();
 void get_all_user_data();
