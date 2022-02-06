@@ -54,6 +54,7 @@ void show_home() {
     gtk_widget_set_valign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
     gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 50);
 
+    //NOTES
     GtkWidget *note_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_name(GTK_WIDGET(note_box), "note_box");
     gtk_widget_set_halign(GTK_WIDGET(note_box), GTK_ALIGN_START);
@@ -66,9 +67,6 @@ void show_home() {
     GtkWidget *note_box_inner = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(GTK_WIDGET(note_box_inner), "note_box_inner");
     load_css_main(t_screen.provider, note_box_inner);
-    /*gtk_widget_set_halign(GTK_WIDGET(note_box_inner), GTK_ALIGN_START);
-    gtk_widget_set_valign(GTK_WIDGET(note_box_inner), GTK_ALIGN_START);
-    gtk_box_set_spacing(GTK_BOX(note_box_inner), 10);*/
     gtk_widget_set_size_request(note_box_inner, 0, 300);
 
     GtkWidget *note_text_writer = gtk_text_view_new();
@@ -79,6 +77,7 @@ void show_home() {
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(note_text_writer), GTK_WRAP_WORD_CHAR);
     t_main.note_input = note_text_writer;
     g_signal_connect_after(note_text_buffer, "insert-text", G_CALLBACK(insert_text_note), NULL);
+    // notes buffer from data base
     //gtk_text_buffer_set_text();
 
     GtkWidget *note_scroll = gtk_scrolled_window_new ();
@@ -91,6 +90,36 @@ void show_home() {
     gtk_box_append(GTK_BOX(note_box_inner), note_scroll);
     gtk_box_append(GTK_BOX(note_box), note_box_inner);
     gtk_box_append(GTK_BOX(t_main.right_panel), note_box);
+    // NOTES
+
+    GtkWidget *weather_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(weather_box), "weather_box");
+    gtk_widget_set_halign(GTK_WIDGET(weather_box), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(weather_box), GTK_ALIGN_START);
+    gtk_box_set_spacing(GTK_BOX(weather_box), 10);
+
+    GtkWidget *weather_box_inner_hor = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(note_box_inner), "weather_box_inner_hor");
+
+
+    char *city = "харків";
+    char **weather_label_array = weather_parse(city);
+
+    char *weather_temperature = weather_label_array[0];
+    char *weather_image_path = weather_label_array[1];
+    char *weather_date = weather_label_array[2];
+
+    GtkWidget *weather_date_label = gtk_label_new(weather_date);
+    gtk_box_append(GTK_BOX(weather_box_inner_hor), weather_date_label);
+    GtkWidget *weather_image = gtk_image_new_from_file(weather_image_path);
+    gtk_widget_set_size_request(weather_image, 100, 100);
+    gtk_box_append(GTK_BOX(weather_box_inner_hor), weather_image);
+    GtkWidget *weather_temperature_label = gtk_label_new(weather_temperature);
+    gtk_box_append(GTK_BOX(weather_box), weather_box_inner_hor);
+    gtk_box_append(GTK_BOX(weather_box), weather_temperature_label);
+
+    gtk_box_append(GTK_BOX(t_main.right_panel), weather_box);
+    
 
 
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);

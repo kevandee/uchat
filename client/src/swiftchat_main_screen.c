@@ -668,6 +668,26 @@ static void hide_stickers(gpointer data)
     gtk_widget_hide(t_main.sticker_panel);
 }
 
+static void send_sticker(GtkGestureClick *gesture, int n_press, double x, double y, gpointer data) {
+    (void)gesture;
+    (void)n_press;
+    (void)x;
+    (void)y;
+
+    int sticker_num = *(int *)data;
+
+    char buf[544] = {0};
+    sprintf(buf, "<sticker chat_id=%d, sticker_num=%d>", cur_client.cur_chat.id, sticker_num);
+    send_all(cur_client.ssl, buf, 544);
+
+    GtkWidget *sticker = gtk_image_new_from_file(mx_strjoin(mx_strjoin("client/media/stickers/", mx_itoa(sticker_num)), ".png"));
+    gtk_widget_set_halign(sticker, GTK_ALIGN_END);
+    gtk_widget_set_margin_end(sticker, 5);
+    gtk_widget_set_margin_bottom(sticker, 5);
+    gtk_widget_set_size_request(GTK_WIDGET(sticker), 130, 130);
+    gtk_box_append(GTK_BOX (t_main.scroll_box_right), sticker);
+}
+
 static void show_stickers(gpointer data)
 {
     GtkWidget **change = data;
@@ -698,17 +718,22 @@ static void show_stickers(gpointer data)
     {
         for(j = 1; j <= 4; j++) // Rows
         {
-            //GError *error = NULL;
-            //GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(mx_strjoin(mx_strjoin("client/media/withoutbg/", mx_itoa(sticker_num)), ".png"), &error);
-            //GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file("/Users/romanlitvinov/zTraining/uchat/client/media/stickers/sticker.png", &error);
-            //single = gtk_image_new_from_pixbuf (pixbuf);
+            if(sticker_num > 60) 
+                break;
             single = gtk_image_new_from_file(mx_strjoin(mx_strjoin("client/media/stickers/", mx_itoa(sticker_num)), ".png"));
-            //single = gtk_image_new_from_file("client/media/1.png");
+
             gtk_widget_set_size_request(GTK_WIDGET(single), 70, 70);
             gtk_grid_attach(GTK_GRID(stickers), single, j, i, 1, 1);
             gtk_widget_set_name(GTK_WIDGET(single), "stickers");
-            //if(error) g_print("%s\n", error->message);
-            if(sticker_num > 60) break;
+
+            GtkGesture *click_sticker = gtk_gesture_click_new();
+            gtk_gesture_set_state(click_sticker, GTK_EVENT_SEQUENCE_CLAIMED);
+            int *num = (int *)malloc(sizeof(int));
+            *num = sticker_num;
+            g_signal_connect_after(click_sticker, "pressed", G_CALLBACK(send_sticker), num);
+            gtk_widget_add_controller(single, GTK_EVENT_CONTROLLER(click_sticker));
+
+            
             sticker_num++;
         }
     }
@@ -839,11 +864,8 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_widget_set_valign(GTK_WIDGET(chat_headerbar_left), GTK_ALIGN_CENTER);
     GtkWidget *photo_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     GtkWidget *photo =  NULL;
-
-    if (cur_client.cur_chat.is_avatar) {
-        photo = get_circle_widget_from_png_avatar(&cur_client.cur_chat.avatar, 50, 50, true);
-    }
-    else if(mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) == 0) {
+   
+    if(mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) == 0) {
         char buf[544] = {0};
         t_main.loaded = false;
         t_list *temp = cur_client.cur_chat.users;
@@ -860,6 +882,9 @@ void show_chat_history(GtkWidget *widget, gpointer data)
             *avatar = t_main.default_avatar;
         }
         photo = get_circle_widget_from_png_avatar(avatar, 50, 50, true);
+    }
+    else {
+        photo = get_circle_widget_from_png_avatar(&cur_client.cur_chat.avatar, 50, 50, true);
     }
 
     gtk_box_append(GTK_BOX(photo_box), photo);
@@ -970,7 +995,8 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     GtkWidget *stickers = NULL;
     if(cur_client.theme == DARK_THEME)
         stickers = gtk_image_new_from_file("client/media/sticker_dark.png");
-    else stickers = gtk_image_new_from_file("client/media/sticker_light.png");
+    else 
+        stickers = gtk_image_new_from_file("client/media/sticker_light.png");
     //GtkWidget *stickers = gtk_image_new_from_file("client/media/sticker.png");
     gtk_widget_set_size_request(stickers, 27, 27);
     GtkWidget *attach_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);

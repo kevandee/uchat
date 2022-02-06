@@ -426,6 +426,44 @@ void *client_work(void *param) {
 
             send_message(buf, cur->login, &cur->cur_chat, false);
         }
+        else if (mx_strncmp(message, "<sticker chat_id=", 17) == 0) { //"<sticker chat_id=%d, sticker_num=%d>"
+            printf("%s\n", message);
+            char *temp = message + 17;
+            int len = 0;
+            while (*(temp + len) != ',') {
+                len++;
+            }
+            char *c_id = mx_strndup(temp, len);
+            printf("%s\n", c_id);
+            int chat_id = mx_atoi(c_id);
+            mx_strdel(&c_id);
+            if (chat_id != cur->cur_chat.id) {
+                printf("change chat\n");
+                change_chat_by_id(chat_id, cur);
+            }
+
+            temp = mx_strstr(message, "sticker_num=") + 12;
+            len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            char *s_id = mx_strndup(temp, len);
+            
+
+            char *query = NULL;
+            char *sql_pattern = NULL;
+            sql_pattern = "INSERT INTO messages (chat_id, user_id, text, type) VALUES (%d, %d, '%s', '%s');";
+            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, s_id, "sticker");
+            
+            int *mes_id = sqlite3_exec_db(query, 2);
+            
+            cur->cur_chat.last_mes_id = *mes_id;
+
+            char buf[544] = {0};
+            sprintf(buf, "<sticker chat_id=%d, mes_id=%d, from=%s, prev=0>%s", chat_id, *mes_id, cur->login, s_id);
+            mx_strdel(&s_id);
+            send_message(buf, cur->login, &cur->cur_chat, false);
+        }
         else if (mx_strncmp(message, "<chat users avatars>", 20) == 0){
             printf("%s\n", message);
             char *id_str = message + 20;
@@ -486,12 +524,21 @@ void *client_work(void *param) {
             mx_strdel(&m_id);
 
             t_list *mes_list = db_messages_sender(chat_id, mes_id); //DODELAI
+
             printf("chat_id %d\n", chat_id);
             char buf[512 + 32] = {0};
             while(mes_list) {
                 t_message *mes_send = (t_message *)mes_list->data;
-                sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, mes_send->data);
-
+                if (mx_strcmp(mes_send->type, "file") == 0) {
+                    char *name = mes_send->data;
+                    while (mx_strchr(name, '/')) {
+                        name = mx_strchr(name, '/') + 1;
+                    }
+                    sprintf(buf, "<file chat_id=%d, mes_id=%d, from=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, name);
+                }
+                else {
+                    sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, mes_send->data);
+                }
                 send_all(cur->ssl, buf, 512 + 32);
 
                 clear_message(buf, 544);
@@ -515,6 +562,41 @@ void *client_work(void *param) {
             sprintf(buf, "<get user avatar>");
             send_all(cur->ssl, buf, 544);
             send_avatar(avatar, cur->ssl);
+        }
+        else if (mx_strncmp(message, "<get file chat_id=", 18) == 0) { // "<get file chat_id=%d, mes_id=%d>"
+            char *temp = message + 18;
+            int len = 0;
+            while (*(temp + len) != ',') {
+                len++;
+            }
+            char *c_id = mx_strndup(temp, len);
+            printf("%s\n", c_id);
+            int chat_id = mx_atoi(c_id);
+            mx_strdel(&c_id);
+            if (chat_id != cur->cur_chat.id) {
+                printf("change chat\n");
+                change_chat_by_id(chat_id, cur);
+            }
+            temp = mx_strstr(temp, "mes_id=") + 7;
+            len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            char *m_id = mx_strndup(temp, len);
+            printf("%s\n", m_id);
+            int mes_id = mx_atoi(m_id);
+            mx_strdel(&m_id);
+
+            char *path = get_message_data_by_id(mes_id, chat_id);
+
+            char buf[544] = {0};
+            sprintf(buf, "<get file>");
+            send_all(cur->ssl, buf, 544);
+            char *mode = "rb";
+            if (mx_strstr(path, ".txt")) {
+                mode = "r";
+            }
+            send_file(cur->ssl, path, mode);
         }
         else if (mx_strncmp(message, "<delete mes chat_id=", 20) == 0) {
             printf("%s\n", message);

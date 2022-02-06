@@ -133,21 +133,6 @@ gboolean add_file_msg(gpointer data) {
     else {
         gtk_widget_set_halign(GTK_WIDGET(incoming_file_box), GTK_ALIGN_END);
         gtk_widget_set_valign(GTK_WIDGET(incoming_file_box), GTK_ALIGN_END);
-/*
-        GtkGesture *gesture = gtk_gesture_click_new();
-        gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
-        gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
-        GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
-        arr[0] = incoming_msg;
-        arr[1] = incoming_msg_box;
-        int *mes_id = (int *)malloc(sizeof(int));
-        *mes_id = message->id;
-        t_list *gesture_data = NULL;
-        mx_push_back(&gesture_data, arr);
-        mx_push_back(&gesture_data, mes_id);
-        g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), gesture_data);
-        gtk_widget_add_controller(incoming_msg_box, GTK_EVENT_CONTROLLER(gesture));
-*/
         
         is_sender = true;
     }
@@ -195,6 +180,21 @@ gboolean add_file_msg(gpointer data) {
     
     gtk_widget_set_size_request(file_icon, 45, 45);
 
+//icon
+    GtkGesture *gesture = gtk_gesture_click_new();
+    gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
+    //gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
+    //GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
+    //arr[0] = incoming_msg;
+    //arr[1] = incoming_msg_box;
+    //int *mes_id = (int *)malloc(sizeof(int));
+    //*mes_id = message->id;
+    //t_list *gesture_data = NULL;
+    //mx_push_back(&gesture_data, arr);
+    //mx_push_back(&gesture_data, mes_id);
+    g_signal_connect_after(gesture, "pressed", G_CALLBACK(choise_dir), file_mes);
+    gtk_widget_add_controller(file_icon, GTK_EVENT_CONTROLLER(gesture));
+//icon
 
     if (is_sender) {
         gtk_box_prepend(GTK_BOX(incoming_file_box), file_icon);
@@ -219,7 +219,107 @@ gboolean add_file_msg(gpointer data) {
 
     return FALSE;
 }
+/*
+gboolean add_sticker_msg(gpointer data) {
+    t_sticker *file_mes = (t_sticker *)data;
 
+    GtkWidget *incoming_sticker_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+
+    bool is_sender = false;
+    if (mx_strcmp(file_mes->sender, cur_client.login) != 0){
+        gtk_widget_set_halign(GTK_WIDGET(incoming_file_box), GTK_ALIGN_START);
+        gtk_widget_set_valign(GTK_WIDGET(incoming_file_box), GTK_ALIGN_START);
+    }   
+    else {
+        gtk_widget_set_halign(GTK_WIDGET(incoming_file_box), GTK_ALIGN_END);
+        gtk_widget_set_valign(GTK_WIDGET(incoming_file_box), GTK_ALIGN_END);
+        
+        is_sender = true;
+    }
+    gtk_widget_set_margin_end(incoming_file_box, 5);
+    gtk_widget_set_margin_bottom(incoming_file_box, 5);
+   
+    if (!is_sender)
+        gtk_widget_set_name(GTK_WIDGET(incoming_file_name), "incoming-message");
+    else 
+        gtk_widget_set_name(GTK_WIDGET(incoming_file_name), "message");
+    load_css_main(t_screen.provider, incoming_file_name);
+    
+    gtk_label_set_selectable(GTK_LABEL(incoming_file_name), FALSE);
+    GtkWidget *User_logo = NULL;
+    if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
+        if (!is_sender) {
+            t_list *avatars = cur_client.cur_chat.users_avatars;
+            t_list *user_list = cur_client.cur_chat.users;
+            while (mx_strcmp(user_list->data, file_mes->sender) != 0 && user_list) {
+                if (mx_strcmp(user_list->data, cur_client.login) == 0) {
+                    user_list = user_list->next;
+                    continue;
+                }
+                avatars = avatars->next;
+                user_list = user_list->next;
+            }
+
+            if (avatars) {
+                t_avatar *draw = avatars->data;
+                if (mx_strcmp (draw->name, "default") == 0) {
+                    draw = &t_main.default_avatar;
+                }
+                User_logo = get_circle_widget_from_png_avatar(draw, 45, 45, false);
+                gtk_box_append(GTK_BOX(incoming_file_box), User_logo);
+            }
+        }
+        else {
+            User_logo = get_circle_widget_current_user_avatar();
+        }
+    }
+
+    gtk_box_append(GTK_BOX(incoming_file_box), incoming_file_name);
+
+    GtkWidget *file_icon = get_icon_from_filename(file_mes->name); 
+    
+    gtk_widget_set_size_request(file_icon, 45, 45);
+
+//icon
+    GtkGesture *gesture = gtk_gesture_click_new();
+    gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
+    //gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
+    //GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
+    //arr[0] = incoming_msg;
+    //arr[1] = incoming_msg_box;
+    //int *mes_id = (int *)malloc(sizeof(int));
+    //mes_id = message->id;
+    //t_list *gesture_data = NULL;
+    //mx_push_back(&gesture_data, arr);
+    //mx_push_back(&gesture_data, mes_id);
+    g_signal_connect_after(gesture, "pressed", G_CALLBACK(choise_dir), file_mes);
+    gtk_widget_add_controller(file_icon, GTK_EVENT_CONTROLLER(gesture));
+//icon
+
+    if (is_sender) {
+        gtk_box_prepend(GTK_BOX(incoming_file_box), file_icon);
+    }
+    else {
+        gtk_box_append(GTK_BOX(incoming_file_box), file_icon);
+    }
+
+    if (is_sender && mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0)
+        gtk_box_append(GTK_BOX(incoming_file_name), User_logo);
+    if (!file_mes->prev) {
+        gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_file_box);
+        //mx_push_front(&t_main.message_widgets_list, incoming_msg);
+    }
+    else {
+        gtk_box_prepend(GTK_BOX(t_main.scroll_box_right), incoming_file_box);
+        //mx_push_back(&t_main.message_widgets_list, incoming_msg);
+    }
+    //t_main.last_mes = incoming_msg_box;
+    
+    pthread_mutex_unlock(&cl_mutex);
+
+    return FALSE;
+}
+*/
 void *rec_func(void *param) {
     while(!t_main.loaded) {
         sleep(1);
@@ -372,7 +472,6 @@ void *rec_func(void *param) {
                         mx_push_front(&cur_client.cur_chat.messages, mes);
                     }
                     
-                    
                     pthread_mutex_unlock(&cl_mutex);
                 }
                 else if (prev) {
@@ -389,7 +488,7 @@ void *rec_func(void *param) {
                 printf("> ");
                 fflush(stdout);
             }
-            else if (mx_strncmp(message, "<file chat_id=", 14) == 0) { // "<file chat_id=%d, sender=%s, mes_id=%d>"
+            else if (mx_strncmp(message, "<file chat_id=", 14) == 0) { 
                 char *temp = message + 14;
                 int len = 0;
                 while (*(temp + len) != ',') {
@@ -457,6 +556,91 @@ void *rec_func(void *param) {
                 printf("%s\n", message);
                 printf("> ");
                 fflush(stdout);                
+            }
+            else if (mx_strncmp(message, "<sticker chat_id=", 10) == 0) { // "<sticker chat_id=%d, mes_id=%d, from=%s, prev=0>%s"
+                char *temp = message + 14;
+                int len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *c_id = mx_strndup(temp, len);
+                printf("%s\n", c_id);
+                int chat_id = mx_atoi(c_id);                        // ид чата, в который надо вставить сообщение
+                (void)chat_id; // избавляюсь от unused variable
+                mx_strdel(&c_id);
+                temp = mx_strstr(message, "mes_id=") + 7;
+                len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *mes_id = mx_strndup(temp, len);
+                printf("%s\n", mes_id);
+                int message_id = mx_atoi(mes_id);
+                mx_strdel(&c_id);
+                temp = mx_strstr(message, "from=") + 5;
+                len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *sender = mx_strndup(temp, len);              // отправитель
+                printf("%s\n", sender);
+                temp = mx_strstr(message, "prev=") + 5;
+                bool prev = *temp == '0' ? false : true; 
+                printf("bool %i %c\n", prev, *temp);
+
+                char *sticker_num = mx_strchr(message, '>') + 1;
+
+                if (cur_client.cur_chat.id == chat_id) {
+                    t_sticker *new_sticker = (t_sticker *)malloc(sizeof(t_sticker));
+                    new_sticker->sticker_num = mx_atoi(sticker_num);
+                    new_sticker->sender = mx_strdup(sender);
+                    new_sticker->date = NULL;
+                    new_sticker->prev = prev;
+                    new_sticker->id = message_id;
+                    pthread_mutex_lock(&cl_mutex);
+                    //g_idle_add(add_file_msg, new_sticker);
+                    pthread_mutex_lock(&cl_mutex);
+                    if (prev) {
+                        cur_client.cur_chat.last_mes_id = new_sticker->id;
+                        int status = 1;
+                        SSL_write(cur_client.ssl, &status, sizeof(int));
+                        //mx_push_back(&cur_client.cur_chat.messages, mes);
+                    }
+                    /*else {
+                        mx_push_front(&cur_client.cur_chat.messages, mes);
+                    }*/
+                    
+                    pthread_mutex_unlock(&cl_mutex);
+                }
+                else if (prev) {
+                    int status = 0;
+                    SSL_write(cur_client.ssl, &status, sizeof(int));        
+                }
+                
+                if (!prev || t_main.scroll_mes) {           
+                    pthread_t display_thread = NULL;
+                    pthread_create(&display_thread, NULL, scroll_func, NULL);  
+                }
+        
+                printf("%s\n", message);
+                printf("> ");
+                fflush(stdout);
+            }
+            else if(mx_strncmp(message, "<get file>", 10) == 0) { // "<get file chat_id=%d, mes_id=%d>"
+                char *path = mx_strjoin(t_main.choosed_dir, "/");
+                path = mx_strrejoin(path, t_main.choosed_file->name);
+
+                char *mode = "wb";
+                if (mx_strstr(path, ".txt")) {
+                    mode = "w";
+                }
+
+                printf("load\n");
+                pthread_mutex_lock(&cl_mutex);
+                recv_file(cur_client.ssl, path, mode);
+                t_main.choosed_file = NULL;
+                t_main.choosed_dir = NULL;
+                pthread_mutex_unlock(&cl_mutex);
             }
             else if(mx_strncmp(message, "<last message>", 14) == 0) {
                 if (!t_main.first_load_mes){
@@ -780,20 +964,20 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    printf("SSL: chipher: %s\n", SSL_get_cipher(ssl));
+    printf("SSL: Connecte to server with chipher: %s\n", SSL_get_cipher(ssl));
     X509 *cert = SSL_get_peer_certificate(ssl);
     if (cert == NULL) {
         printf("SSL: No certificates configured.\n");
     }
     else {
-        printf("SSL: Server certificates:\n");
+        /*printf("SSL: Server certificates:\n");
         char *line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
         printf("SSL: Subject: %s\n", line);
         free(line);
         line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
         printf("SSL: Issuer: %s\n", line);
         free(line);
-        X509_free(cert);
+        X509_free(cert);*/
     }
 
     //      echo server check

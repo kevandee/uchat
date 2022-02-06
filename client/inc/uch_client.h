@@ -17,6 +17,7 @@
 #include "../../frameworks/SQLite3/inc/sqlite3.h"
 #include "../../utils/inc/utils.h"
 
+#include <curl/curl.h>
 #include <gtk/gtk.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -37,6 +38,15 @@ typedef struct s_file_mes {
     int id;
     bool prev;
 }               t_file_mes;
+
+typedef struct s_sticker{
+    int sticker_num;
+    char *sender;
+    char *date;
+
+    int id;
+    bool prev;
+}               t_sticker;
 
 struct
 {
@@ -71,6 +81,9 @@ struct
     t_avatar default_avatar;
     t_avatar default_group_avatar;
     t_avatar *loaded_avatar;
+
+    char *choosed_dir;
+    t_file_mes *choosed_file;
 }   t_main;
 
 struct
@@ -101,6 +114,7 @@ void chat_decorate_headerbar();
 void load_css_main(GtkCssProvider *provider, GtkWidget *widget);
 void show_settings();
 void show_home();
+char **weather_parse(char *city);
 void show_chat_history(GtkWidget *widget, gpointer data);
 void return_to_chatlist(GtkWidget *widget, gpointer data);
 void add_chat_dialog(GtkWidget *widget, gpointer data);
@@ -129,6 +143,7 @@ t_list *get_chat_users_avatars(t_chat *chat);
 
 
 void choise_file();
+void choise_dir();
 void get_all_user_data();
 void get_messages_from_server(int c_id, int mes_id);
 t_avatar *get_avatar(t_avatar *avatar);
