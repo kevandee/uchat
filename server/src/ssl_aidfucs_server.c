@@ -163,7 +163,6 @@ void certificate_ckeck(SSL *ssl) {
 // the allocated ssl memory in the end 
 // of clients work and if abort occurs
 // VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-//      UNFINISHED
 void close_connection(SSL *ssl) {
     int socket = SSL_get_fd(ssl);
     SSL_free(ssl);

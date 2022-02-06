@@ -39,12 +39,23 @@ void return_to_chatlist(GtkWidget *widget, gpointer data) {
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left),t_main.scroll_box_left);
 }
 
-
+static void return_to_chat() {
+    t_chat *swap = NULL;
+    t_list *temp = cur_client.chats;
+    while (temp) {
+        swap = (t_chat *)temp->data;
+        if (swap->id == cur_client.cur_chat.id) {
+            break;
+        }
+        temp = temp->next;
+    }
+    cur_client.cur_chat.id = 0;
+    show_chat_history(NULL, swap);
+}
 
 static void show_group_settings(GtkWidget *widget, gpointer data)
 {
     (void)widget;
-    cur_client.cur_chat.id = -1;
     if(t_main.sticker_panel)
     {
         gtk_widget_hide(t_main.sticker_panel);
@@ -80,7 +91,7 @@ static void show_group_settings(GtkWidget *widget, gpointer data)
 
     GtkGesture *click_back = gtk_gesture_click_new();
     gtk_gesture_set_state(click_back, GTK_EVENT_SEQUENCE_CLAIMED);
-    g_signal_connect_swapped(click_back, "pressed", G_CALLBACK(show_chat_history), data);
+    g_signal_connect_swapped(click_back, "pressed", G_CALLBACK(return_to_chat), data);
     gtk_widget_add_controller(return_button, GTK_EVENT_CONTROLLER(click_back));
 
     gtk_widget_set_size_request(return_button, 25, 25);
@@ -113,7 +124,7 @@ static void show_group_settings(GtkWidget *widget, gpointer data)
     gtk_widget_set_halign(GTK_WIDGET(photo_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(photo_box), GTK_ALIGN_START);
     GtkWidget *change_photo = gtk_button_new_with_label("Change photo");
-    //g_signal_connect(change_photo, "clicked", G_CALLBACK(choise_photo_file), NULL);
+    g_signal_connect(change_photo, "clicked", G_CALLBACK(choise_chatphoto_file), NULL);
     gtk_widget_set_name(GTK_WIDGET(change_photo), "change_photo_btn");
     load_css_main(t_screen.provider, change_photo);
     gtk_box_append(GTK_BOX(photo_buttons_box), change_photo);
@@ -176,12 +187,12 @@ static void show_group_settings(GtkWidget *widget, gpointer data)
     GtkWidget *group_image_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(group_image_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(group_image_box), GTK_ALIGN_CENTER);
-    GtkWidget *group_image = get_circle_widget_from_png_avatar(&cur_client.avatar, 120, 120,  true);
+    GtkWidget *group_image = get_circle_widget_from_png_avatar(&cur_client.cur_chat.avatar, 120, 120,  true);
     gtk_box_append(GTK_BOX(group_image_box), group_image);
     GtkWidget *group_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(group_name_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(group_name_box), GTK_ALIGN_CENTER);
-    GtkWidget *group_name = gtk_label_new("BEBRA LOVERS");
+    GtkWidget *group_name = gtk_label_new(cur_client.cur_chat.name);
     gtk_widget_set_size_request(group_name, 230, 0);
     gtk_label_set_max_width_chars(GTK_LABEL (group_name), 32);
     gtk_label_set_wrap(GTK_LABEL(group_name), true);
