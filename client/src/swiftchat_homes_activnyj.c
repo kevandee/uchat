@@ -24,6 +24,17 @@ static void insert_text_note(GtkTextBuffer *buffer, GtkTextIter *location)
     user_exec_db(cur_client.login, query, 2);
 }
 
+static void save_note(GtkWidget *widget, gpointer buff) {
+    (void) widget;
+    GtkWidget *entry = buff;
+    GtkTextBuffer *gtk_text_buff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(entry));
+    GtkTextIter start, end;
+    gtk_text_buffer_get_start_iter(gtk_text_buff, &start);
+    gtk_text_buffer_get_end_iter(gtk_text_buff, &end);
+
+    const char *text_buff = gtk_text_buffer_get_text(gtk_text_buff, &start, &end, true);
+    printf("\n%s\n", text_buff);
+}
 
 void show_home() {
     gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.settings);
@@ -54,15 +65,32 @@ void show_home() {
     gtk_widget_set_valign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
     gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 50);
 
+    GtkWidget *box_container1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(box_container1), "box_container");
+
     //NOTES
     GtkWidget *note_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_name(GTK_WIDGET(note_box), "note_box");
     gtk_widget_set_halign(GTK_WIDGET(note_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(note_box), GTK_ALIGN_START);
     gtk_box_set_spacing(GTK_BOX(note_box), 10);
+    gtk_widget_set_size_request(note_box, 300, 0);
+
+    GtkWidget *note_box_header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(note_box_header), "note_box_header");
+    gtk_widget_set_size_request(note_box_header, 300, 0);
+    gtk_box_append(GTK_BOX(note_box), note_box_header);
 
     GtkWidget *notes_label = gtk_label_new("Your notes:");
-    gtk_box_append(GTK_BOX(note_box), notes_label);
+    gtk_box_append(GTK_BOX(note_box_header), notes_label);
+
+    GtkWidget *notes_saver = gtk_button_new_with_label("Save");
+    gtk_widget_set_name(GTK_WIDGET(notes_saver), "notes_saver");
+    gtk_widget_set_size_request(GTK_WIDGET(notes_saver), 0, 0);
+    gtk_widget_set_halign(GTK_WIDGET(notes_saver), GTK_ALIGN_END);
+    gtk_widget_set_valign(GTK_WIDGET(notes_saver), GTK_ALIGN_END);
+    
+    gtk_box_append(GTK_BOX(note_box_header), notes_saver);
 
     GtkWidget *note_box_inner = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(GTK_WIDGET(note_box_inner), "note_box_inner");
@@ -70,17 +98,24 @@ void show_home() {
     gtk_widget_set_size_request(note_box_inner, 0, 300);
 
     GtkWidget *note_text_writer = gtk_text_view_new();
-    gtk_widget_set_name(GTK_WIDGET(note_text_writer), "write_note");
+    gtk_widget_set_name(GTK_WIDGET(note_text_writer), "note_text_writer");
     load_css_main(t_screen.provider, note_text_writer);
     gtk_widget_set_size_request(note_text_writer, 300, 0);
+
+    
+
     GtkTextBuffer *note_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (note_text_writer));
+    //gtk_widget_set_name(GTK_WIDGET(note_text_buffer), "note_text_buffer");
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(note_text_writer), GTK_WRAP_WORD_CHAR);
     t_main.note_input = note_text_writer;
     g_signal_connect_after(note_text_buffer, "insert-text", G_CALLBACK(insert_text_note), NULL);
     // notes buffer from data base
     //gtk_text_buffer_set_text();
 
+    g_signal_connect_after(notes_saver, "clicked", G_CALLBACK(save_note), note_text_writer);
+
     GtkWidget *note_scroll = gtk_scrolled_window_new ();
+    gtk_widget_set_name(GTK_WIDGET(note_scroll), "note_scroll");
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(note_scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
     gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (note_scroll), note_text_writer);
     gtk_scrolled_window_set_propagate_natural_height (GTK_SCROLLED_WINDOW(note_scroll),false);
@@ -89,8 +124,8 @@ void show_home() {
     
     gtk_box_append(GTK_BOX(note_box_inner), note_scroll);
     gtk_box_append(GTK_BOX(note_box), note_box_inner);
-    gtk_box_append(GTK_BOX(t_main.right_panel), note_box);
-    // NOTES
+    gtk_box_append(GTK_BOX(box_container1), note_box);
+    // NOTES End
 
     GtkWidget *weather_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_name(GTK_WIDGET(weather_box), "weather_box");
@@ -118,9 +153,9 @@ void show_home() {
     gtk_box_append(GTK_BOX(weather_box), weather_box_inner_hor);
     gtk_box_append(GTK_BOX(weather_box), weather_temperature_label);
 
-    gtk_box_append(GTK_BOX(t_main.right_panel), weather_box);
+    gtk_box_append(GTK_BOX(box_container1), weather_box);
     
-
+    gtk_box_append(GTK_BOX(t_main.right_panel), box_container1);
 
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
 }
