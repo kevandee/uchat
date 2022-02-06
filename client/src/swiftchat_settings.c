@@ -323,6 +323,7 @@ void show_settings()
     gtk_widget_set_halign(GTK_WIDGET(acc_sett_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(acc_sett_box), GTK_ALIGN_START);
     gtk_widget_set_margin_bottom(acc_sett_box, 20);
+    gtk_widget_set_margin_top(acc_sett_box, 28);
     GtkWidget *acc_sett_label = gtk_label_new("Account settings");
     gtk_widget_set_name(GTK_WIDGET(acc_sett_label), "account_sett_text");
     load_css_main(t_screen.provider, acc_sett_label);
@@ -499,7 +500,9 @@ void show_settings()
     gtk_widget_set_name(user_name, "user_name");
     load_css_main(t_screen.provider, user_name);
     gtk_box_append(GTK_BOX(user_name_box), user_name);
-    GtkWidget *user_bio_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *user_bio_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(GTK_WIDGET(user_bio_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(GTK_WIDGET(user_bio_box), GTK_ALIGN_CENTER);
     gtk_widget_set_size_request(user_bio_box, 230, 0);
     char *bio_str = NULL;
     if (mx_strcmp(cur_client.bio, ".clear") != 0) {
