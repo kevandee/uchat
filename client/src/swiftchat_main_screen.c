@@ -583,23 +583,20 @@ void show_chat_history(GtkWidget *widget, gpointer data)
 
     printf("id of chat %d\n", ((t_chat *)data)->id);
     cur_client.cur_chat = *((t_chat *)data);
-    
+    printf("1\n");
     t_main.scroll_mes = true;
     if(t_main.sticker_panel)
     {
         gtk_widget_hide(t_main.sticker_panel);
     }
 
-    cairo_surface_t *image = get_surface_from_jpg(cur_client.avatar.path);
-    int org_width = cairo_image_surface_get_width(image);
-    int org_height = cairo_image_surface_get_height(image);
-    
-    cur_client.avatar.image = scale_to_half(image, org_width, org_height, cur_client.avatar.scaled_w * 45/300, cur_client.avatar.scaled_h * 45/300);
+    printf("2\n");
 
     gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.home);
     if(cur_client.theme == DARK_THEME)
         t_actives.home = gtk_image_new_from_file("client/media/home.png");
-    else t_actives.home = gtk_image_new_from_file("client/media/home_light.png");
+    else 
+        t_actives.home = gtk_image_new_from_file("client/media/home_light.png");
     gtk_widget_set_name(GTK_WIDGET(t_actives.home), "home_icon");
     load_css_main(t_screen.provider, t_actives.home);
     GtkGesture *click_home = gtk_gesture_click_new();
@@ -611,7 +608,8 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.settings);
     if(cur_client.theme == DARK_THEME)
         t_actives.settings = gtk_image_new_from_file("client/media/settings.png");
-    else t_actives.settings = gtk_image_new_from_file("client/media/setting_light.png");
+    else 
+        t_actives.settings = gtk_image_new_from_file("client/media/setting_light.png");
     gtk_widget_set_name(GTK_WIDGET(t_actives.settings), "settings_icon");
     load_css_main(t_screen.provider, t_actives.settings);
     GtkGesture *click_settings = gtk_gesture_click_new();
@@ -630,6 +628,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
             usleep(50);
         }
     }
+
     gtk_grid_remove(GTK_GRID(t_main.grid), t_main.right_panel);
     t_main.right_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_CENTER);
@@ -645,7 +644,30 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_widget_set_halign(GTK_WIDGET(chat_headerbar_left), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(chat_headerbar_left), GTK_ALIGN_CENTER);
     GtkWidget *photo_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *photo = get_circle_widget_from_png_avatar(&cur_client.cur_chat.avatar, 50, 50, false);
+    GtkWidget *photo =  NULL;
+
+    if (cur_client.cur_chat.is_avatar) {
+        photo = get_circle_widget_from_png_avatar(&cur_client.cur_chat.avatar, 50, 50, true);
+    }
+    else if(mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) == 0) {
+        char buf[544] = {0};
+        t_main.loaded = false;
+        t_list *temp = cur_client.cur_chat.users;
+        if (mx_strcmp (cur_client.login, temp->data) != 0)
+            sprintf(buf, "<get user avatar>%s",temp->data);
+        else 
+            sprintf(buf, "<get user avatar>%s",temp->next->data);
+        send_all(cur_client.ssl, buf, 544);
+        while(!t_main.loaded) {
+            usleep(50);
+        }
+        t_avatar *avatar = t_main.loaded_avatar;
+        if (mx_strcmp(avatar->name, "default") == 0) {
+            *avatar = t_main.default_avatar;
+        }
+        photo = get_circle_widget_from_png_avatar(avatar, 50, 50, true);
+    }
+
     gtk_box_append(GTK_BOX(photo_box), photo);
     GtkWidget *info_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(info_box), GTK_ALIGN_START);
