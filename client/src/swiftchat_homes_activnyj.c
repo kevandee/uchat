@@ -19,16 +19,23 @@ static void insert_text_note(GtkTextBuffer *buffer, GtkTextIter *location)
     printf("\nnote : %s\n", buf_str);
 }
 
-static void save_note(GtkWidget *widget, gpointer buff) {
-    (void) widget;
+static void save_note(GtkGestureClick *gesture, int n_press, double x, double y, gpointer buff) {
+    (void) gesture;
+    (void) n_press;
+    (void) x;
+    (void) y;
+
     GtkWidget *entry = buff;
     GtkTextBuffer *gtk_text_buff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(entry));
     GtkTextIter start, end;
     gtk_text_buffer_get_start_iter(gtk_text_buff, &start);
     gtk_text_buffer_get_end_iter(gtk_text_buff, &end);
 
+
     const char *text_buff = gtk_text_buffer_get_text(gtk_text_buff, &start, &end, true);
-    printf("\n%s\n", text_buff);
+    printf("\nkirill lox %s\n", text_buff);
+
+
     char *query = NULL;
     char *sql_pattern = "UPDATE user SET note = '%s';";
     asprintf(&query, sql_pattern, text_buff);
