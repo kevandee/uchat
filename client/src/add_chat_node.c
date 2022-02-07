@@ -33,6 +33,9 @@ static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
 ///gboolean add_msg(gpointer data)
 gboolean add_chat_node(gpointer data) {
     t_chat *chat = data;
+    if (!chat) {
+        printf("suka\n");
+    }
     printf ("/// chat name %s ///\n", chat->name);
     GtkWidget *child_widget = gtk_button_new ();
     gtk_widget_set_size_request(child_widget, 200, 54);
@@ -74,6 +77,9 @@ gboolean add_chat_node(gpointer data) {
             printf("1\n");
             chat->avatar = t_main.default_avatar;
         }
+    }
+    else if (chat->is_new) {
+        chat->avatar = t_main.default_group_avatar;
     }
 
     printf ("chat name %s\n", chat->avatar.name);
@@ -120,6 +126,7 @@ gboolean add_chat_node(gpointer data) {
     }
     else { 
         g_signal_connect(child_widget, "clicked", G_CALLBACK(show_chat_history), chat);
+        mx_push_back(&t_main.chat_nodes_info, chat_info);
     }
     gtk_box_append(GTK_BOX(t_main.scroll_box_left), child_widget);
     return FALSE;

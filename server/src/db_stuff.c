@@ -289,6 +289,8 @@ t_list *db_messages_sender(int c_id, int prev) {
             list = list->next;
             mx_strcpy(mess->data, list->data);
             list = list->next;
+            mx_strcpy(mess->time, mx_strtrim(list->data));
+            list = list->next;
             mx_strcpy(mess->type, list->data);
             mx_push_back(&temp, mess);
             list = list->next;

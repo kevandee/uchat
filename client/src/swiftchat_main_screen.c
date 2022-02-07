@@ -9,6 +9,7 @@ void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
 void return_to_chatlist(GtkWidget *widget, gpointer data) {
     //gtk_widget_hide(gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left)));
     (void)widget;
+    printf("tut\n");
     if(data != NULL)
     {
         GtkWidget** swapped = data;
@@ -25,17 +26,19 @@ void return_to_chatlist(GtkWidget *widget, gpointer data) {
         gtk_box_append(GTK_BOX(swapped[2]), goback);
         g_signal_connect(goback, "clicked", G_CALLBACK(add_chat_dialog), (gpointer)swapped);
     }
+    printf("tut\n");
     t_main.scroll_box_left = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_size_request(GTK_WIDGET(t_main.scroll_box_left), 200, 0);
     gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_left), 200, 600);
 
     t_list *chats = cur_client.chats;
+    mx_clear_list(&t_main.chat_nodes_info);
+    t_main.chat_nodes_info = NULL;
     while (chats) {
-        
         add_chat_node(chats->data);
         chats = chats->next;
     }
-    
+    printf("tut\n");
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left),t_main.scroll_box_left);
 }
 
@@ -53,7 +56,7 @@ static void return_to_chat() {
     show_chat_history(NULL, swap);
 }
 
-static void show_group_settings(GtkWidget *widget, gpointer data)
+void show_group_settings(GtkWidget *widget, gpointer data)
 {
     (void)widget;
     if(t_main.sticker_panel)
@@ -1208,6 +1211,8 @@ void chat_show_main_screen(GtkWidget *window)
     
 
     t_list *chats = cur_client.chats;
+    mx_clear_list(&t_main.chat_nodes_info);
+    t_main.chat_nodes_info = NULL;
     while (chats) {
         add_chat_node(chats->data);
         

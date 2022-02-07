@@ -46,7 +46,6 @@ void *client_work(void *param) {
         if(SSL_read(cur->ssl, passwd, 16) <= 0 || mx_strlen(passwd) <  8 || mx_strlen(passwd) > 16){
             printf("Didn't enter the password.\n");
             free_client(&cur, &users_list);
-
             
             return NULL;
 
@@ -275,7 +274,6 @@ void *client_work(void *param) {
             sprintf(buf, "<image loaded>");
             send_all(cur->ssl, buf, 512 + 32); 
             clear_message(buf, 512 + 32);
-
             
             SSL_read(cur->ssl, &recv_avatar.scaled_w, sizeof(double));
             SSL_read(cur->ssl, &recv_avatar.scaled_h, sizeof(double));
@@ -284,18 +282,41 @@ void *client_work(void *param) {
             SSL_read(cur->ssl, &recv_avatar.y, sizeof(double));
 
             clear_message(buf, 512 + 32);
-            sprintf(buf, "<setting avatar>");
-            send_all(cur->ssl, buf, 512+32);
-            send_image(cur->ssl, recv_avatar.path);
-
+            char *table = NULL;
+            int id = 0;
+            bool is_chat = false;
+            if (!mx_strstr(message, "chat_id=")) {
+                table = "users";
+                id = cur->id;
+                sprintf(buf, "<setting avatar>");
+                send_all(cur->ssl, buf, 512+32);
+                send_image(cur->ssl, recv_avatar.path);
+            }
+            else { // <setting avatar>chat_id=
+                table = "chats";
+                id = mx_atoi(mx_strstr(message, "chat_id=") + 8);   
+                is_chat = true;
+                if (id != cur->cur_chat.id) {
+                    printf("change chat\n");
+                    change_chat_by_id(id, cur);
+                }
+            }
             sprintf(buf, "path=%s scaled_w=%f scaled_h=%f x=%f y=%f ", recv_avatar.path,recv_avatar.scaled_w, recv_avatar.scaled_h,recv_avatar.x, recv_avatar.y);
             printf("buf %s\n", buf);
             char *query = NULL;
             char *sql_pattern = NULL;
-            sql_pattern = "UPDATE users SET avatar = '%s' WHERE id = %d;";
-            asprintf(&query, sql_pattern, buf, cur->id);
+            
+            sql_pattern = "UPDATE %s SET avatar = '%s' WHERE id = %d;";
+            
+            asprintf(&query, sql_pattern, table, buf, id);
+            printf("query %s\n", query);
             sqlite3_exec_db(query, 2);
 
+            if (is_chat) {
+                clear_message(message, 544);
+                sprintf(message, "<update avatar chat_id=%d>", id);
+                send_message(message, cur->login, &cur->cur_chat, false);
+            }
         }
         else if (mx_strncmp(mx_strtrim(message), "<setting, name=", 15) == 0) {
             char *name = NULL;
@@ -568,6 +589,22 @@ void *client_work(void *param) {
             char buf[544] = {0};
             sprintf(buf, "<get user avatar>");
             send_all(cur->ssl, buf, 544);
+            send_avatar(avatar, cur->ssl);
+        }
+        else if(mx_strncmp(message, "<get chat avatar chat_id=", 25) == 0) { //"<get chat avatar chat_id=%d>"
+            char *temp = message + 25;
+            int len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            char *c_id = mx_strndup(temp, len);
+            printf("%s\n", c_id);
+            int chat_id = mx_atoi(c_id);
+            mx_strdel(&c_id);
+            printf("get chat avatar %d\n", chat_id);
+            char *avatar_info = get_chat_avatar(chat_id);
+            t_avatar *avatar = parse_avatar_info(avatar_info);
+
             send_avatar(avatar, cur->ssl);
         }
         else if (mx_strncmp(message, "<get file chat_id=", 18) == 0) { // "<get file chat_id=%d, mes_id=%d>"

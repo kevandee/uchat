@@ -85,6 +85,8 @@ void text_changed_main_screen(GObject *object, GParamSpec *pspec, gpointer data)
         }
 
         chats = res;
+        mx_clear_list(&t_main.chat_nodes_info);
+        t_main.chat_nodes_info = NULL;
         while (chats) {
             add_chat_node(chats->data);
             chats = chats->next;

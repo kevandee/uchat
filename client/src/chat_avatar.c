@@ -97,29 +97,29 @@ static void move_image (GtkGestureDrag *gesture, double offset_x, double offset_
     gtk_widget_queue_draw(darea);   
 
 }
-/*
-static void send_avatar() {
+
+static void send_chat_avatar() { // <setting avatar>chat_id=
 
     char buf[512 + 32] = {0};
-    sprintf(buf, "%s", "<setting avatar>");
-    send_all(cur_client.cur_chat.ssl, buf, 512 + 32);
+    sprintf(buf, "<setting avatar>chat_id=%d", cur_client.cur_chat.id);
+    send_all(cur_client.ssl, buf, 512 + 32);
     clear_message(buf, 512 + 32);
     
     sprintf(buf, "%s", cur_client.cur_chat.avatar.name);
-    send_all(cur_client.cur_chat.ssl, buf, 512 + 32);
+    send_all(cur_client.ssl, buf, 512 + 32);
     clear_message(buf, 512 + 32);
     t_main.loaded = false;
-    send_image(cur_client.cur_chat.ssl, cur_client.cur_chat.avatar.path);
+    send_image(cur_client.ssl, cur_client.cur_chat.avatar.path);
     
     while (!t_main.loaded) {
         usleep(50);
     }
 
-    SSL_write(cur_client.cur_chat.ssl, &cur_client.cur_chat.avatar.scaled_w, sizeof(double));
-    SSL_write(cur_client.cur_chat.ssl, &cur_client.cur_chat.avatar.scaled_h, sizeof(double));
+    SSL_write(cur_client.ssl, &cur_client.cur_chat.avatar.scaled_w, sizeof(double));
+    SSL_write(cur_client.ssl, &cur_client.cur_chat.avatar.scaled_h, sizeof(double));
 
-    SSL_write(cur_client.cur_chat.ssl, &cur_client.cur_chat.avatar.x, sizeof(double));
-    SSL_write(cur_client.cur_chat.ssl, &cur_client.cur_chat.avatar.y, sizeof(double));
+    SSL_write(cur_client.ssl, &cur_client.cur_chat.avatar.x, sizeof(double));
+    SSL_write(cur_client.ssl, &cur_client.cur_chat.avatar.y, sizeof(double));
     t_avatar *new = (t_avatar *)malloc(sizeof(t_avatar));
     new->image = cur_client.cur_chat.avatar.image;
     new->path = cur_client.cur_chat.avatar.path;
@@ -127,21 +127,31 @@ static void send_avatar() {
     new->y = cur_client.cur_chat.avatar.y;
     new->scaled_h = cur_client.cur_chat.avatar.scaled_h;
     new->scaled_w = cur_client.cur_chat.avatar.scaled_w;
-    t_main.loaded = false;
-    while (!t_main.loaded) {
-        usleep(50);
+
+    t_list *temp_widgets = t_main.chat_nodes_info;
+    t_list *temp_ch = cur_client.chats;
+
+    while (temp_ch) {
+        if (((t_chat *)temp_ch->data)->id == cur_client.cur_chat.id) {
+            break;
+        }
+        temp_widgets = temp_widgets->next;
+        temp_ch = temp_ch->next;
     }
-    gtk_box_remove(GTK_BOX (t_main.search_panel), t_main.logo);
 
-    t_main.logo = get_circle_widget_from_png_avatar(new, 45, 45, false);
+    ((t_chat *)temp_ch->data)->avatar = cur_client.cur_chat.avatar;
+    gtk_box_remove(GTK_BOX (temp_widgets->data), gtk_widget_get_first_child(GTK_WIDGET (temp_widgets->data)));
 
-    gtk_widget_set_size_request(t_main.logo, 45, 45);
-    gtk_widget_set_name(GTK_WIDGET(t_main.logo), "account_avatar");
-    load_css_main(t_screen.provider, t_main.logo);
-    gtk_box_prepend(GTK_BOX (t_main.search_panel), t_main.logo);
-    show_settings();
+    GtkWidget *chat_image = get_circle_widget_from_png_avatar(new, 57, 57, true);
+
+    //gtk_widget_set_size_request(t_main.logo, 45, 45);
+    //gtk_widget_set_name(GTK_WIDGET(t_main.logo), "account_avatar");
+    //load_css_main(t_screen.provider, t_main.logo);
+    gtk_box_prepend(GTK_BOX (temp_widgets->data), chat_image);
+    //show_chat_settings();
+    show_group_settings(NULL, NULL);
 }
-*/
+
 static void avatar_range(GFile *file) {
     cairo_surface_t *image = get_surface_from_jpg(g_file_get_path(file));
 
@@ -164,7 +174,7 @@ static void avatar_range(GFile *file) {
     gtk_widget_set_halign(GTK_WIDGET(apply_button), GTK_ALIGN_CENTER);
     gtk_widget_set_valign(GTK_WIDGET(apply_button), GTK_ALIGN_CENTER);
 
-    //g_signal_connect(apply_button, "clicked", G_CALLBACK(send_avatar), NULL);
+    g_signal_connect(apply_button, "clicked", G_CALLBACK(send_chat_avatar), NULL);
 
     gtk_box_append(GTK_BOX (t_main.right_panel), darea);
     gtk_box_append(GTK_BOX (t_main.right_panel), apply_button);

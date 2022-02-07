@@ -67,6 +67,7 @@ struct
     GtkWidget *add_users_grid;
     GtkWidget *note_input;
 
+    t_list *chat_nodes_info;
     int message_change_id;
     t_list *message_widgets_list;
 
@@ -116,6 +117,7 @@ void show_settings();
 void show_home();
 char **weather_parse(char *city);
 void show_chat_history(GtkWidget *widget, gpointer data);
+void show_group_settings(GtkWidget *widget, gpointer data);
 void return_to_chatlist(GtkWidget *widget, gpointer data);
 void add_chat_dialog(GtkWidget *widget, gpointer data);
 

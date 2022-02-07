@@ -778,6 +778,46 @@ void *rec_func(void *param) {
                 printf("gets avatar %s\n", t_main.loaded_avatar->name);
                 t_main.loaded = true;
             }
+            if(mx_strncmp(mx_strtrim(message), "<update avatar chat_id=",23) == 0) {
+                printf("a\n");
+                char *temp = mx_strstr(message, "chat_id=") + 8;
+                int len = 0;
+                while (*(temp + len) != '>') {
+                    len++;
+                }
+                char *c_id = mx_strndup(temp, len);
+                printf("%s\n", c_id);
+                int chat_id = mx_atoi(c_id);
+                mx_strdel(&c_id);
+
+                char buf[544] = {0};
+                sprintf(buf, "<get chat avatar chat_id=%d>",chat_id);
+                send_all(cur_client.ssl, buf, 544);
+                t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
+                get_avatar(t_main.loaded_avatar);
+                printf("gets avatar %s\n", t_main.loaded_avatar->name);
+                if (mx_strcmp(t_main.loaded_avatar->name, "default") == 0) {
+                    *t_main.loaded_avatar = t_main.default_group_avatar;
+                }
+                
+                t_list *temp_widgets = t_main.chat_nodes_info;
+                t_list *temp_ch = cur_client.chats;
+
+                while (temp_ch) {
+                    if (((t_chat *)temp_ch->data)->id == chat_id) {
+                        break;
+                    }
+                    temp_widgets = temp_widgets->next;
+                    temp_ch = temp_ch->next;
+                }
+
+                ((t_chat *)temp_ch->data)->avatar = *t_main.loaded_avatar;
+                gtk_box_remove(GTK_BOX (temp_widgets->data), gtk_widget_get_first_child(GTK_WIDGET (temp_widgets->data)));
+
+                GtkWidget *chat_image = get_circle_widget_from_png_avatar(t_main.loaded_avatar, 57, 57, true);
+
+                gtk_box_prepend(GTK_BOX (temp_widgets->data), chat_image);
+            }
             else if(mx_strcmp(mx_strtrim(message), "<image loaded>") == 0) {
 
                 t_main.loaded = true;
