@@ -79,45 +79,56 @@ void show_home()
     load_css_main(t_screen.provider, note_box);
     gtk_widget_set_halign(GTK_WIDGET(note_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(note_box), GTK_ALIGN_START);
-    gtk_box_set_spacing(GTK_BOX(note_box), 10);
     gtk_widget_set_size_request(note_box, 0, 0);
 
     GtkWidget *note_box_header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(note_box_header, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(note_box_header, GTK_ALIGN_CENTER);
     gtk_widget_set_name(GTK_WIDGET(note_box_header), "note_box_header");
+    load_css_main(t_screen.provider, note_box_header);
     gtk_box_append(GTK_BOX(note_box), note_box_header);
     gtk_widget_set_size_request(note_box_header, 300, 0);
 
     GtkWidget *note_box_label = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(note_box_label, GTK_ALIGN_START);
     gtk_widget_set_valign(note_box_label, GTK_ALIGN_CENTER);
-    gtk_widget_set_name(GTK_WIDGET(note_box_header), "note_box_label");
-    GtkWidget *note_label = gtk_label_new("Your notes:");
+    gtk_widget_set_name(GTK_WIDGET(note_box_label), "note_box_label");
+    GtkWidget *note_label = gtk_label_new("Notes");
+
     gtk_box_append(GTK_BOX(note_box_label), note_label);
     gtk_box_append(GTK_BOX(note_box_header), note_box_label);
 
-    GtkWidget *note_box_saver = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget *note_box_saver = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(GTK_WIDGET(note_box_saver), "note_box_saver");
     gtk_widget_set_halign(note_box_saver, GTK_ALIGN_END);
     gtk_widget_set_valign(note_box_saver, GTK_ALIGN_CENTER);
-    GtkWidget *note_saver = gtk_button_new_with_label("Save");
+    load_css_main(t_screen.provider, note_box_saver);
+
+    GtkWidget *note_saver = gtk_label_new("Save");
     gtk_widget_set_name(GTK_WIDGET(note_saver), "notes_saver");
-    gtk_widget_set_size_request(GTK_WIDGET(note_saver), 0, 0);
-    gtk_box_set_spacing(GTK_BOX(note_box_header), 370);         // distance between label and button
-    
+    gtk_box_set_spacing(GTK_BOX(note_box_header), 321);         // distance between label and button
+    /*GtkWidget *note_saver = gtk_image_new_from_file("client/media/save_home.png");
+    gtk_widget_set_name(GTK_WIDGET(note_saver), "notes_saver");
+    gtk_box_set_spacing(GTK_BOX(note_box_header), 340);         // distance between label and button
+    load_css_main(t_screen.provider, note_saver);*/
+
     gtk_box_append(GTK_BOX(note_box_saver), note_saver);
     gtk_box_append(GTK_BOX(note_box_header), note_box_saver);
 
     GtkWidget *note_box_inner = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(GTK_WIDGET(note_box_inner), "note_box_inner");
     load_css_main(t_screen.provider, note_box_inner);
-    gtk_widget_set_size_request(note_box_inner, 0, 250);
+    gtk_widget_set_size_request(note_box_inner, 0, 190);
 
     GtkWidget *note_text_writer = gtk_text_view_new();
     gtk_widget_set_name(GTK_WIDGET(note_text_writer), "note_text_writer");
     load_css_main(t_screen.provider, note_text_writer);
     gtk_widget_set_size_request(note_text_writer, 500, 0);
+
+    GtkGesture *click_save = gtk_gesture_click_new();
+    gtk_gesture_set_state(click_save, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_after(click_save, "pressed", G_CALLBACK(save_note), note_text_writer);
+    gtk_widget_add_controller(note_saver, GTK_EVENT_CONTROLLER(click_save));
 
     GtkTextBuffer *note_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (note_text_writer));
     //gtk_widget_set_name(GTK_WIDGET(note_text_buffer), "note_text_buffer");
@@ -130,8 +141,6 @@ void show_home()
         temp->data = "";
     }
     gtk_text_buffer_set_text(note_text_buffer, (char *)temp->data, mx_strlen((char *)temp->data));
-
-    g_signal_connect_after(note_saver, "clicked", G_CALLBACK(save_note), note_text_writer);
 
     GtkWidget *note_scroll = gtk_scrolled_window_new ();
     gtk_widget_set_name(GTK_WIDGET(note_scroll), "note_scroll");
