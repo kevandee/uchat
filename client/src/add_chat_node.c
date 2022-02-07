@@ -53,7 +53,7 @@ void redraw_actives_chats(GtkWidget *widget, gpointer data)
         return;
     }
 
-    while (temp_ch) 
+    while (temp_ch && temp_widgets) 
     {
         if (((t_chat *)temp_ch->data)->id == cur_client.cur_chat.id) 
         {

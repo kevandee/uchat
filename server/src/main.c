@@ -6,6 +6,7 @@
 
 t_list *users_list;
 
+
 void *client_work(void *param) {
     sqlite3_create_db();
 
@@ -490,15 +491,17 @@ void *client_work(void *param) {
 
             char *query = NULL;
             char *sql_pattern = NULL;
-            sql_pattern = "INSERT INTO messages (chat_id, user_id, text, type) VALUES (%d, %d, '%s', '%s');";
-            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, s_id, "sticker");
+            sql_pattern = "INSERT INTO messages (chat_id, user_id, text, time, type) VALUES (%d, %d, '%s', '%s', '%s');";
+            asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, s_id, get_time(), "sticker");
             
             int *mes_id = sqlite3_exec_db(query, 2);
             
             cur->cur_chat.last_mes_id = *mes_id;
 
+            char *time = mx_strndup(get_time() + 11, 5);
+
             char buf[544] = {0};
-            sprintf(buf, "<sticker chat_id=%d, mes_id=%d, from=%s, prev=0>%s", chat_id, *mes_id, cur->login, s_id);
+            sprintf(buf, "<sticker chat_id=%d, mes_id=%d, from=%s, time=%s, prev=0>%s", chat_id, *mes_id, cur->login, time, s_id);
             mx_strdel(&s_id);
             send_message(buf, cur->login, &cur->cur_chat, false);
         }
@@ -574,6 +577,9 @@ void *client_work(void *param) {
                         name = mx_strchr(name, '/') + 1;
                     }
                     sprintf(buf, "<file chat_id=%d, mes_id=%d, from=%s, time=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, time, name);
+                }
+                else if (mx_strcmp(mes_send->type, "sticker") == 0) {
+                    sprintf(buf, "<sticker chat_id=%d, mes_id=%d, from=%s, time=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, time, mes_send->data);
                 }
                 else {
                     sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, type=%s, time=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, mes_send->type, time, mes_send->data);
@@ -775,15 +781,37 @@ void client_work_wrapper(SSL_CTX *context, int client_fd, pthread_t *thread, t_c
     pthread_create(thread, NULL, client_work, new_client);
 }
 
+void daemonize_server() {
+    pid_t process_id = 0;
+    pid_t sid = 0;
+    
+    process_id = fork();
+    if (process_id < 0) {
+        exit(1);
+    }
+    if (process_id > 0) {
+        printf("server pid = %d\n", process_id);
+        exit(0);
+    }
+    umask(0);
+    sid = setsid();
+    
+    if (sid < 0)
+        exit(1);
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+}
+
 int main(int argc, char *argv[]) {
     printf("%s\n", SSLeay_version(SSLEAY_VERSION));
     
-    signal(SIGPIPE, SIG_IGN);
+    //signal(SIGPIPE, SIG_IGN);
     if (argc != 2) {
         mx_printerr("usage: ./uchat_server <port>\n");
         return -1;
     }
-
+    //daemonize_server();
     //  SSLing
     SSL_CTX *context;
     SSL_library_init();
@@ -800,12 +828,14 @@ int main(int argc, char *argv[]) {
     load_certs(context, "certificate.pem", "PEM_privatekey.pem");
     printf("SSL: certificates loaded\n");
 
+
     // opening connection
+    //daemonize_server();
     struct sockaddr_in adr = {0};
     socklen_t adrlen = sizeof(adr);
     int serv_fd = open_server_connection(mx_atoi(argv[1]), &adr, adrlen);
     printf("SSL: connection opened\n");
-
+    //daemonize_server();
     // for client serving
     pthread_t thread;
     users_list = NULL;
