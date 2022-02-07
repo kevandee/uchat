@@ -473,3 +473,12 @@ scrolledwindow {
 }
 
 /*----------GROUP MESSAGES--------------*/
+#weather_box
+{
+  background-color: red;
+  padding: 10px 10px 10px 10px;
+}
+
+
+
+

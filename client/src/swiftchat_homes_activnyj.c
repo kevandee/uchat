@@ -136,7 +136,10 @@ void show_home()
     // NOTES End
 
     GtkWidget *weather_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(weather_box, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(weather_box, GTK_ALIGN_CENTER);
     gtk_widget_set_name(GTK_WIDGET(weather_box), "weather_box");
+    load_css_main(t_screen.provider, weather_box);
     GtkWidget *weather_grid = gtk_grid_new();
     //gtk_widget_set_name(GTK_WIDGET(home_grid, "weather_grid");
     gtk_grid_set_row_spacing(GTK_GRID(weather_grid), 10);
@@ -174,6 +177,7 @@ void show_home()
     gtk_box_append(GTK_BOX(weather_box), weather_grid);
 
     gtk_grid_attach(GTK_GRID(home_grid), weather_box, 1, 0, 1, 1);
+
     gtk_box_append(GTK_BOX(t_main.right_panel), home_grid);
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
 }
