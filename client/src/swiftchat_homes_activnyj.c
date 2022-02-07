@@ -151,28 +151,61 @@ void show_home()
     char *city = "харків";
     char **weather_label_array = weather_parse(city);
 
-    char *weather_temperature = weather_label_array[0];
-    char *weather_image_path = weather_label_array[1];
-    char *weather_date = weather_label_array[2];
+    char *weather_day = weather_label_array[0];
+    char *weather_month = weather_label_array[1];
+    char *weather_location = weather_label_array[2];
+    char *weather_temperature = weather_label_array[3];
+    char *weather_image_path = weather_label_array[4];
 
-    GtkWidget *weather_date_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_widget_set_name(GTK_WIDGET(weather_date_box), "weather_date_box");    
-    GtkWidget *weather_date_label = gtk_label_new(weather_date);
-    gtk_box_append(GTK_BOX(weather_date_box), weather_date_label);
+    GtkWidget *weather_date_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(weather_date_box), "weather_date_box");
+    load_css_main(t_screen.provider, weather_date_box);
+
+    GtkWidget *weather_day_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(weather_day_box), "weather_day_box");
+    load_css_main(t_screen.provider, weather_day_box);
+    GtkWidget *weather_label_day = gtk_label_new(weather_day);
+    gtk_box_append(GTK_BOX(weather_day_box), weather_label_day);
+    gtk_box_append(GTK_BOX(weather_date_box), weather_day_box);
+
+    GtkWidget *weather_month_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(weather_month_box), "weather_month_box");
+    load_css_main(t_screen.provider, weather_month_box);
+    GtkWidget *weather_label_month = gtk_label_new(weather_month);
+    gtk_box_append(GTK_BOX(weather_month_box), weather_label_month);
+    gtk_box_append(GTK_BOX(weather_date_box), weather_month_box);
 
     GtkWidget *weather_image_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_widget_set_name(GTK_WIDGET(weather_image_box), "weather_image_box"); 
+    gtk_widget_set_name(GTK_WIDGET(weather_image_box), "weather_image_box");
+    load_css_main(t_screen.provider, weather_image_box);
     GtkWidget *weather_image = gtk_image_new_from_file(weather_image_path);
     gtk_widget_set_size_request(weather_image, 100, 100);
     gtk_box_append(GTK_BOX(weather_image_box), weather_image);
 
+    GtkWidget *weather_bottom_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(weather_bottom_box), "weather_bottom_box");
+    load_css_main(t_screen.provider, weather_bottom_box);
+
+    GtkWidget *weather_location_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(weather_location_box), "weather_location_box");
+    load_css_main(t_screen.provider, weather_location_box);
+    GtkWidget *weather_location_label = gtk_label_new(weather_location);
+    gtk_widget_set_name(GTK_WIDGET(weather_location_label), "weather_location_label");
+    load_css_main(t_screen.provider, weather_location_label);
+    gtk_box_append(GTK_BOX(weather_location_box), weather_location_label);
+    gtk_box_append(GTK_BOX(weather_bottom_box), weather_location_box);
+
     GtkWidget *weather_temperature_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_widget_set_name(GTK_WIDGET(weather_temperature_box), "weather_temperature_box"); 
+    gtk_widget_set_name(GTK_WIDGET(weather_temperature_box), "weather_temperature_box");
+    load_css_main(t_screen.provider, weather_temperature_box);
     GtkWidget *weather_temperature_label = gtk_label_new(weather_temperature);
+    gtk_widget_set_name(GTK_WIDGET(weather_temperature_label), "weather_temperature_label");
+    load_css_main(t_screen.provider, weather_temperature_label);
     gtk_box_append(GTK_BOX(weather_temperature_box), weather_temperature_label);
+    gtk_box_append(GTK_BOX(weather_bottom_box), weather_temperature_box);
     
     gtk_grid_attach(GTK_GRID(weather_grid), weather_date_box, 0, 0, 1, 1);
-    gtk_grid_attach(GTK_GRID(weather_grid), weather_temperature_box, 0, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(weather_grid), weather_bottom_box, 0, 2, 1, 1);
     gtk_grid_attach(GTK_GRID(weather_grid), weather_image_box, 2, 1, 1, 1);
     gtk_box_append(GTK_BOX(weather_box), weather_grid);
 

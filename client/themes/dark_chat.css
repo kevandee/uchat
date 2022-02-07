@@ -473,12 +473,35 @@ scrolledwindow {
 }
 
 /*----------GROUP MESSAGES--------------*/
-#weather_box
-{
+
+
+/*----------HOMES ACTIVNYJ--------------*/
+#weather_box  {
   background-color: red;
-  padding: 10px 10px 10px 10px;
+  padding: 20px 10px 20px 20px;
 }
 
+#weather_day_box {
+  font-size: 52px;
+  font-weight: 700;
+  color: #fff;
+}
 
+#weather_month_box {
+  font-size: 16px;
+  color: #fff;
+}
 
+#weather_location_box {
+  font-size: 16px;
+  color: #fff;
+}
 
+#weather_location_label {
+  text-transform: capitalize;
+}
+
+#weather_temperature_box {
+  font-size: 48px;
+  color: #fff;
+}
