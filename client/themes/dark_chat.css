@@ -480,6 +480,40 @@ scrolledwindow {
   padding: 5px 5px 5px 5px;
 }
 
+#note_box_header{
+    background-color:rgb(236, 179, 101);
+    border-radius: 20px 20px 0px 0px;
+    padding-left: 20px;
+    padding-right: 18px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    color: white;
+}
+#note_text_writer{
+  border-radius: 0px 0px 20px 20px;
+  font-size: 18px;
+  padding-left: 10px;
+  padding-top: 10px;
+}
+
+#note_box_saver{
+  padding: 7px 25px 5px 26px;
+  background-color: white;
+  color: rgb(236, 179, 101);
+  border-radius: 12px;
+  font-size: 14px;
+  border: 1px solid #fff;
+}
+#note_box_saver:hover{
+  background-color: rgb(236, 179, 101);
+  /*border: 1px solid white;*/
+  color: white;
+}
+
 #weather_box  {
   background-color: red;
   padding: 20px 10px 20px 20px;
