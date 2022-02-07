@@ -15,13 +15,8 @@ static void insert_text_note(GtkTextBuffer *buffer, GtkTextIter *location)
         gtk_text_buffer_delete(buffer, &offset, &end);
         gtk_text_iter_assign(location, &offset);
     }
-
     /////// VVV delete this VVV
     printf("\nnote : %s\n", buf_str);
-    char *query = NULL;
-    char *sql_pattern = "UPDATE user SET note = '%s');";
-    asprintf(&query, sql_pattern, buf_str);
-    user_exec_db(cur_client.login, query, 2);
 }
 
 static void save_note(GtkWidget *widget, gpointer buff) {
@@ -34,6 +29,10 @@ static void save_note(GtkWidget *widget, gpointer buff) {
 
     const char *text_buff = gtk_text_buffer_get_text(gtk_text_buff, &start, &end, true);
     printf("\n%s\n", text_buff);
+    char *query = NULL;
+    char *sql_pattern = "UPDATE user SET note = '%s');";
+    asprintf(&query, sql_pattern, text_buff);
+    user_exec_db(cur_client.login, query, 2);
 }
 
 void show_home() {
