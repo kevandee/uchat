@@ -340,6 +340,12 @@ scrolledwindow {
 
 #scroll_buttons {
   background:transparent;
+  border-radius: 0px 0px 0px 0px;
+}
+
+#scroll_button_active {
+  background: #6c6c6c;
+  border-radius: 0px 0px 0px 0px;
 }
 
 #scroll_buttons_border {

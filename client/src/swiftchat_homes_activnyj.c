@@ -15,13 +15,8 @@ static void insert_text_note(GtkTextBuffer *buffer, GtkTextIter *location)
         gtk_text_buffer_delete(buffer, &offset, &end);
         gtk_text_iter_assign(location, &offset);
     }
-
     /////// VVV delete this VVV
     printf("\nnote : %s\n", buf_str);
-    char *query = NULL;
-    char *sql_pattern = "UPDATE user SET note = '%s');";
-    asprintf(&query, sql_pattern, buf_str);
-    user_exec_db(cur_client.login, query, 2);
 }
 
 static void save_note(GtkWidget *widget, gpointer buff) {
@@ -34,9 +29,16 @@ static void save_note(GtkWidget *widget, gpointer buff) {
 
     const char *text_buff = gtk_text_buffer_get_text(gtk_text_buff, &start, &end, true);
     printf("\n%s\n", text_buff);
+    char *query = NULL;
+    char *sql_pattern = "UPDATE user SET note = '%s');";
+    asprintf(&query, sql_pattern, text_buff);
+    user_exec_db(cur_client.login, query, 2);
 }
 
-void show_home() {
+void show_home() 
+{
+    int point = 1;
+    redraw_actives_chats(NULL, &point);
     gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.settings);
     if(cur_client.theme == DARK_THEME)
         t_actives.settings = gtk_image_new_from_file("client/media/settings.png");
@@ -65,9 +67,12 @@ void show_home() {
     gtk_widget_set_valign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
     gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 50);
 
-    GtkWidget *box_container1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_widget_set_name(GTK_WIDGET(box_container1), "box_container");
 
+    GtkWidget *home_grid = gtk_grid_new();
+    //gtk_widget_set_name(GTK_WIDGET(home_grid, "home_grid");
+    gtk_grid_set_row_spacing(GTK_GRID(home_grid), 50);
+    gtk_grid_set_column_spacing(GTK_GRID(home_grid), 150);
+    
     //NOTES
     GtkWidget *note_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_name(GTK_WIDGET(note_box), "note_box");
@@ -81,16 +86,21 @@ void show_home() {
     gtk_widget_set_size_request(note_box_header, 300, 0);
     gtk_box_append(GTK_BOX(note_box), note_box_header);
 
-    GtkWidget *notes_label = gtk_label_new("Your notes:");
-    gtk_box_append(GTK_BOX(note_box_header), notes_label);
+    GtkWidget *note_box_label = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(note_box_header), "note_box_label");
+    GtkWidget *note_label = gtk_label_new("Your notes:");
+    gtk_box_append(GTK_BOX(note_box_label), note_label);
+    gtk_box_append(GTK_BOX(note_box_header), note_box_label);
 
-    GtkWidget *notes_saver = gtk_button_new_with_label("Save");
-    gtk_widget_set_name(GTK_WIDGET(notes_saver), "notes_saver");
-    gtk_widget_set_size_request(GTK_WIDGET(notes_saver), 0, 0);
-    gtk_widget_set_halign(GTK_WIDGET(notes_saver), GTK_ALIGN_END);
-    gtk_widget_set_valign(GTK_WIDGET(notes_saver), GTK_ALIGN_END);
+    GtkWidget *note_box_saver = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(note_box_saver), "note_box_saver");
+    GtkWidget *note_saver = gtk_button_new_with_label("Save");
+    gtk_widget_set_name(GTK_WIDGET(note_saver), "notes_saver");
+    gtk_widget_set_size_request(GTK_WIDGET(note_saver), 0, 0);
+    gtk_box_set_spacing(GTK_BOX(note_box_header), 170);         // distance between label and button
     
-    gtk_box_append(GTK_BOX(note_box_header), notes_saver);
+    gtk_box_append(GTK_BOX(note_box_saver), note_saver);
+    gtk_box_append(GTK_BOX(note_box_header), note_box_saver);
 
     GtkWidget *note_box_inner = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(GTK_WIDGET(note_box_inner), "note_box_inner");
@@ -102,8 +112,6 @@ void show_home() {
     load_css_main(t_screen.provider, note_text_writer);
     gtk_widget_set_size_request(note_text_writer, 300, 0);
 
-    
-
     GtkTextBuffer *note_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (note_text_writer));
     //gtk_widget_set_name(GTK_WIDGET(note_text_buffer), "note_text_buffer");
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(note_text_writer), GTK_WRAP_WORD_CHAR);
@@ -112,7 +120,7 @@ void show_home() {
     // notes buffer from data base
     //gtk_text_buffer_set_text();
 
-    g_signal_connect_after(notes_saver, "clicked", G_CALLBACK(save_note), note_text_writer);
+    g_signal_connect_after(note_saver, "clicked", G_CALLBACK(save_note), note_text_writer);
 
     GtkWidget *note_scroll = gtk_scrolled_window_new ();
     gtk_widget_set_name(GTK_WIDGET(note_scroll), "note_scroll");
@@ -124,18 +132,18 @@ void show_home() {
     
     gtk_box_append(GTK_BOX(note_box_inner), note_scroll);
     gtk_box_append(GTK_BOX(note_box), note_box_inner);
-    gtk_box_append(GTK_BOX(box_container1), note_box);
+    gtk_grid_attach(GTK_GRID(home_grid), note_box, 0, 0, 1, 1);
     // NOTES End
 
     GtkWidget *weather_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_name(GTK_WIDGET(weather_box), "weather_box");
-    gtk_widget_set_halign(GTK_WIDGET(weather_box), GTK_ALIGN_START);
+    GtkWidget *weather_grid = gtk_grid_new();
+    //gtk_widget_set_name(GTK_WIDGET(home_grid, "weather_grid");
+    gtk_grid_set_row_spacing(GTK_GRID(weather_grid), 10);
+    gtk_grid_set_column_spacing(GTK_GRID(weather_grid), 10);
+    /*gtk_widget_set_halign(GTK_WIDGET(weather_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(weather_box), GTK_ALIGN_START);
-    gtk_box_set_spacing(GTK_BOX(weather_box), 10);
-
-    GtkWidget *weather_box_inner_hor = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_widget_set_name(GTK_WIDGET(note_box_inner), "weather_box_inner_hor");
-
+    gtk_box_set_spacing(GTK_BOX(weather_box), 10);*/
 
     char *city = "харків";
     char **weather_label_array = weather_parse(city);
@@ -144,18 +152,28 @@ void show_home() {
     char *weather_image_path = weather_label_array[1];
     char *weather_date = weather_label_array[2];
 
+    GtkWidget *weather_date_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(weather_date_box), "weather_date_box");    
     GtkWidget *weather_date_label = gtk_label_new(weather_date);
-    gtk_box_append(GTK_BOX(weather_box_inner_hor), weather_date_label);
+    gtk_box_append(GTK_BOX(weather_date_box), weather_date_label);
+
+    GtkWidget *weather_image_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(weather_image_box), "weather_image_box"); 
     GtkWidget *weather_image = gtk_image_new_from_file(weather_image_path);
     gtk_widget_set_size_request(weather_image, 100, 100);
-    gtk_box_append(GTK_BOX(weather_box_inner_hor), weather_image);
+    gtk_box_append(GTK_BOX(weather_image_box), weather_image);
+
+    GtkWidget *weather_temperature_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(GTK_WIDGET(weather_temperature_box), "weather_temperature_box"); 
     GtkWidget *weather_temperature_label = gtk_label_new(weather_temperature);
-    gtk_box_append(GTK_BOX(weather_box), weather_box_inner_hor);
-    gtk_box_append(GTK_BOX(weather_box), weather_temperature_label);
-
-    gtk_box_append(GTK_BOX(box_container1), weather_box);
+    gtk_box_append(GTK_BOX(weather_temperature_box), weather_temperature_label);
     
-    gtk_box_append(GTK_BOX(t_main.right_panel), box_container1);
+    gtk_grid_attach(GTK_GRID(weather_grid), weather_date_box, 0, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(weather_grid), weather_temperature_box, 0, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(weather_grid), weather_image_box, 2, 1, 1, 1);
+    gtk_box_append(GTK_BOX(weather_box), weather_grid);
 
+    gtk_grid_attach(GTK_GRID(home_grid), weather_box, 1, 0, 1, 1);
+    gtk_box_append(GTK_BOX(t_main.right_panel), home_grid);
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
 }

@@ -362,7 +362,7 @@ gboolean add_file_msg(gpointer data) {
     }
 
     if (is_sender && mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0)
-        gtk_box_append(GTK_BOX(incoming_file_name), User_logo);
+        gtk_box_append(GTK_BOX(incoming_file_box), User_logo);
     if (!file_mes->prev) {
         gtk_box_append(GTK_BOX(t_main.scroll_box_right), incoming_file_box);
         //mx_push_front(&t_main.message_widgets_list, incoming_msg);
@@ -1266,7 +1266,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    printf("SSL: Connecte to server with chipher: %s\n", SSL_get_cipher(ssl));
+    printf("SSL: Connected to server with chipher: %s\n", SSL_get_cipher(ssl));
     X509 *cert = SSL_get_peer_certificate(ssl);
     if (cert == NULL) {
         printf("SSL: No certificates configured.\n");
