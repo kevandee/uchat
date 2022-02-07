@@ -71,7 +71,7 @@ void show_home()
     GtkWidget *home_grid = gtk_grid_new();
     //gtk_widget_set_name(GTK_WIDGET(home_grid, "home_grid");
     gtk_grid_set_row_spacing(GTK_GRID(home_grid), 50);
-    gtk_grid_set_column_spacing(GTK_GRID(home_grid), 150);
+    gtk_grid_set_column_spacing(GTK_GRID(home_grid), 36);
     
     //NOTES
     GtkWidget *note_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -82,11 +82,14 @@ void show_home()
     gtk_widget_set_size_request(note_box, 300, 0);
 
     GtkWidget *note_box_header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(note_box_header, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(note_box_header, GTK_ALIGN_CENTER);
     gtk_widget_set_name(GTK_WIDGET(note_box_header), "note_box_header");
     gtk_widget_set_size_request(note_box_header, 300, 0);
-    gtk_box_append(GTK_BOX(note_box), note_box_header);
 
     GtkWidget *note_box_label = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(note_box_label, GTK_ALIGN_START);
+    gtk_widget_set_valign(note_box_label, GTK_ALIGN_CENTER);
     gtk_widget_set_name(GTK_WIDGET(note_box_header), "note_box_label");
     GtkWidget *note_label = gtk_label_new("Your notes:");
     gtk_box_append(GTK_BOX(note_box_label), note_label);
@@ -94,23 +97,27 @@ void show_home()
 
     GtkWidget *note_box_saver = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_name(GTK_WIDGET(note_box_saver), "note_box_saver");
+    gtk_widget_set_halign(note_box_saver, GTK_ALIGN_END);
+    gtk_widget_set_valign(note_box_saver, GTK_ALIGN_CENTER);
     GtkWidget *note_saver = gtk_button_new_with_label("Save");
     gtk_widget_set_name(GTK_WIDGET(note_saver), "notes_saver");
     gtk_widget_set_size_request(GTK_WIDGET(note_saver), 0, 0);
-    gtk_box_set_spacing(GTK_BOX(note_box_header), 170);         // distance between label and button
+    gtk_box_set_spacing(GTK_BOX(note_box_header), 370);         // distance between label and button
     
     gtk_box_append(GTK_BOX(note_box_saver), note_saver);
     gtk_box_append(GTK_BOX(note_box_header), note_box_saver);
 
+    gtk_box_append(GTK_BOX(note_box), note_box_header);
+
     GtkWidget *note_box_inner = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(GTK_WIDGET(note_box_inner), "note_box_inner");
     load_css_main(t_screen.provider, note_box_inner);
-    gtk_widget_set_size_request(note_box_inner, 0, 300);
+    gtk_widget_set_size_request(note_box_inner, 0, 250);
 
     GtkWidget *note_text_writer = gtk_text_view_new();
     gtk_widget_set_name(GTK_WIDGET(note_text_writer), "note_text_writer");
     load_css_main(t_screen.provider, note_text_writer);
-    gtk_widget_set_size_request(note_text_writer, 300, 0);
+    gtk_widget_set_size_request(note_text_writer, 500, 0);
 
     GtkTextBuffer *note_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (note_text_writer));
     //gtk_widget_set_name(GTK_WIDGET(note_text_buffer), "note_text_buffer");
@@ -137,7 +144,7 @@ void show_home()
 
     GtkWidget *weather_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(weather_box, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(weather_box, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(weather_box, GTK_ALIGN_END);
     gtk_widget_set_name(GTK_WIDGET(weather_box), "weather_box");
     load_css_main(t_screen.provider, weather_box);
     GtkWidget *weather_grid = gtk_grid_new();
