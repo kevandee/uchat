@@ -111,7 +111,7 @@ gboolean add_msg(gpointer data) {
         }
 
         else {
-            User_logo = get_circle_widget_current_user_avatar();
+            User_logo = get_circle_widget_from_png_avatar(&cur_client.avatar, 45, 45, false);
         }
     }
 
@@ -185,9 +185,23 @@ gboolean add_msg(gpointer data) {
         if(is_sender)
         {
             gtk_box_prepend(GTK_BOX(incoming_msg_box), user_action_box);
-            gtk_grid_attach(GTK_GRID(message_content), user_name_box, 1, 1, 1, 1);
+            //gtk_grid_attach(GTK_GRID(message_content), user_name_box, 1, 1, 1, 1);
             gtk_grid_attach(GTK_GRID(message_content), incoming_msg_box, 1, 2, 1, 1);
             gtk_grid_attach(GTK_GRID(message_content), user_logo_box, 2, 1, 1, 2);
+        
+            GtkGesture *gesture = gtk_gesture_click_new();
+            gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
+            gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
+            GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
+            arr[0] = incoming_msg;
+            arr[1] = incoming_msg_box;
+            int *mes_id = (int *)malloc(sizeof(int));
+            *mes_id = message->id;
+            t_list *gesture_data = NULL;
+            mx_push_back(&gesture_data, arr);
+            mx_push_back(&gesture_data, mes_id);
+            g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), gesture_data);
+            gtk_widget_add_controller(incoming_msg_box, GTK_EVENT_CONTROLLER(gesture));
         }
         else
         {

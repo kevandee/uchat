@@ -22,8 +22,10 @@ static void delete ( GSimpleAction *action, G_GNUC_UNUSED GVariant *parameter, G
 
     // <delete message>
     gtk_popover_popdown(GTK_POPOVER (pop));
-    gtk_widget_hide(arr[1]);
-
+    if (mx_strncmp(cur_client.name, ".dialog", 7) == 0)
+        gtk_widget_hide(arr[1]);
+    else 
+        gtk_widget_hide(gtk_widget_get_parent (arr[1]));
     char buf[544] = {0};
     sprintf(buf, "<delete mes chat_id=%d, mes_id=%d>", cur_client.cur_chat.id, *((int *)gesture_list->next->data));
     printf("%s\n", buf);

@@ -9,7 +9,7 @@ void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
 void return_to_chatlist(GtkWidget *widget, gpointer data) {
     //gtk_widget_hide(gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left)));
     (void)widget;
-    printf("tut\n");
+
     if(data != NULL)
     {
         GtkWidget** swapped = data;
@@ -38,7 +38,7 @@ void return_to_chatlist(GtkWidget *widget, gpointer data) {
         add_chat_node(chats->data);
         chats = chats->next;
     }
-    printf("tut\n");
+
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left),t_main.scroll_box_left);
 }
 
@@ -585,7 +585,7 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
 
             if(group_chat)
             {
-                gtk_grid_attach(GTK_GRID(message_content), user_name_box, 1, 1, 1, 1);
+                //gtk_grid_attach(GTK_GRID(message_content), user_name_box, 1, 1, 1, 1);
                 gtk_grid_attach(GTK_GRID(message_content), my_msg_box, 1, 2, 1, 1);
                 gtk_grid_attach(GTK_GRID(message_content), user_logo_box, 2, 1, 1, 2);
                 gtk_box_append(GTK_BOX(message_box), message_content);
