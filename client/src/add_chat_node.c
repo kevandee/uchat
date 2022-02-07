@@ -30,6 +30,14 @@ static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
     //return_to_chatlist(NULL, NULL);
 }
 
+/*static void redraw_backgr(GtkWidget *widget, gpointer data)
+{
+    (void)widget;
+    GtkWidget *chat_box = data;
+    gtk_widget_set_name(chat_box, "scroll_buttons_active");
+    load_css_main(t_screen.provider, chat_box);
+}*/
+
 ///gboolean add_msg(gpointer data)
 gboolean add_chat_node(gpointer data) {
     t_chat *chat = data;
@@ -120,12 +128,15 @@ gboolean add_chat_node(gpointer data) {
     gtk_box_append (GTK_BOX(chat_info), chat_name);
 
     gtk_button_set_child(GTK_BUTTON (child_widget), chat_info);
+
     //переход в историю чатов, в файле мейн скрин
     if (mx_strcmp(chat->name, ".new_dialog") == 0) {
         g_signal_connect(child_widget, "clicked", G_CALLBACK(send_and_choice_new_dialog), chat);
+        //g_signal_connect(child_widget, "clicked", G_CALLBACK(redraw_backgr), chat_info);
     }
     else { 
         g_signal_connect(child_widget, "clicked", G_CALLBACK(show_chat_history), chat);
+        //g_signal_connect(child_widget, "clicked", G_CALLBACK(redraw_backgr), chat_info);
         mx_push_back(&t_main.chat_nodes_info, chat_info);
     }
     gtk_box_append(GTK_BOX(t_main.scroll_box_left), child_widget);

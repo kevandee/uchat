@@ -342,6 +342,10 @@ scrolledwindow {
   background:transparent;
 }
 
+#scroll_buttons_active {
+  background: #6c6c6c;
+}
+
 #scroll_buttons_border {
   background: transparent;
   outline-color: transparent;
