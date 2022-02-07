@@ -102,29 +102,22 @@ char **weather_parse(char *city) {
   temp += mx_strlen("<p class=\"month\"") + 1;
   weather_array[6] = swift_weather_trim(temp, '<'); // Month (Format:лютого)
 
-  char **label_array = malloc(3 * sizeof (char *));
-  for (int i = 0; i < 3; i++) {
+  char **label_array = malloc(5 * sizeof (char *));
+  for (int i = 0; i < 5; i++) {
     label_array[i] = NULL;
   }
 
-  char *ntemp = mx_strjoin(city, ": ");
-  ntemp = mx_strrejoin(ntemp, weather_array[5]);
-  ntemp = mx_strrejoin(ntemp, " ");
-  ntemp = mx_strrejoin(ntemp, weather_array[4]);
-  label_array[0] = mx_strdup(ntemp);
-  mx_strdel(&ntemp);
+  label_array[0] = mx_strdup(weather_array[2]);// date
 
-  ntemp = mx_strjoin("client/media/weather/", weather_array[3]);
-  ntemp = mx_strrejoin(ntemp, ".jpg");
-  printf("\n%s\n%s\n", weather_array[3], ntemp);
-  label_array[1] = mx_strdup(ntemp);
-  mx_strdel(&ntemp);
+  label_array[1] = mx_strdup(weather_array[6]); // month
 
-  ntemp = mx_strjoin(weather_array[2], " ");
-  ntemp = mx_strrejoin(ntemp, weather_array[6]);
-  ntemp = mx_strrejoin(ntemp, " ");
-  ntemp = mx_strrejoin(ntemp, weather_array[0]);
-  label_array[2] = mx_strdup(ntemp);
+  label_array[2] = mx_strjoin(city, ", Україна");// city, Ukraine
+
+  label_array[3] = mx_strjoin(weather_array[5], "°С"); // temperature 
+
+  char *ntemp = mx_strjoin("client/media/weather/", weather_array[3]);
+  ntemp = mx_strrejoin(ntemp, ".png");
+  label_array[4] = mx_strdup(ntemp);
   mx_strdel(&ntemp);
 
   mx_del_strarr(&weather_array);
