@@ -15,7 +15,7 @@ void sqlite3_create_db() {
         sql = mx_strrejoin(sql, "PRAGMA encoding = \"UTF-8\";");
         sql = mx_strrejoin(sql, "CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, login TEXT NOT NULL, password TEXT NOT NULL, name TEXT DEFAULT \".clear\", surname TEXT DEFAULT \".clear\", bio TEXT DEFAULT \".clear\", avatar TEXT DEFAULT \"default\", theme TEXT DEFAULT dark);");
         sql = mx_strrejoin(sql, "CREATE TABLE chats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, members INTEGER NOT NULL, avatar TEXT DEFAULT \"default\");");
-        sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT, chat_id INTEGER NOT NULL, user_id INTEGER NOT NULL, admin BOOLEAN NOT NULL DEFAULT FALSE);");
+        sql = mx_strrejoin(sql, "CREATE TABLE members (id INTEGER PRIMARY KEY AUTOINCREMENT, chat_id INTEGER NOT NULL, user_id INTEGER NOT NULL, admin BOOLEAN NOT NULL DEFAULT FALSE, mute BOOLEAN NOT NULL DEFAULT FALSE);");
         sql = mx_strrejoin(sql, "CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, chat_id INTEGER NOT NULL, user_id INTEGER NOT NULL, text TEXT DEFAULT NULL, time DATETIME NOT NULL, type TEXT DEFAULT text);");
         sql = mx_strrejoin(sql, "INSERT INTO users (login, password) VALUES ('Dima123', 'Dimapassword');");
         sql = mx_strrejoin(sql, "INSERT INTO users (login, password) VALUES ('Fibbs123', 'Mafilirkan');");
@@ -373,4 +373,21 @@ void update_user_bio(char *bio, int id) {
     sql_pattern = "UPDATE users SET bio = '%s' WHERE id = %d;";
     asprintf(&query, sql_pattern, bio, id);
     sqlite3_exec_db(query, 2);
+}
+
+void change_mute(int c_id, int u_id) {
+    char *query = NULL;
+    char *sql_pattern = "SELECT mute FROM members WHERE chat_id = %d AND user_id = %d;";
+    asprintf(&query, sql_pattern, c_id, u_id);
+    t_list *temp = sqlite3_exec_db(query, 1);
+    if (strcmp(temp->data, "0") == 0) {
+        sql_pattern = "UPDATE members SET mute = '%d' WHERE chat_id = %d and user_id = %d;";
+        asprintf(&query, sql_pattern,  1, c_id, u_id);
+        sqlite3_exec_db(query, 2);
+    }
+    else {
+        sql_pattern = "UPDATE members SET mute = '%d' WHERE chat_id = %d and user_id = %d;";
+        asprintf(&query, sql_pattern,  0, c_id, u_id);
+        sqlite3_exec_db(query, 2);
+    }
 }
