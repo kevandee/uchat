@@ -40,6 +40,7 @@ void return_to_chatlist(GtkWidget *widget, gpointer data) {
     }
 
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left),t_main.scroll_box_left);
+    redraw_actives_chats(NULL, NULL);
 }
 
 static void return_to_chat() {
@@ -54,6 +55,42 @@ static void return_to_chat() {
     }
     cur_client.cur_chat.id = 0;
     show_chat_history(NULL, swap);
+}
+
+static void send_new_chat_name(GtkWidget *widget, gpointer data) {
+    (void)widget;
+    GtkWidget *entry = data;
+    const char *tmp_chat_name = gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY (entry)));
+
+    if (mx_strlen(tmp_chat_name) == 0) {
+        return;
+    }
+
+    if (mx_strcmp(tmp_chat_name, cur_client.cur_chat.name) != 0) {
+        clear_message(cur_client.name, 32);
+        mx_strcpy(cur_client.cur_chat.name, tmp_chat_name);
+    }
+    else {
+        return;
+    }
+    
+    char buf[544] = {0};
+    sprintf(buf, "<setting chat_id=%d, chat_name=%s>", cur_client.cur_chat.id, tmp_chat_name);
+    send_all(cur_client.ssl, buf, 544);
+    t_list *temp_widgets = t_main.chat_nodes_info;
+    t_list *temp_ch = cur_client.chats;
+
+    while (temp_ch) {
+        if (((t_chat *)temp_ch->data)->id == cur_client.cur_chat.id) {
+            break;
+        }
+        temp_widgets = temp_widgets->next;
+        temp_ch = temp_ch->next;
+    }
+
+    mx_strcpy(((t_chat *)temp_ch->data)->name, tmp_chat_name);
+    gtk_label_set_text(GTK_LABEL (gtk_widget_get_last_child (temp_widgets->data)), tmp_chat_name);
+    show_group_settings(NULL, NULL);
 }
 
 void show_group_settings(GtkWidget *widget, gpointer data)
@@ -160,7 +197,7 @@ void show_group_settings(GtkWidget *widget, gpointer data)
     gtk_entry_set_max_length(GTK_ENTRY(entry_field_name), 32);
     gtk_widget_set_name(GTK_WIDGET(entry_field_name), "entry_field_name");
     load_css_main(t_screen.provider, entry_field_name);
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_field_name), "New gruup name");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_field_name), "New group name");
     gtk_widget_set_size_request(entry_field_name, 240, 30);
     gtk_box_append(GTK_BOX(name_entry_box), entry_field_name);
     GtkWidget *apply_button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -168,6 +205,7 @@ void show_group_settings(GtkWidget *widget, gpointer data)
     gtk_widget_set_valign(GTK_WIDGET(apply_button_box), GTK_ALIGN_CENTER);
     GtkWidget *apply_button = gtk_button_new_with_label("Apply");
     gtk_widget_set_name(GTK_WIDGET(apply_button), "apply_btn");
+    g_signal_connect (apply_button, "clicked", G_CALLBACK(send_new_chat_name), entry_field_name);
     load_css_main(t_screen.provider, apply_button);
     gtk_widget_set_size_request(apply_button, 160, 30);
     gtk_widget_set_margin_start(apply_button, 0);
@@ -283,7 +321,8 @@ static void send_chat(GtkWidget *widget, gpointer data) {
     return_to_chatlist(widget, swapped);
 }
 
-void add_chat_dialog(GtkWidget *widget, gpointer data) {
+void add_chat_dialog(GtkWidget *widget, gpointer data) 
+{
     (void)widget;
     GtkWidget** swapped = data;
     gtk_label_set_label(GTK_LABEL(swapped[0]), "New Group");
@@ -573,7 +612,10 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
             GtkWidget *user_action = gtk_label_new("edited");
             gtk_widget_set_name(user_action, "user_action");
             load_css_main(t_screen.provider, user_action);
-            GtkWidget *user_action_time = gtk_label_new("13:45");
+            time_t t;
+            time(&t);
+            char *time = mx_strndup(ctime(&t) + 11, 5);
+            GtkWidget *user_action_time = gtk_label_new(time);
             gtk_widget_set_name(user_action_time, "user_action");
             load_css_main(t_screen.provider, user_action_time);
 
@@ -850,7 +892,7 @@ void load_more_messages (GtkScrolledWindow *scrolled_window, GtkPositionType pos
 void show_chat_history(GtkWidget *widget, gpointer data)
 {
     (void)widget;
-    if (cur_client.cur_chat.id == ((t_chat *)data)->id) {
+    if (data && cur_client.cur_chat.id == ((t_chat *)data)->id) {
         return;
     }
     mx_clear_ldata(&cur_client.cur_chat.messages);
@@ -859,8 +901,10 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     mx_clear_list(&t_main.message_widgets_list);
     t_main.message_widgets_list = NULL;
 
-    printf("id of chat %d\n", ((t_chat *)data)->id);
-    cur_client.cur_chat = *((t_chat *)data);
+    if (data){
+        printf("id of chat %d\n", ((t_chat *)data)->id);
+        cur_client.cur_chat = *((t_chat *)data);
+    }
     printf("1\n");
     t_main.scroll_mes = true;
     if(t_main.sticker_panel)

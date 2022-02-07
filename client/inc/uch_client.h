@@ -123,6 +123,7 @@ void add_chat_dialog(GtkWidget *widget, gpointer data);
 
 void *scroll_func();
 void *save_scroll_func();
+void redraw_actives_chats(GtkWidget *widget, gpointer data);
 
 void send_login(GtkWidget *widget, gpointer data);
 void chat_show_main_screen(GtkWidget *window);

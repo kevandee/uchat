@@ -947,14 +947,14 @@ void *rec_func(void *param) {
                 printf("setts avatar\n");
                 t_main.loaded = true;
             }
-            if(mx_strncmp(mx_strtrim(message), "<get user avatar>",17) == 0) {
+            else if(mx_strncmp(mx_strtrim(message), "<get user avatar>",17) == 0) {
                 printf("a\n");
                 t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
                 get_avatar(t_main.loaded_avatar);
                 printf("gets avatar %s\n", t_main.loaded_avatar->name);
                 t_main.loaded = true;
             }
-            if(mx_strncmp(mx_strtrim(message), "<update avatar chat_id=",23) == 0) {
+            else if(mx_strncmp(mx_strtrim(message), "<update avatar chat_id=",23) == 0) {
                 printf("a\n");
                 char *temp = mx_strstr(message, "chat_id=") + 8;
                 int len = 0;
@@ -993,6 +993,92 @@ void *rec_func(void *param) {
                 GtkWidget *chat_image = get_circle_widget_from_png_avatar(t_main.loaded_avatar, 57, 57, true);
 
                 gtk_box_prepend(GTK_BOX (temp_widgets->data), chat_image);
+
+                if (cur_client.cur_chat.id == chat_id) {
+                    GtkWidget *header_bar_box = gtk_widget_get_first_child(t_main.right_panel);
+                    GtkWidget *header_bar_left = gtk_grid_get_child_at(GTK_GRID(header_bar_box), 0, 0);
+                                     
+                    GtkWidget *photo_box = gtk_widget_get_first_child(header_bar_left);
+                    gtk_widget_hide(photo_box);
+                    photo_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+                    GtkWidget *photo =  NULL;
+                    photo = get_circle_widget_from_png_avatar(t_main.loaded_avatar, 50, 50, true);
+                    
+                    gtk_box_append(GTK_BOX(photo_box), photo);
+                    gtk_box_prepend(GTK_BOX(header_bar_left), photo_box);
+
+                }
+            }
+            else if(mx_strncmp(message, "<update name chat_id=",21) == 0) { // "<setting chat_id=%d, chat_name=%s>"
+                printf("a\n");
+                char *temp = mx_strstr(message, "chat_id=") + 8;
+                int len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *c_id = mx_strndup(temp, len);
+                printf("%s\n", c_id);
+                int chat_id = mx_atoi(c_id);
+                mx_strdel(&c_id);
+
+                temp = mx_strstr(message, "chat_name=") + 10;
+                len = 0;
+                while (*(temp + len) != '>') {
+                    len++;
+                }
+                char *c_name = mx_strndup(temp, len);  
+                
+                t_list *temp_widgets = t_main.chat_nodes_info;
+                t_list *temp_ch = cur_client.chats;
+
+                while (temp_ch) {
+                    if (((t_chat *)temp_ch->data)->id == chat_id) {
+                        break;
+                    }
+                    temp_widgets = temp_widgets->next;
+                    temp_ch = temp_ch->next;
+                }
+
+                mx_strcpy(((t_chat *)temp_ch->data)->name, c_name);
+                mx_strcpy(cur_client.cur_chat.name, c_name);
+                gtk_label_set_text(GTK_LABEL (gtk_widget_get_last_child (temp_widgets->data)), c_name);
+                if (cur_client.cur_chat.id == chat_id) {
+                    GtkWidget *header_bar_box = gtk_widget_get_first_child(t_main.right_panel);
+                    GtkWidget *header_bar_left = gtk_grid_get_child_at(GTK_GRID(header_bar_box), 0, 0);
+                     /*                   
+                    GtkWidget *photo_box = gtk_widget_get_first_child(header_bar_left);
+                    gtk_widget_hide(photo_box);
+                    photo_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+                    GtkWidget *photo =  NULL;
+                    photo = get_circle_widget_from_png_avatar(&cur_client.cur_chat.avatar, 50, 50, true);
+                    
+                    gtk_box_append(GTK_BOX(photo_box), photo);
+                    */
+                    GtkWidget *info_box = gtk_widget_get_last_child(header_bar_left);
+                    gtk_widget_hide(info_box);
+                    info_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+                    gtk_widget_set_halign(GTK_WIDGET(info_box), GTK_ALIGN_START);
+                    gtk_widget_set_valign(GTK_WIDGET(info_box), GTK_ALIGN_CENTER);
+                    gtk_widget_set_margin_start(info_box, 10);
+                    GtkWidget *group_or_user_name = NULL;
+                   
+                    group_or_user_name = gtk_label_new(cur_client.cur_chat.name);
+                    
+                    GtkWidget *group_or_user_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+                    gtk_widget_set_halign(GTK_WIDGET(info_box), GTK_ALIGN_START);
+                    gtk_widget_set_name(GTK_WIDGET(group_or_user_name), "chat_name_inside_label");
+                    load_css_main(t_screen.provider, group_or_user_name);
+                    gtk_box_append(GTK_BOX(group_or_user_name_box), group_or_user_name);
+                    GtkWidget *status = gtk_label_new("last seen 13 minutes ago");
+                    gtk_widget_set_name(GTK_WIDGET(status), "last_online");
+                    load_css_main(t_screen.provider, status);
+                    gtk_box_append(GTK_BOX(info_box), group_or_user_name_box);
+                    gtk_box_append(GTK_BOX(info_box), status);
+
+                    //gtk_box_append(GTK_BOX(header_bar_left), photo_box);
+                    gtk_box_append(GTK_BOX(header_bar_left), info_box);
+
+                }
             }
             else if(mx_strcmp(mx_strtrim(message), "<image loaded>") == 0) {
 

@@ -300,6 +300,9 @@ static void send_settings(GtkWidget *widget, gpointer data) {
 
 void show_settings() 
 {
+    int point = 1;
+    redraw_actives_chats(NULL, &point);
+    
     cur_client.cur_chat.id = -1;
     if(t_main.sticker_panel)
     {

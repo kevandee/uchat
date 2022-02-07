@@ -35,7 +35,10 @@ static void save_note(GtkWidget *widget, gpointer buff) {
     user_exec_db(cur_client.login, query, 2);
 }
 
-void show_home() {
+void show_home() 
+{
+    int point = 1;
+    redraw_actives_chats(NULL, &point);
     gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.settings);
     if(cur_client.theme == DARK_THEME)
         t_actives.settings = gtk_image_new_from_file("client/media/settings.png");

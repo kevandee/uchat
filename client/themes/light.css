@@ -333,6 +333,12 @@ menubar popover{
 
 #scroll_buttons {
   background:transparent;
+  border-radius: 0px 0px 0px 0px;
+}
+
+#scroll_button_active {
+  background: rgb(236, 179, 101);
+  border-radius: 0px 0px 0px 0px;
 }
 
 #scroll_buttons_border {

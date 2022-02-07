@@ -358,6 +358,32 @@ void *client_work(void *param) {
                 // изменяешь bio
             }
         }
+        else if (mx_strncmp(message, "<setting chat_id=", 17) == 0) { //"<setting chat_id=%d, chat_name=%s>"
+            char *temp = message +17;
+            int len = 0;
+            while (*(temp + len) != ',') {
+                len++;
+            }
+            char *c_id = mx_strndup(temp, len);
+            printf("%s\n", c_id);
+            int chat_id = mx_atoi(c_id);
+            mx_strdel(&c_id);
+            if (chat_id != cur->cur_chat.id) {
+                printf("change chat\n");
+                change_chat_by_id(chat_id, cur);
+            }
+            temp = mx_strstr(message, "chat_name=") + 10;
+            len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            char *c_name = mx_strndup(temp, len);
+
+            char buf[544] = {0};
+            sprintf(buf, "<update name chat_id=%d, chat_name=%s>", chat_id, c_name);
+            update_chat_name(c_name, chat_id);
+            send_message(buf, cur->login, &cur->cur_chat, false);
+        }
         else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0) {
             printf("%s\n", message);
             char *temp = message + 15;
