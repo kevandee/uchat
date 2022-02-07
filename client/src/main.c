@@ -1233,7 +1233,8 @@ void *rec_func(void *param) {
                 char buf[544] = {0};
                 sprintf(buf, "client_data/%s", cur_client.avatar.name);
                 recv_image(cur_client.ssl, buf);
-                mx_strdel(&cur_client.avatar.path);
+                if (malloc_size (cur_client.avatar.path))
+                    mx_strdel(&cur_client.avatar.path);
                 cur_client.avatar.path = mx_strdup(buf);
 
                 printf("setts avatar\n");

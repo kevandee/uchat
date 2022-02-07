@@ -116,6 +116,7 @@ void load_css_main(GtkCssProvider *provider, GtkWidget *widget);
 void show_settings();
 void show_home();
 char **weather_parse(char *city);
+void send_default_chat_avatar();
 void show_chat_history(GtkWidget *widget, gpointer data);
 void show_group_settings(GtkWidget *widget, gpointer data);
 void return_to_chatlist(GtkWidget *widget, gpointer data);
