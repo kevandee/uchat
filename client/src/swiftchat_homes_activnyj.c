@@ -30,7 +30,7 @@ static void save_note(GtkWidget *widget, gpointer buff) {
     const char *text_buff = gtk_text_buffer_get_text(gtk_text_buff, &start, &end, true);
     printf("\n%s\n", text_buff);
     char *query = NULL;
-    char *sql_pattern = "UPDATE user SET note = '%s');";
+    char *sql_pattern = "UPDATE user SET note = '%s';";
     asprintf(&query, sql_pattern, text_buff);
     user_exec_db(cur_client.login, query, 2);
 }
@@ -76,15 +76,17 @@ void show_home()
     //NOTES
     GtkWidget *note_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_name(GTK_WIDGET(note_box), "note_box");
+    load_css_main(t_screen.provider, note_box);
     gtk_widget_set_halign(GTK_WIDGET(note_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(note_box), GTK_ALIGN_START);
     gtk_box_set_spacing(GTK_BOX(note_box), 10);
-    gtk_widget_set_size_request(note_box, 300, 0);
+    gtk_widget_set_size_request(note_box, 0, 0);
 
     GtkWidget *note_box_header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(note_box_header, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(note_box_header, GTK_ALIGN_CENTER);
     gtk_widget_set_name(GTK_WIDGET(note_box_header), "note_box_header");
+    gtk_box_append(GTK_BOX(note_box), note_box_header);
     gtk_widget_set_size_request(note_box_header, 300, 0);
 
     GtkWidget *note_box_label = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -107,8 +109,6 @@ void show_home()
     gtk_box_append(GTK_BOX(note_box_saver), note_saver);
     gtk_box_append(GTK_BOX(note_box_header), note_box_saver);
 
-    gtk_box_append(GTK_BOX(note_box), note_box_header);
-
     GtkWidget *note_box_inner = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(GTK_WIDGET(note_box_inner), "note_box_inner");
     load_css_main(t_screen.provider, note_box_inner);
@@ -125,7 +125,11 @@ void show_home()
     t_main.note_input = note_text_writer;
     g_signal_connect_after(note_text_buffer, "insert-text", G_CALLBACK(insert_text_note), NULL);
     // notes buffer from data base
-    //gtk_text_buffer_set_text();
+    t_list *temp = user_exec_db(cur_client.login, "SELECT note FROM user;", 1);
+    if (mx_strcmp((char *)temp->data, ".clear") == 0) {
+        temp->data = "";
+    }
+    gtk_text_buffer_set_text(note_text_buffer, (char *)temp->data, mx_strlen((char *)temp->data));
 
     g_signal_connect_after(note_saver, "clicked", G_CALLBACK(save_note), note_text_writer);
 
@@ -171,15 +175,19 @@ void show_home()
     GtkWidget *weather_day_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(GTK_WIDGET(weather_day_box), "weather_day_box");
     load_css_main(t_screen.provider, weather_day_box);
-    GtkWidget *weather_label_day = gtk_label_new(weather_day);
-    gtk_box_append(GTK_BOX(weather_day_box), weather_label_day);
+    GtkWidget *weather_day_label = gtk_label_new(weather_day);
+    gtk_widget_set_name(GTK_WIDGET(weather_day_label), "weather_day_label");
+    load_css_main(t_screen.provider, weather_day_label);
+    gtk_box_append(GTK_BOX(weather_day_box), weather_day_label);
     gtk_box_append(GTK_BOX(weather_date_box), weather_day_box);
 
     GtkWidget *weather_month_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_name(GTK_WIDGET(weather_month_box), "weather_month_box");
     load_css_main(t_screen.provider, weather_month_box);
-    GtkWidget *weather_label_month = gtk_label_new(weather_month);
-    gtk_box_append(GTK_BOX(weather_month_box), weather_label_month);
+    GtkWidget *weather_month_label = gtk_label_new(weather_month);
+    gtk_widget_set_name(GTK_WIDGET(weather_month_label), "weather_month_label");
+    load_css_main(t_screen.provider, weather_month_label);
+    gtk_box_append(GTK_BOX(weather_month_box), weather_month_label);
     gtk_box_append(GTK_BOX(weather_date_box), weather_month_box);
 
     GtkWidget *weather_image_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);

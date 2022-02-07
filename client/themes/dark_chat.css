@@ -476,6 +476,10 @@ scrolledwindow {
 
 
 /*----------HOMES ACTIVNYJ--------------*/
+#note_box {
+  padding: 5px 5px 5px 5px;
+}
+
 #weather_box  {
   background-color: red;
   padding: 20px 10px 20px 20px;
@@ -490,6 +494,10 @@ scrolledwindow {
 #weather_month_box {
   font-size: 16px;
   color: #fff;
+}
+
+#weather_month_label {
+  text-transform: capitalize;
 }
 
 #weather_location_box {

@@ -603,7 +603,7 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
                 user_logo_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
                 gtk_widget_set_halign(GTK_WIDGET(user_logo_box), GTK_ALIGN_CENTER);
                 gtk_widget_set_valign(GTK_WIDGET(user_logo_box), GTK_ALIGN_CENTER);
-                user_logo = get_circle_widget_current_user_avatar();
+                user_logo = get_circle_widget_from_png_avatar(&cur_client.avatar, 45, 45, false);
                 gtk_box_append(GTK_BOX(user_logo_box), user_logo);
             }
 
@@ -639,32 +639,6 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
             }
 
             gtk_box_append(GTK_BOX(t_main.scroll_box_right), message_box);
-
-
-            /*else
-            {
-                my_msg_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
-                gtk_widget_set_halign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
-                gtk_widget_set_valign(GTK_WIDGET(my_msg_box), GTK_ALIGN_END);
-                GtkWidget *user_action_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
-                gtk_widget_set_halign(GTK_WIDGET(user_action_box), GTK_ALIGN_CENTER);
-                gtk_widget_set_valign(GTK_WIDGET(user_action_box), GTK_ALIGN_CENTER);
-                GtkWidget *user_action = gtk_label_new("edited");
-                gtk_widget_set_name(user_action, "user_action");
-                load_css_main(t_screen.provider, user_action);
-                GtkWidget *user_action_time = gtk_label_new("13:45");
-                gtk_widget_set_name(user_action_time, "user_action");
-                load_css_main(t_screen.provider, user_action_time);
-
-                gtk_box_append(GTK_BOX(user_action_box), user_action);
-                gtk_box_append(GTK_BOX(user_action_box), user_action_time);
-                gtk_widget_hide(user_action);
-
-                gtk_box_append(GTK_BOX(my_msg_box), user_action_box);
-                gtk_box_append(GTK_BOX(my_msg_box), msg);
-                gtk_box_append(GTK_BOX(t_main.scroll_box_right), my_msg_box);
-            }*/
-
             pthread_t display_thread = NULL;
             pthread_create(&display_thread, NULL, scroll_func, NULL);
         }
@@ -672,7 +646,6 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
         else {
             sprintf(message, "<edit msg, chat_id=%d, mes_id=%d>%s", cur_client.cur_chat.id, t_main.message_change_id, str);
             is_edit = true;
-
             // найти и изменить
             t_list *temp_mes = cur_client.cur_chat.messages;
             t_list *temp_widgets = t_main.message_widgets_list;
