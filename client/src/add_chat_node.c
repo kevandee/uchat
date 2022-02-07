@@ -170,7 +170,7 @@ gboolean add_chat_node(gpointer data) {
     else { 
         g_signal_connect(child_widget, "clicked", G_CALLBACK(show_chat_history), chat);
         g_signal_connect(child_widget, "clicked", G_CALLBACK(redraw_actives_chats), NULL);
-        mx_push_back(&t_main.chat_nodes_info, child_widget);
+        mx_push_back(&t_main.chat_nodes_info, chat_info);
     }
     gtk_box_append(GTK_BOX(t_main.scroll_box_left), child_widget);
     return FALSE;

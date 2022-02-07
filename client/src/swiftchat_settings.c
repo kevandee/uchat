@@ -124,7 +124,6 @@ static void move_image (GtkGestureDrag *gesture, double offset_x, double offset_
 }
 
 static void send_avatar() {
-
     char buf[512 + 32] = {0};
     sprintf(buf, "%s", "<setting avatar>");
     send_all(cur_client.ssl, buf, 512 + 32);
@@ -165,6 +164,11 @@ static void send_avatar() {
     load_css_main(t_screen.provider, t_main.logo);
     gtk_box_prepend(GTK_BOX (t_main.search_panel), t_main.logo);
     show_settings();
+}
+
+static void send_default_avatar() {
+    cur_client.avatar = t_main.default_avatar;
+    send_avatar();
 }
 
 static void avatar_range(GFile *file) {
@@ -376,6 +380,7 @@ void show_settings()
     gtk_widget_set_name(GTK_WIDGET(delete), "delete_btn");
     load_css_main(t_screen.provider, delete);
     gtk_box_append(GTK_BOX(photo_buttons_box), delete);
+    g_signal_connect(delete, "clicked", G_CALLBACK(send_default_avatar), NULL);
 
     gtk_box_append(GTK_BOX(photo_box), photo_label_box);
     gtk_box_append(GTK_BOX(photo_box), photo_buttons_box);

@@ -172,6 +172,7 @@ void show_group_settings(GtkWidget *widget, gpointer data)
     gtk_widget_set_name(GTK_WIDGET(delete), "delete_btn");
     load_css_main(t_screen.provider, delete);
     gtk_box_append(GTK_BOX(photo_buttons_box), delete);
+    g_signal_connect(delete, "clicked", G_CALLBACK(send_default_chat_avatar), NULL);
 
     gtk_box_append(GTK_BOX(photo_box), photo_label_box);
     gtk_box_append(GTK_BOX(photo_box), photo_buttons_box);
