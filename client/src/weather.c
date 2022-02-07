@@ -14,7 +14,11 @@ static char *get_weather(char *city) {
     
   curl = curl_easy_init();
   if(curl) {
+    //curl_easy_setopt(curl, CURLOPT_URL, "https://www.accuweather.com/en/ua/kharkiv/323903/weather-forecast/323903");
+    //curl_easy_setopt(curl, CURLOPT_URL, "https://www.timeanddate.com/weather/ukraine/kharkiv");
     curl_easy_setopt(curl, CURLOPT_URL, "https://ua.sinoptik.ua/погода-харків");
+    //curl_easy_setopt(curl, CURLOPT_URL, "https://en.tutiempo.net/kharkiv.html");
+    //curl_easy_setopt(curl, CURLOPT_URL, "https://m.rp5.ua/Weather_in_Kharkiv");
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/7.47.1");
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -46,6 +50,21 @@ static char *swift_weather_trim(char *string, char final_char) {
   return mx_strndup(string, counter);
 }
 
+/*char **weather_parse(char *city) {
+  char *weather_string = get_weather(city);
+  //printf("\n\n%s\n", weather_string);
+
+  char **weather_array = malloc(8 * sizeof (char *));
+  for (int i = 0; i < 8; i++) {
+    weather_array[i] = NULL;
+  }
+
+  char *temp = mx_strstr(weather_string, "Kharkiv");
+  weather_array[0] = swift_weather_trim(temp, '>');
+
+  return weather_array;
+}*/
+
 char **weather_parse(char *city) {
   char *weather_string = get_weather(city);
 
@@ -54,15 +73,9 @@ char **weather_parse(char *city) {
     weather_array[i] = NULL;
   }
 
-  /*char *temp = mx_strstr(weather_string, "k=\"//ua.sinoptik.ua/погода-");
-  temp += mx_strlen("k=\"//ua.sinoptik.ua/погода-");
-  temp = mx_strchr(temp, '/') + 1;
-  weather_array[0] = swift_weather_trim(temp, '\"');  // Date (Format: 2022-02-06)
-  printf("\n%s\n", weather_array[0]);*/
-
   char *temp = mx_strstr(weather_string, "k=\"//ua.sinoptik.ua/погода-");
   temp += mx_strlen("k=\"//ua.sinoptik.ua/погода-");
-  temp = mx_strchr(temp, '/') + 1;
+  temp = mx_strchr(temp, '/') + 1; 
   weather_array[0] = swift_weather_trim(temp, '-');  // Year (Format: 2022)
   
   temp = mx_strchr(temp, '-') + 1;
@@ -88,11 +101,6 @@ char **weather_parse(char *city) {
   temp = mx_strstr(temp, "<p class=\"month\"");
   temp += mx_strlen("<p class=\"month\"") + 1;
   weather_array[6] = swift_weather_trim(temp, '<'); // Month (Format:лютого)
-
-  /*char *temp = mx_strstr(weather_string, "<p class=\"day-link\"");
-  temp = mx_strchr(temp, '>') + 1;
-  weather_array[0] = swift_weather_trim(temp, '<');   //Day of week (Format:Неділя) 
-  printf("\n%s\n", weather_array[0]);*/
 
   char **label_array = malloc(3 * sizeof (char *));
   for (int i = 0; i < 3; i++) {
@@ -122,53 +130,3 @@ char **weather_parse(char *city) {
   mx_del_strarr(&weather_array);
   return label_array;
 }
-
-/*char **weather_parse(char *city) {
-  char *weather_string = get_weather(city);
-  printf("\n%s\n", weather_string);
-  char **weather_array = malloc(3 * sizeof (char *));
-  for (int i = 0; i < 3; i++) {
-    weather_array[i] = NULL;
-  }
-
-  char *temp = mx_strchr(weather_string, '\n');
-  temp += 33;
-  weather_array[0] = mx_strndup(temp, mx_get_char_index(temp, '\n')); // weather type (cloudy, sunny)
-
-  temp = mx_strchr(temp, '\n');
-  temp += 44;
-  weather_array[1] = swift_weather_trim(temp); //temperature day
-
-  temp += mx_strlen(weather_array[1]) + 16;
-  weather_array[2] = swift_weather_trim(temp);  //temperature night
-
-
-  char **label_out_array = malloc(3 * sizeof (char *));
-  for (int i = 0; i < 3; i++) {
-    label_out_array[i] = NULL;
-  }
-
-  temp = mx_strjoin(city, "\n");
-  temp = mx_strrejoin(temp, weather_array[1]);
-  temp = mx_strrejoin(temp, "(");
-  temp = mx_strrejoin(temp, weather_array[2]);
-  temp = mx_strrejoin(temp, ")°C");
-  label_out_array[0] = mx_strdup(temp);// 'format:' Kharkov \n -5°C
-  printf("\n%s\n", temp);
-  mx_strdel(&temp);
-
-  temp = mx_strdup("Date\nhere");
-  label_out_array[1] = mx_strdup(temp);// 'format:' December \n  31 \n 2020
-  printf("\n%s\n", temp);
-  mx_strdel(&temp);
-
-  temp = mx_strjoin("client/media/weather/weather-", weather_array[0]);
-  temp = mx_strrejoin(temp, ".jpg");
-  label_out_array[2] = mx_strdup(temp); // weather type (cloudy, sunny)
-  printf("\n%s\n", temp);
-  mx_strdel(&temp);
-
-  mx_del_strarr(&weather_array);
-  mx_strdel(&weather_string);
-  return label_out_array;
-}*/

@@ -687,7 +687,11 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
             }
 
             gtk_label_set_text(GTK_LABEL (temp_widgets->data), str);
-
+            GtkWidget *parent = gtk_widget_get_parent(temp_widgets->data);
+            GtkWidget *edited_label = gtk_widget_get_first_child(gtk_widget_get_last_child(parent));
+            if (!gtk_widget_get_visible(edited_label)) {
+                gtk_widget_show(edited_label);
+            }
             t_main.message_change_id = 0;
         }           
 
