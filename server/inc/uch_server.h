@@ -65,6 +65,7 @@ void update_user_name(char *name, int id);
 void update_user_surname(char *surname, int id);
 void update_user_bio(char *bio, int id);
 void update_chat_name(char *name, int id);
+void change_mute(int c_id, int u_id);
 
 //SSling
 SSL_CTX *CTX_initialize_server();
