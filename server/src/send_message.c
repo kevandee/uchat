@@ -10,8 +10,13 @@ void send_message(char *mes, char *sender, t_chat *chat, bool is_text_message) {
     }
 
     char buf[512 + 32] = {0};
-    if (chat && is_text_message)
-        sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, prev=0>%s", chat->id, chat->last_mes_id, sender, mes);
+    if (chat && is_text_message){
+        time_t t;
+        time(&t);
+        char *time = mx_strndup(ctime(&t) + 11, 5);
+        
+        sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, time=%s, type=msg, prev=0>%s", chat->id, chat->last_mes_id, sender, time, mes);
+    }
     else 
         sprintf(buf, "%s", mes);
     pthread_mutex_lock(&send_mutex);
