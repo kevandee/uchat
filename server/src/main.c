@@ -784,9 +784,6 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    char *weather = get_weather("Kharkov");
-    printf("%s\n", weather);
-
     //  SSLing
     SSL_CTX *context;
     SSL_library_init();
