@@ -56,6 +56,7 @@ typedef struct s_message {
     int c_id;
     bool prev;
 
+    bool edited;
     char time[32];
     char sender[32];
     char type[32];

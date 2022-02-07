@@ -47,21 +47,6 @@ gboolean add_msg(gpointer data) {
         gtk_widget_set_halign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
         gtk_widget_set_valign(GTK_WIDGET(incoming_msg_box), GTK_ALIGN_END);
         //ыgtk_widget_set_margin_end(incoming_msg_box, 5);
-
-        GtkGesture *gesture = gtk_gesture_click_new();
-        gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
-        gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
-        GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
-        arr[0] = incoming_msg;
-        arr[1] = incoming_msg_box;
-        int *mes_id = (int *)malloc(sizeof(int));
-        *mes_id = message->id;
-        t_list *gesture_data = NULL;
-        mx_push_back(&gesture_data, arr);
-        mx_push_back(&gesture_data, mes_id);
-        g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), gesture_data);
-        gtk_widget_add_controller(incoming_msg_box, GTK_EVENT_CONTROLLER(gesture));
-
         
         is_sender = true;
     }
@@ -174,13 +159,14 @@ gboolean add_msg(gpointer data) {
         GtkWidget *user_action = gtk_label_new("edited");
         gtk_widget_set_name(user_action, "user_action");
         load_css_main(t_screen.provider, user_action);
-        GtkWidget *user_action_time = gtk_label_new("13:45");
+        GtkWidget *user_action_time = gtk_label_new(message->time);
         gtk_widget_set_name(user_action_time, "user_action");
         load_css_main(t_screen.provider, user_action_time);
 
         gtk_box_append(GTK_BOX(user_action_box), user_action);
         gtk_box_append(GTK_BOX(user_action_box), user_action_time);
-        gtk_widget_hide(user_action);
+        if (mx_strcmp(message->type, "text_edited") != 0)
+            gtk_widget_hide(user_action);
 
         if(is_sender)
         {
@@ -243,17 +229,31 @@ gboolean add_msg(gpointer data) {
         GtkWidget *user_action = gtk_label_new("edited");
         gtk_widget_set_name(user_action, "user_action");
         load_css_main(t_screen.provider, user_action);
-        GtkWidget *user_action_time = gtk_label_new("13:45");
+        GtkWidget *user_action_time = gtk_label_new(message->time);
         gtk_widget_set_name(user_action_time, "user_action");
         load_css_main(t_screen.provider, user_action_time);
 
         gtk_box_append(GTK_BOX(user_action_box), user_action);
         gtk_box_append(GTK_BOX(user_action_box), user_action_time);
-        gtk_widget_hide(user_action);
+        if (mx_strcmp(message->type, "text_edited") != 0)
+            gtk_widget_hide(user_action);
 
         if(is_sender)
         {
             gtk_box_prepend(GTK_BOX(incoming_msg_box), user_action_box);
+            GtkGesture *gesture = gtk_gesture_click_new();
+            gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
+            gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
+            GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
+            arr[0] = incoming_msg;
+            arr[1] = incoming_msg_box;
+            int *mes_id = (int *)malloc(sizeof(int));
+            *mes_id = message->id;
+            t_list *gesture_data = NULL;
+            mx_push_back(&gesture_data, arr);
+            mx_push_back(&gesture_data, mes_id);
+            g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), gesture_data);
+            gtk_widget_add_controller(incoming_msg_box, GTK_EVENT_CONTROLLER(gesture));
         }
         else
         {
@@ -606,17 +606,30 @@ void *rec_func(void *param) {
                 bool prev = *temp == '0' ? false : true; 
                 printf("bool %i %c\n", prev, *temp);
 
+                char *time = mx_strndup (mx_strstr(message, "time=") + 5, 5);
+
                 char *total_msg = mx_strdup(mx_strchr(message, '>') + 1);     // сообщение
                                                                    // время надо получить локально на клиенте
                 printf("%s\n", total_msg);
-                
+
+                temp = mx_strstr(message, "type=") + 5;
+                len = 0;
+                while (*(temp + len) != ',') {
+                    len++;
+                }
+                char *type = mx_strndup(temp, len);
+
                 if (cur_client.cur_chat.id == chat_id) {
                     t_message *mes = (t_message *)malloc(sizeof(t_message));
                     mes->c_id = chat_id;
                     mes->prev = prev;
                     mes->id = message_id;
+                    
                     mx_strcpy(mes->sender, sender);
                     mx_strcpy(mes->data, total_msg);
+                    mx_strcpy(mes->time, time);
+                    mx_strcpy(mes->type, type);
+
                     pthread_mutex_lock(&cl_mutex);
                     g_idle_add(add_msg, mes);
                     pthread_mutex_lock(&cl_mutex);
@@ -916,6 +929,11 @@ void *rec_func(void *param) {
 
                     const char *text = mx_strchr(message, '>') + 1;
                     gtk_label_set_text(GTK_LABEL (temp_widgets->data), text);
+                    GtkWidget *parent = gtk_widget_get_parent(temp_widgets->data);
+                    GtkWidget *edited_label = gtk_widget_get_first_child(gtk_widget_get_last_child(parent));
+                    if (!gtk_widget_get_visible(edited_label)) {
+                        gtk_widget_show(edited_label);
+                    }
                 } 
             }
             else if(mx_strcmp(mx_strtrim(message), "<setting avatar>") == 0) {

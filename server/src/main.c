@@ -541,16 +541,18 @@ void *client_work(void *param) {
             char buf[512 + 32] = {0};
             while(mes_list) {
                 t_message *mes_send = (t_message *)mes_list->data;
+                char *time = mx_strndup(mes_send->time + 11, 5);
                 if (mx_strcmp(mes_send->type, "file") == 0) {
                     char *name = mes_send->data;
                     while (mx_strchr(name, '/')) {
                         name = mx_strchr(name, '/') + 1;
                     }
-                    sprintf(buf, "<file chat_id=%d, mes_id=%d, from=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, name);
+                    sprintf(buf, "<file chat_id=%d, mes_id=%d, from=%s, time=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, time, name);
                 }
                 else {
-                    sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, mes_send->data);
+                    sprintf(buf, "<msg, chat_id=%d, mes_id=%d, from=%s, type=%s, time=%s, prev=1>%s", chat_id, mes_send->id, mes_send->sender, mes_send->type, time, mes_send->data);
                 }
+                mx_strdel(&time);
                 send_all(cur->ssl, buf, 512 + 32);
 
                 clear_message(buf, 544);
