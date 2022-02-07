@@ -40,6 +40,7 @@ void return_to_chatlist(GtkWidget *widget, gpointer data) {
     }
 
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left),t_main.scroll_box_left);
+    redraw_actives_chats(NULL, NULL);
 }
 
 static void return_to_chat() {
@@ -283,7 +284,8 @@ static void send_chat(GtkWidget *widget, gpointer data) {
     return_to_chatlist(widget, swapped);
 }
 
-void add_chat_dialog(GtkWidget *widget, gpointer data) {
+void add_chat_dialog(GtkWidget *widget, gpointer data) 
+{
     (void)widget;
     GtkWidget** swapped = data;
     gtk_label_set_label(GTK_LABEL(swapped[0]), "New Group");
