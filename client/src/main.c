@@ -1180,7 +1180,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    printf("SSL: Connecte to server with chipher: %s\n", SSL_get_cipher(ssl));
+    printf("SSL: Connected to server with chipher: %s\n", SSL_get_cipher(ssl));
     X509 *cert = SSL_get_peer_certificate(ssl);
     if (cert == NULL) {
         printf("SSL: No certificates configured.\n");
