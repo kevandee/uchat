@@ -33,8 +33,8 @@ void clear_message(char *mes, const int size);
 typedef struct s_file_mes {
     char *name;
     char *sender;
-    char *date;
-
+    char *data;
+    char *time;
     int id;
     bool prev;
 }               t_file_mes;
@@ -42,8 +42,8 @@ typedef struct s_file_mes {
 typedef struct s_sticker{
     int sticker_num;
     char *sender;
-    char *date;
-
+    char *data;
+    char *time;
     int id;
     bool prev;
 }               t_sticker;
