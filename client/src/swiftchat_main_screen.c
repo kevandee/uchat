@@ -268,6 +268,40 @@ void show_group_settings(GtkWidget *widget, gpointer data)
     gtk_widget_set_halign(GTK_WIDGET(members_list_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(members_list_box), GTK_ALIGN_START);
     GtkWidget *members_scroll_window = gtk_scrolled_window_new();
+        t_list *temp_names = cur_client.cur_chat.users;
+    t_list *temp_avatars = cur_client.cur_chat.users_avatars;
+    while(temp_names)
+    {
+        GtkWidget *user_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+        gtk_widget_set_valign(user_box,GTK_ALIGN_CENTER);
+        gtk_widget_set_halign(user_box,GTK_ALIGN_START);
+        t_avatar *avatar_img = NULL;
+        if (mx_strcmp(temp_names->data, cur_client.login) != 0) {
+            
+            if (mx_strcmp( ((t_avatar *)temp_avatars->data)->name, "default") == 0) {
+                avatar_img = &t_main.default_avatar;
+            }
+            else {
+                avatar_img = temp_avatars->data;
+            }
+        }
+        else {
+            avatar_img = &cur_client.avatar;
+        }
+
+        GtkWidget *avatar = get_circle_widget_from_png_avatar(avatar_img, 45, 45, true);
+
+        gtk_box_append(GTK_BOX(user_box), avatar);
+        GtkWidget *name = gtk_label_new(temp_names->data);
+        gtk_widget_set_name(GTK_WIDGET(name), "chat_name"); 
+        load_css_main(t_screen.provider, name);
+        gtk_box_append(GTK_BOX(user_box), name);
+
+        gtk_box_append(GTK_BOX(members_list_box), user_box);
+        if (mx_strcmp(temp_names->data, cur_client.login) != 0)
+            temp_avatars = temp_avatars->next;
+        temp_names = temp_names->next; 
+    }
     gtk_widget_set_size_request(GTK_WIDGET(members_scroll_window), 320, 350);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(members_scroll_window), members_list_box);
     gtk_widget_set_name(members_scroll_window, "test");
