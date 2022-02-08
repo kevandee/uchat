@@ -41,21 +41,16 @@ void send_all_user_data(t_client *client) {
         t_chat *chat = (t_chat *)temp->data;
         
         sprintf(buf, "%s",(chat)->name);
-        printf("name: %s\n", (chat)->name);
         send_all(client->ssl, (chat)->name, 256);
         SSL_write(client->ssl, &(chat)->id, sizeof(int));
-        printf("id: %d\n", (chat)->id); 
-        printf("count users: %d\n", (chat)->count_users);
         SSL_write(client->ssl, &(chat)->count_users, sizeof(int));
         t_list *temp_l = (chat)->users;
         while(temp_l) {
             char user_name[32]={0};
             sprintf(user_name, "%s", temp_l->data);
-            printf("users: %s\n", temp_l->data);
             send_all(client->ssl, user_name, 32);
             temp_l = temp_l->next;
         }
-        printf("chat sended to %s\n", client->login);
 
         char *query = NULL;
         char *sql_pattern = "SELECT mute FROM members WHERE chat_id = %d AND user_id = %d;";
@@ -67,7 +62,6 @@ void send_all_user_data(t_client *client) {
         else {
             send_all(client->ssl, "1", 1);
         }
-        printf("mute %s\n", temp_m->data);
 
         temp = temp->next;
         char *avatar_info = NULL;

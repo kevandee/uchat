@@ -32,10 +32,8 @@ void *client_work(void *param) {
             
             return NULL;
         }
-        printf("choise %s\n", choise);
         // login
         if(SSL_read(cur->ssl, login, NAME_LEN) <= 0 || mx_strlen(login) <  2 || mx_strlen(login) >= 32){
-            printf("Didn't enter the name.\n");
             free_client(&cur, &users_list);
 
             return NULL;
@@ -45,7 +43,6 @@ void *client_work(void *param) {
 
         //passwd
         if(SSL_read(cur->ssl, passwd, 16) <= 0 || mx_strlen(passwd) <  8 || mx_strlen(passwd) > 16){
-            printf("Didn't enter the password.\n");
             free_client(&cur, &users_list);
             
             return NULL;
@@ -54,7 +51,6 @@ void *client_work(void *param) {
             cur->passwd=mx_strtrim(passwd);
         }
         //DB SWITH
-        printf("%s || %s || %s\n", choise, cur->login, cur->passwd);
         if (mx_strcmp(choise, "u") == 0) {
             char *query = NULL;
             char *sql_pattern = NULL;
@@ -96,64 +92,8 @@ void *client_work(void *param) {
             }
         }
 
-        /*switch(choise) {
-            case 'u': {
-                char *query = NULL;
-                char *sql_pattern = NULL;
-                t_list *list = NULL;
-                sql_pattern = "SELECT EXISTS (SELECT id FROM users WHERE login=('%s'));";
-                asprintf(&query, sql_pattern, cur->login);
-                list = sqlite3_exec_db(query, 1);
-                if (strcmp(list->data, "0") == 0) {
-                    //REGESTRATION TO DB
-                    sql_pattern = "INSERT INTO users (login, password) VALUES ('%s', '%s');";
-                    asprintf(&query, sql_pattern, cur->login, cur->passwd);
-                    sqlite3_exec_db(query, 2);
-                    const bool success_reg = false;
-                    SSL_write(cur->ssl, &success_reg, sizeof(bool));
-                }
-                else {
-                    //LOGIN ALREDAY TAKEN
-                    SSL_write(cur->ssl, &err_msg, sizeof(bool));
-                }
-                break;
-            }
-            case 'i': {
-                char *query = NULL;
-                char *sql_pattern = NULL;
-                t_list *list = NULL;
-                
-                sql_pattern = "SELECT EXISTS (SELECT id FROM users WHERE login=('%s') AND password=('%s'));";
-                asprintf(&query, sql_pattern, cur->login, cur->passwd);
-                list = sqlite3_exec_db(query, 1);
-                if (strcmp(list->data, "1") == 0) {
-                    //USER FOUND
-                    err_msg = false;
-                    sql_pattern = "SELECT id FROM users WHERE login=('%s') AND password=('%s');";
-                    asprintf(&query, sql_pattern, cur->login, cur->passwd);
-                    list = sqlite3_exec_db(query, 1);
-                }
-                else {
-                    //USER NOT FOUND
-                    SSL_write(cur->ssl, &err_msg, sizeof(bool));
-                }
-                break;
-            }
-        }*/
     }
-    
-    // auth success
-    /*
-    switch (choise) {
-        case 'u':
-            cur->chat_count = 0;
-            cur->chats = NULL;
-            break;
-        case 'i':
-            //get_client_data(&cur);
-            break;
-    }
-    */
+
     cur->id = get_user_id(cur->login);
    
     if (mx_strcmp(choise, "i") == 0){
@@ -161,7 +101,6 @@ void *client_work(void *param) {
         send_all_user_data(cur);
     }
     sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
-    printf("%s", buff_out);
     sprintf(buff_out, "%s has joined\n", cur->login);
     //send_message(buff_out,login, NULL, true);
     char message[MAX_LEN + NAME_LEN];
@@ -170,10 +109,6 @@ void *client_work(void *param) {
 
         if (mes_stat == 0 || (mx_strcmp(message, "exit") == 0)) {
             sprintf(buff_out, "%s has left\n", cur->login);
-			printf("%s", buff_out);
-
-
-
             is_run = false;
         }
         else if (mx_strcmp(message, "<users list>") == 0) {
@@ -183,9 +118,7 @@ void *client_work(void *param) {
             t_list *users_l = sqlite3_exec_db("SELECT login FROM users", 1);
             
             int users_count = mx_list_size(users_l);
-            printf("users count %d\n", users_count);
             SSL_write(cur->ssl, &users_count, sizeof(int));
-            printf("users count %d\n", users_count);
             while (users_l) {
                 char buf[20] = {0};
                 sprintf(buf, "%s", users_l->data);
@@ -198,7 +131,6 @@ void *client_work(void *param) {
         }
         else if (mx_strncmp(message,"<add chat, name=",16) == 0) {
             // работа со строкой, будет всё переделано под гтк
-            printf("%s\n", message);
             char *temp = message + 16;
             int len = 0;
             while (*(temp + len) != '>') {
@@ -219,7 +151,6 @@ void *client_work(void *param) {
             int i;
             mx_push_back(&new_chat->users, mx_strdup(cur->login));
             for (i = 0; arr[i]; i++) {
-                printf("arr %s\n", arr[i]);
                 mx_push_back(&new_chat->users, mx_strdup(arr[i]));
             } 
             if (mx_strcmp(name, ".dialog") == 0) {
@@ -262,7 +193,6 @@ void *client_work(void *param) {
             send_new_chat(new_chat);
 
             mx_push_back(&cur->chats, new_chat);
-            printf("added\n");
             pthread_mutex_unlock(&send_mutex);
             clear_message(message, MAX_LEN + NAME_LEN);
         }
@@ -306,7 +236,6 @@ void *client_work(void *param) {
             clear_message(buf, 512 + 32);
             char *path = mx_strjoin("data/avatars/", cur->login);
             sprintf(buf, "data/avatars/%s/%s", cur->login, recv_avatar.name);
-            printf("buf %s\n", buf);
             struct stat st = {0};
             if (stat("data", &st) == -1) {
                 mkdir("data", 0777);
@@ -318,7 +247,6 @@ void *client_work(void *param) {
                 mkdir(path, 0777);
             }
             mx_strdel(&path);
-            printf("buf %s\n", buf);
             recv_avatar.path = mx_strdup(buf);
             clear_message(buf, 544);
             recv_image(cur->ssl, recv_avatar.path);
@@ -349,19 +277,16 @@ void *client_work(void *param) {
                 id = mx_atoi(mx_strstr(message, "chat_id=") + 8);   
                 is_chat = true;
                 if (id != cur->cur_chat.id) {
-                    printf("change chat\n");
                     change_chat_by_id(id, cur);
                 }
             }
             sprintf(buf, "path=%s scaled_w=%f scaled_h=%f x=%f y=%f ", recv_avatar.path,recv_avatar.scaled_w, recv_avatar.scaled_h,recv_avatar.x, recv_avatar.y);
-            printf("buf %s\n", buf);
             char *query = NULL;
             char *sql_pattern = NULL;
             
             sql_pattern = "UPDATE %s SET avatar = '%s' WHERE id = %d;";
             
             asprintf(&query, sql_pattern, table, buf, id);
-            printf("query %s\n", query);
             sqlite3_exec_db(query, 2);
 
             if (is_chat) {
@@ -404,7 +329,6 @@ void *client_work(void *param) {
             }
             if (mx_strcmp(bio, ".not_changed") != 0) {
                 mx_strcpy(cur->bio, bio);
-                printf("receive bio: %s\n", bio);
                 update_user_bio(cur->bio, cur->id);
 
                 // изменяешь bio
@@ -417,11 +341,9 @@ void *client_work(void *param) {
                 len++;
             }
             char *c_id = mx_strndup(temp, len);
-            printf("%s\n", c_id);
             int chat_id = mx_atoi(c_id);
             mx_strdel(&c_id);
             if (chat_id != cur->cur_chat.id) {
-                printf("change chat\n");
                 change_chat_by_id(chat_id, cur);
             }
             temp = mx_strstr(message, "chat_name=") + 10;
@@ -443,25 +365,21 @@ void *client_work(void *param) {
                 len++;
             }
             char *c_id = mx_strndup(temp, len);
-            printf("%s\n", c_id);
             int chat_id = mx_atoi(c_id);
             mx_strdel(&c_id);
 
             change_mute(chat_id, cur->id);
         }
         else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0) {
-            printf("%s\n", message);
             char *temp = message + 15;
             int len = 0;
             while (*(temp + len) != '>') {
                 len++;
             }
             char *c_id = mx_strndup(temp, len);
-            printf("%s\n", c_id);
             int chat_id = mx_atoi(c_id);
             mx_strdel(&c_id);
             if (chat_id != cur->cur_chat.id) {
-                printf("change chat\n");
                 change_chat_by_id(chat_id, cur);
             }
 
@@ -477,18 +395,15 @@ void *client_work(void *param) {
             clear_message(message, MAX_LEN + NAME_LEN);
         }
         else if(mx_strncmp(message, "<file chat_id=", 14) == 0) { //"<file chat_id=%d, name=%s, mode=%s>"
-            printf("%s\n", message);
             char *temp = message + 14;
             int len = 0;
             while (*(temp + len) != ',') {
                 len++;
             }
             char *c_id = mx_strndup(temp, len);
-            printf("%s\n", c_id);
             int chat_id = mx_atoi(c_id);
             mx_strdel(&c_id);
             if (chat_id != cur->cur_chat.id) {
-                printf("change chat\n");
                 change_chat_by_id(chat_id, cur);
             }
 
@@ -512,7 +427,6 @@ void *client_work(void *param) {
             }
 
             char *mode = mx_strndup(temp, len);
-            //printf("name %s\npath %s\nmode %s\n", name, path, mode);
             char *query = NULL;
             char *sql_pattern = NULL;
             time_t t;
@@ -530,18 +444,15 @@ void *client_work(void *param) {
             send_message(buf, cur->login, &cur->cur_chat, false);
         }
         else if (mx_strncmp(message, "<sticker chat_id=", 17) == 0) { //"<sticker chat_id=%d, sticker_num=%d>"
-            printf("%s\n", message);
             char *temp = message + 17;
             int len = 0;
             while (*(temp + len) != ',') {
                 len++;
             }
             char *c_id = mx_strndup(temp, len);
-            printf("%s\n", c_id);
             int chat_id = mx_atoi(c_id);
             mx_strdel(&c_id);
             if (chat_id != cur->cur_chat.id) {
-                printf("change chat\n");
                 change_chat_by_id(chat_id, cur);
             }
 
@@ -570,10 +481,8 @@ void *client_work(void *param) {
             send_message(buf, cur->login, &cur->cur_chat, false);
         }
         else if (mx_strncmp(message, "<chat users avatars>", 20) == 0){
-            printf("%s\n", message);
             char *id_str = message + 20;
             int chat_id = mx_atoi(id_str);
-            printf ("%s ,chat id %d\n", id_str, chat_id);
             t_list *users = get_chat_users(chat_id);
 
             char buf[512+32] = {0};
@@ -581,7 +490,6 @@ void *client_work(void *param) {
             send_all(cur->ssl,buf, 512+32);
             while (users) {
                 if (mx_strcmp(users->data, cur->login) != 0) {
-                    printf("%s %s\n", users->data, cur->login);
                     char *avatar_info = get_user_avatar(get_user_id(users->data));
                     t_avatar *avatar = parse_avatar_info(avatar_info);
                     
@@ -615,7 +523,6 @@ void *client_work(void *param) {
             }
             char *c_id = mx_strndup(temp, len);
             int chat_id = mx_atoi(c_id);
-            printf("c_id %s\n", c_id);
             mx_strdel(&c_id);
 
             temp = mx_strstr(message, "last_mes=") + 9;
@@ -625,12 +532,10 @@ void *client_work(void *param) {
             }
             char *m_id = mx_strndup(temp, len);
             int mes_id = mx_atoi(m_id);
-            printf("m_id %s\n", m_id);
             mx_strdel(&m_id);
 
             t_list *mes_list = db_messages_sender(chat_id, mes_id); //DODELAI
 
-            printf("chat_id %d\n", chat_id);
             char buf[512 + 32] = {0};
             while(mes_list) {
                 t_message *mes_send = (t_message *)mes_list->data;
@@ -665,7 +570,6 @@ void *client_work(void *param) {
         }
         else if(mx_strncmp(message, "<get user avatar>", 17) == 0) { //<get user avatar>
             char *user_name = message + 17;
-            printf("get user avatar %s\n", user_name);
             char *avatar_info = get_user_avatar(get_user_id(user_name));
             t_avatar *avatar = parse_avatar_info(avatar_info);
             char buf[544] = {0};
@@ -680,10 +584,8 @@ void *client_work(void *param) {
                 len++;
             }
             char *c_id = mx_strndup(temp, len);
-            printf("%s\n", c_id);
             int chat_id = mx_atoi(c_id);
             mx_strdel(&c_id);
-            printf("get chat avatar %d\n", chat_id);
             char *avatar_info = get_chat_avatar(chat_id);
             t_avatar *avatar = parse_avatar_info(avatar_info);
 
@@ -696,11 +598,9 @@ void *client_work(void *param) {
                 len++;
             }
             char *c_id = mx_strndup(temp, len);
-            printf("%s\n", c_id);
             int chat_id = mx_atoi(c_id);
             mx_strdel(&c_id);
             if (chat_id != cur->cur_chat.id) {
-                printf("change chat\n");
                 change_chat_by_id(chat_id, cur);
             }
             temp = mx_strstr(temp, "mes_id=") + 7;
@@ -709,7 +609,6 @@ void *client_work(void *param) {
                 len++;
             }
             char *m_id = mx_strndup(temp, len);
-            printf("%s\n", m_id);
             int mes_id = mx_atoi(m_id);
             mx_strdel(&m_id);
 
@@ -725,18 +624,15 @@ void *client_work(void *param) {
             send_file(cur->ssl, path, mode);
         }
         else if (mx_strncmp(message, "<delete mes chat_id=", 20) == 0) {
-            printf("%s\n", message);
             char *temp = message + 20;
             int len = 0;
             while (*(temp + len) != ',') {
                 len++;
             }
             char *c_id = mx_strndup(temp, len);
-            printf("%s\n", c_id);
             int chat_id = mx_atoi(c_id);
             mx_strdel(&c_id);
             if (chat_id != cur->cur_chat.id) {
-                printf("change chat\n");
                 change_chat_by_id(chat_id, cur);
             }
             temp = mx_strstr(temp, "mes_id=") + 7;
@@ -745,7 +641,6 @@ void *client_work(void *param) {
                 len++;
             }
             char *m_id = mx_strndup(temp, len);
-            printf("%s\n", m_id);
             int mes_id = mx_atoi(m_id);
             mx_strdel(&m_id);
             
@@ -760,11 +655,9 @@ void *client_work(void *param) {
                 len++;
             }
             char *c_id = mx_strndup(temp, len);
-            printf("%s\n", c_id);
             int chat_id = mx_atoi(c_id);
             mx_strdel(&c_id);
             if (chat_id != cur->cur_chat.id) {
-                printf("change chat\n");
                 change_chat_by_id(chat_id, cur);
             }
             temp = mx_strstr(temp, "mes_id=") + 7;
@@ -773,7 +666,6 @@ void *client_work(void *param) {
                 len++;
             }
             char *m_id = mx_strndup(temp, len);
-            printf("%s\n", m_id);
             int mes_id = mx_atoi(m_id);
             mx_strdel(&m_id);
             
@@ -787,7 +679,6 @@ void *client_work(void *param) {
             SSL_write(cur->ssl, &mes_id, sizeof(int));
         }
         else if (mes_stat > 0) {
-            printf("Message Received from %s | %s |\n", login, message);
 		    if(cur->cur_chat.id != 0){
                 send_message(message, cur->login, &cur->cur_chat, true);
             }
@@ -798,7 +689,6 @@ void *client_work(void *param) {
         }
         
     }
-
 
     // отключение клиента от сервера
     close_connection(cur->ssl);
@@ -818,7 +708,6 @@ t_client *create_new_client(const struct sockaddr_in adr, int client_fd, int *cl
     t_chat init_chat = {0};
     new_client->cur_chat = init_chat;
 
-    printf("id %d\n", *client_id);
     (*client_id)++;
     mx_push_back(&users_list, new_client);
     return new_client;
@@ -837,7 +726,6 @@ void client_work_wrapper(SSL_CTX *context, int client_fd, pthread_t *thread, t_c
     }
 
     new_client->ssl = ssl;
-
     // Certificate check (delete? anyway client has no certs)
     //certificate_ckeck(ssl);
 
@@ -885,41 +773,22 @@ int main_server(int argc, char *argv[]) {
         mx_printerr("usage: ./uchat_server <port>\n");
         return -1;
     }
-    //daemonize_server();
-    //daemonize_server();
+
     //  SSLing
-    
-    //daemonize_server();
     SSL_CTX *context;
     SSL_library_init();
     context = CTX_initialize_server();
-    printf("SSL: SSL initialized\n");
 
     // creaating certificate and pkey
     EVP_PKEY *pkey = create_key();
-    printf("SSL: key generated\n");
     X509 *x509 = create_X509(pkey);
-    printf("SSL: X509 generated\n");
     write_certs(pkey, x509);
-    printf("SSL: certificates saved\n");
     load_certs(context, "certificate.pem", "PEM_privatekey.pem");
-    printf("SSL: certificates loaded\n");
-
-
-    // opening connection
-    
-    
-    printf("SSL: connection opened\n");
-
-    //daemonize_server();
     // for client serving
     pthread_t thread;
     users_list = NULL;
     pthread_mutex_init(&send_mutex, NULL);
 
-    //char *weather = get_weather("Kharkov");
-    //char *facts = get_facts();
-    //printf("%s\n", facts);
     int client_id = 0;
     int client_fd;
     struct sockaddr_in adr = {0};
@@ -938,9 +807,7 @@ int main_server(int argc, char *argv[]) {
     }
 
     close(client_fd);
-    //close_server(pkey, x509, context);
-    //  SSLing
-
+    close_server(pkey, x509, context);
     return 0;
 }
 

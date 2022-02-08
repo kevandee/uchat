@@ -13,8 +13,7 @@ static void on_open_response (GtkDialog *dialog, int response)
         GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
 
         GFile *file = gtk_file_chooser_get_file (chooser);
-        
-        printf("file %s\n", g_file_get_basename(file));
+
         char buf[544] = {0};
         char *name = g_file_get_basename(file);
         if (mx_strstr(name, ".txt")) {

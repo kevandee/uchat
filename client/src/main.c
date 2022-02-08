@@ -597,7 +597,6 @@ gboolean add_sticker_msg(gpointer data) {
         }
 
         gtk_box_append(GTK_BOX(message_box), message_content);
-        printf("added\n");
         //gtk_box_append(GTK_BOX(incoming_sticker_box), User_logo);
     }
     else
@@ -669,12 +668,10 @@ void *rec_func() {
 
     char message[512 + 32] = {0};
     while (t_main.is_run) {
-        //printf("wait\n");
         SSL *fd = cur_client.ssl;
 		int receive = swiftchat_recv(fd, message, 512 + 32);
 
         if (receive > 0) {
-            printf("|%s|\n", message);
             if(mx_strcmp(mx_strtrim(message), "<add chat>") == 0) {
                 t_chat *new_chat = (t_chat *)malloc(sizeof(t_chat));
                 new_chat->is_new = true;
@@ -687,7 +684,6 @@ void *rec_func() {
                     receive = swiftchat_recv(fd, buf_name, 256);
                 }
                 mx_strcpy(new_chat->name, buf_name);
-                printf("recv chatname %s\n", new_chat->name);
                 receive = swiftchat_recv(fd, &new_chat->id, sizeof(int));
                 while (receive < 0) {
                     receive = swiftchat_recv(fd, &new_chat->id, sizeof(int));
@@ -707,10 +703,8 @@ void *rec_func() {
                 }
                 /////// аватарка чата
                 if (mx_strncmp(new_chat->name, ".dialog", 7) !=0) {
-                    printf("a\n");
                     t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
                     get_avatar(t_main.loaded_avatar);
-                    printf("gets avatar\n");
                     new_chat->avatar=*t_main.loaded_avatar;
                     if (mx_strcmp(new_chat->avatar.name, "default") == 0) {
                         if (mx_strncmp(new_chat->name, ".dialog", 7) != 0)
@@ -734,24 +728,15 @@ void *rec_func() {
                 }
                 cur_client.chat_count++;
                 t_main.loaded = true;
-                printf("chat added\n");
-                /*
-                Дим, тут данные о новом чате приняты на клиент, добавляй на локальную бд
-                */
-                
-                //printf("%s gets chat %s\n", cur_client->login, new_chat->name);
-                printf("> ");
+
                 fflush(stdout);
             }
             else if (mx_strcmp(mx_strtrim(message), "<users list>") == 0) {
-                printf("loooooooox\n");
                 pthread_mutex_lock(&cl_mutex);
                 t_list *users_list = NULL;
                 int count_users = 0;
-                printf("reseive\n");
                 swiftchat_recv(cur_client.ssl, &count_users, sizeof(int));
                 for (int i = 0; i < count_users; i++) {
-                    printf("reseive\n");
                     char buf[20] = {0};
                     swiftchat_recv(cur_client.ssl, buf, 20);
                     mx_push_back(&users_list, mx_strtrim(buf));
@@ -768,7 +753,6 @@ void *rec_func() {
                     len++;
                 }
                 char *c_id = mx_strndup(temp, len);
-                printf("%s\n", c_id);
                 int chat_id = mx_atoi(c_id);                        // ид чата, в который надо вставить сообщение
                 (void)chat_id; // избавляюсь от unused variable
                 mx_strdel(&c_id);
@@ -778,7 +762,6 @@ void *rec_func() {
                     len++;
                 }
                 char *mes_id = mx_strndup(temp, len);
-                printf("%s\n", mes_id);
                 int message_id = mx_atoi(mes_id);
                 mx_strdel(&c_id);
                 temp = mx_strstr(message, "from=") + 5;
@@ -787,16 +770,13 @@ void *rec_func() {
                     len++;
                 }
                 char *sender = mx_strndup(temp, len);              // отправитель
-                printf("%s\n", sender);
                 temp = mx_strstr(message, "prev=") + 5;
                 bool prev = *temp == '0' ? false : true; 
-                printf("bool %i %c\n", prev, *temp);
 
                 char *time = mx_strndup (mx_strstr(message, "time=") + 5, 5);
 
                 char *total_msg = mx_strdup(mx_strchr(message, '>') + 1);     // сообщение
                                                                    // время надо получить локально на клиенте
-                printf("%s\n", total_msg);
 
                 temp = mx_strstr(message, "type=") + 5;
                 len = 0;
@@ -863,8 +843,6 @@ void *rec_func() {
                     pthread_create(&display_thread, NULL, scroll_func, NULL);  
                 }
         
-                printf("%s\n", total_msg);
-                printf("> ");
                 fflush(stdout);
             }
             else if (mx_strncmp(message, "<file chat_id=", 14) == 0) { 
@@ -874,7 +852,6 @@ void *rec_func() {
                     len++;
                 }
                 char *c_id = mx_strndup(temp, len);
-                printf("%s\n", c_id);
                 int chat_id = mx_atoi(c_id);                        // ид чата, в который надо вставить сообщение
                 (void)chat_id; // избавляюсь от unused variable
                 mx_strdel(&c_id);
@@ -884,7 +861,6 @@ void *rec_func() {
                     len++;
                 }
                 char *mes_id = mx_strndup(temp, len);
-                printf("%s\n", mes_id);
                 int message_id = mx_atoi(mes_id);
                 mx_strdel(&c_id);
                 temp = mx_strstr(message, "from=") + 5;
@@ -893,10 +869,8 @@ void *rec_func() {
                     len++;
                 }
                 char *sender = mx_strndup(temp, len);              // отправитель
-                printf("%s\n", sender);
                 temp = mx_strstr(message, "prev=") + 5;
                 bool prev = *temp == '0' ? false : true; 
-                printf("bool %i %c\n", prev, *temp);
                 char *time = mx_strndup (mx_strstr(message, "time=") + 5, 5);
                 char *name = mx_strchr(message, '>') + 1;
 
@@ -917,9 +891,6 @@ void *rec_func() {
                         swiftchat_send(cur_client.ssl, &status, sizeof(int));
                         //mx_push_back(&cur_client.cur_chat.messages, mes);
                     }
-                    /*else {
-                        mx_push_front(&cur_client.cur_chat.messages, mes);
-                    }*/
                     
                     pthread_mutex_unlock(&cl_mutex);
                 }
@@ -955,19 +926,15 @@ void *rec_func() {
                     pthread_create(&display_thread, NULL, scroll_func, NULL);  
                 }
         
-                printf("%s\n", message);
-                printf("> ");
                 fflush(stdout);                
             }
             else if (mx_strncmp(message, "<sticker chat_id=", 17) == 0) { // "<sticker chat_id=%d, mes_id=%d, from=%s, prev=0>%s"
-                printf("sticker\n");
                 char *temp = message + 17;
                 int len = 0;
                 while (*(temp + len) != ',') {
                     len++;
                 }
                 char *c_id = mx_strndup(temp, len);
-                printf("%s\n", c_id);
                 int chat_id = mx_atoi(c_id);                        // ид чата, в который надо вставить сообщение
                 (void)chat_id; // избавляюсь от unused variable
                 mx_strdel(&c_id);
@@ -977,7 +944,6 @@ void *rec_func() {
                     len++;
                 }
                 char *mes_id = mx_strndup(temp, len);
-                printf("%s\n", mes_id);
                 int message_id = mx_atoi(mes_id);
                 mx_strdel(&c_id);
                 temp = mx_strstr(message, "from=") + 5;
@@ -987,10 +953,8 @@ void *rec_func() {
                 }
                 char *time = mx_strndup (mx_strstr(message, "time=") + 5, 5);
                 char *sender = mx_strndup(temp, len);              // отправитель
-                printf("%s\n", sender);
                 temp = mx_strstr(message, "prev=") + 5;
                 bool prev = *temp == '0' ? false : true; 
-                printf("bool %i %c\n", prev, *temp);
 
                 char *sticker_num = mx_strchr(message, '>') + 1;
 
@@ -1011,9 +975,6 @@ void *rec_func() {
                         swiftchat_send(cur_client.ssl, &status, sizeof(int));
                         //mx_push_back(&cur_client.cur_chat.messages, mes);
                     }
-                    /*else {
-                        mx_push_front(&cur_client.cur_chat.messages, mes);
-                    }*/
                     
                     pthread_mutex_unlock(&cl_mutex);
                 }
@@ -1027,8 +988,7 @@ void *rec_func() {
                     pthread_create(&display_thread, NULL, scroll_func, NULL);  
                 }
         
-                printf("%s\n", message);
-                printf("> ");
+
                 fflush(stdout);
             }
             else if(mx_strncmp(message, "<get file>", 10) == 0) { // "<get file chat_id=%d, mes_id=%d>"
@@ -1040,7 +1000,6 @@ void *rec_func() {
                     mode = "w";
                 }
 
-                printf("load\n");
                 pthread_mutex_lock(&cl_mutex);
                 recv_file(cur_client.ssl, path, mode);
                 t_main.choosed_file = NULL;
@@ -1053,7 +1012,6 @@ void *rec_func() {
                     pthread_create(&display_thread, NULL, save_scroll_func, NULL);
                 }
                 else {
-                    printf ("down\n");
                     pthread_t display_thread = NULL;
                     pthread_create(&display_thread, NULL, scroll_func, NULL);  
                     t_main.first_load_mes = false;
@@ -1070,7 +1028,7 @@ void *rec_func() {
                     len++;
                 }
                 char *c_id = mx_strndup(temp, len);
-                printf("%s\n", c_id);
+
                 int chat_id = mx_atoi(c_id);
                 mx_strdel(&c_id);
                 if (cur_client.cur_chat.id == chat_id) {
@@ -1081,7 +1039,6 @@ void *rec_func() {
                         len++;
                     }
                     char *m_id = mx_strndup(temp, len);
-                    printf("%s\n", m_id);
                     int mes_id = mx_atoi(m_id);
                     mx_strdel(&m_id);
 
@@ -1133,7 +1090,6 @@ void *rec_func() {
                     len++;
                 }
                 char *c_id = mx_strndup(temp, len);
-                printf("%s\n", c_id);
                 int chat_id = mx_atoi(c_id);
                 mx_strdel(&c_id);
                 if (cur_client.cur_chat.id == chat_id) {
@@ -1144,7 +1100,6 @@ void *rec_func() {
                         len++;
                     }
                     char *m_id = mx_strndup(temp, len);
-                    printf("%s\n", m_id);
                     int mes_id = mx_atoi(m_id);
                     mx_strdel(&m_id);
 
@@ -1171,7 +1126,6 @@ void *rec_func() {
                 } 
             }
             else if(mx_strcmp(mx_strtrim(message), "<setting avatar>") == 0) {
-                printf("a\n");
                 char buf[544] = {0};
                 sprintf(buf, "client_data/%s", cur_client.avatar.name);
                 printf("buf %s\n", buf);
@@ -1180,28 +1134,24 @@ void *rec_func() {
                     mx_strdel(&cur_client.avatar.path);
                 cur_client.avatar.path = mx_strdup(buf);
 
-                printf("setts avatar\n");
                 t_main.loaded = true;
             }
             else if(mx_strncmp(mx_strtrim(message), "<get user avatar>",17) == 0) {
-                printf("a\n");
                 t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
                 get_avatar(t_main.loaded_avatar);
-                printf("gets avatar %s\n", t_main.loaded_avatar->name);
+
                 if (mx_strcmp(t_main.loaded_avatar->name, "default") == 0) {
                     *t_main.loaded_avatar = t_main.default_avatar;
                 }
                 t_main.loaded = true;
             }
             else if(mx_strncmp(mx_strtrim(message), "<update avatar chat_id=",23) == 0) {
-                printf("a\n");
                 char *temp = mx_strstr(message, "chat_id=") + 8;
                 int len = 0;
                 while (*(temp + len) != '>') {
                     len++;
                 }
                 char *c_id = mx_strndup(temp, len);
-                printf("%s\n", c_id);
                 int chat_id = mx_atoi(c_id);
                 mx_strdel(&c_id);
 
@@ -1210,7 +1160,6 @@ void *rec_func() {
                 swiftchat_send(cur_client.ssl, buf, 544);
                 t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
                 get_avatar(t_main.loaded_avatar);
-                printf("gets avatar %s\n", t_main.loaded_avatar->name);
                 if (mx_strcmp(t_main.loaded_avatar->name, "default") == 0) {
                     *t_main.loaded_avatar = t_main.default_group_avatar;
                 }
@@ -1249,14 +1198,12 @@ void *rec_func() {
                 }
             }
             else if(mx_strncmp(message, "<update name chat_id=",21) == 0) { // "<setting chat_id=%d, chat_name=%s>"
-                printf("a\n");
                 char *temp = mx_strstr(message, "chat_id=") + 8;
                 int len = 0;
                 while (*(temp + len) != ',') {
                     len++;
                 }
                 char *c_id = mx_strndup(temp, len);
-                printf("%s\n", c_id);
                 int chat_id = mx_atoi(c_id);
                 mx_strdel(&c_id);
 
@@ -1284,15 +1231,6 @@ void *rec_func() {
                 if (cur_client.cur_chat.id == chat_id) {
                     GtkWidget *header_bar_box = gtk_widget_get_first_child(t_main.right_panel);
                     GtkWidget *header_bar_left = gtk_grid_get_child_at(GTK_GRID(header_bar_box), 0, 0);
-                     /*                   
-                    GtkWidget *photo_box = gtk_widget_get_first_child(header_bar_left);
-                    gtk_widget_hide(photo_box);
-                    photo_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-                    GtkWidget *photo =  NULL;
-                    photo = get_circle_widget_from_png_avatar(&cur_client.cur_chat.avatar, 50, 50, true);
-                    
-                    gtk_box_append(GTK_BOX(photo_box), photo);
-                    */
                     GtkWidget *info_box = gtk_widget_get_last_child(header_bar_left);
                     gtk_widget_hide(info_box);
                     info_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
@@ -1493,7 +1431,6 @@ int main(int argc, char *argv[]) {
     t_main.context = CTX_initialize_client();
     //cur_client.ssl = SSL_new(t_main.context);
     open_ssl_connection();
-    printf("b\n");
     t_main.loaded = false;
     pthread_t rec_th;
     pthread_mutex_init(&cl_mutex, NULL);

@@ -13,7 +13,6 @@ void free_client(t_client **client, t_list **users_list) {
         del = del->next;
     }
     if (!prev) {
-        //printf("front\n");
         mx_pop_front(users_list);
         t_list *temp = *users_list;
         while (temp) {
@@ -24,14 +23,11 @@ void free_client(t_client **client, t_list **users_list) {
         cur = NULL;
     }
     else if (!del->next) {
-        //printf("back\n");
         mx_pop_back(users_list);
         free(cur);
         cur = NULL;
     }
     else {
-        //printf("prev = %d; del = %d;\n", ((t_client *)prev->data)->id, ((t_client *)del->data)->id);
-        
         if (del->next) {
             prev->next = del -> next;
         }

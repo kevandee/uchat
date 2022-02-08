@@ -1,10 +1,10 @@
 #include "../inc/uch_client.h"
 
 static void edit ( GSimpleAction *action, G_GNUC_UNUSED GVariant *parameter, G_GNUC_UNUSED gpointer data )
-{
+{   
+    (void)action;
     t_list *gesture_list = data;
     GtkWidget **arr = gesture_list->data;
-    g_print ( "You choose `%s` action %s\n", g_action_get_name ( G_ACTION( action ) ), gtk_label_get_text(GTK_LABEL (arr[0])) );
 
     GtkTextBuffer *buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW (t_main.message_input_view));
     const char *text = gtk_label_get_text(GTK_LABEL (arr[0]));
@@ -15,9 +15,9 @@ static void edit ( GSimpleAction *action, G_GNUC_UNUSED GVariant *parameter, G_G
 
 static void delete ( GSimpleAction *action, G_GNUC_UNUSED GVariant *parameter, G_GNUC_UNUSED gpointer data )
 {
+    (void)action;
     t_list *gesture_list = data;
     GtkWidget **arr = gesture_list->data;
-    g_print ( "You choose `%s` action %s\n", g_action_get_name ( G_ACTION( action ) ), gtk_label_get_text(GTK_LABEL (arr[0])) );
     GtkWidget * pop = gesture_list->next->next->data;
 
     // <delete message>
@@ -28,7 +28,6 @@ static void delete ( GSimpleAction *action, G_GNUC_UNUSED GVariant *parameter, G
         gtk_widget_hide(gtk_widget_get_parent (arr[1]));
     char buf[544] = {0};
     sprintf(buf, "<delete mes chat_id=%d, mes_id=%d>", cur_client.cur_chat.id, *((int *)gesture_list->next->data));
-    printf("%s\n", buf);
     swiftchat_send(cur_client.ssl, buf, 544);
 }
 

@@ -36,8 +36,6 @@ int recv_file(SSL *socket, char *path, const char *mode) {
     while (stat < 0) {
         stat = SSL_read(socket, &size, sizeof(int));
     }
-    
-    printf("Reply sent\n");
 
     file = fopen(path, mode);
 
@@ -65,7 +63,6 @@ int recv_file(SSL *socket, char *path, const char *mode) {
     }
 
     fclose(file);
-    printf("File successfully Received!\n");
     
     return 1;
 }

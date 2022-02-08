@@ -36,7 +36,6 @@ int recv_image(SSL *socket, char *path) {
         stat = SSL_read(socket, &size, sizeof(int));
     }
     
-    printf("Reply sent\n");
 
     image = fopen(path, "wb");
 
@@ -64,7 +63,6 @@ int recv_image(SSL *socket, char *path) {
     }
 
     fclose(image);
-    printf("Image successfully Received!\n");
     
     return 1;
 }

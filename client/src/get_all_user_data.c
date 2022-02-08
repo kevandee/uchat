@@ -16,7 +16,6 @@ void get_all_user_data() {
         asprintf(&cur_client.avatar.path, pattern, cur_client.avatar.name);
         recv_image(cur_client.ssl, cur_client.avatar.path);
         swiftchat_send(cur_client.ssl, "<image loaded>", 14); 
-        printf("a\n");
         swiftchat_recv(cur_client.ssl, &cur_client.avatar.scaled_w, sizeof(double));
         swiftchat_recv(cur_client.ssl, &cur_client.avatar.scaled_h, sizeof(double));
         swiftchat_recv(cur_client.ssl, &cur_client.avatar.x, sizeof(double));
@@ -59,7 +58,6 @@ void get_all_user_data() {
         char mute;
         swiftchat_recv(cur_client.ssl, &mute, 1);
         new_chat->mute = mute == '0' ? false : true;
-        printf("mute %c\n", mute);
         // chat avatar
 
         char buf[32] = {0};
@@ -74,7 +72,6 @@ void get_all_user_data() {
             asprintf(&new_chat->avatar.path, pattern, new_chat->avatar.name);
             recv_image(cur_client.ssl, new_chat->avatar.path);
             swiftchat_send(cur_client.ssl, "<image loaded>", 14); 
-            printf("a\n");
             swiftchat_recv(cur_client.ssl, &new_chat->avatar.scaled_w, sizeof(double));
             swiftchat_recv(cur_client.ssl, &new_chat->avatar.scaled_h, sizeof(double));
             swiftchat_recv(cur_client.ssl, &new_chat->avatar.x, sizeof(double));

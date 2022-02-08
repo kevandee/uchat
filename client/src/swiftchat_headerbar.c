@@ -30,7 +30,6 @@ static void enter_mouse(GtkWidget *widget, gpointer data) {
 }
 static void close_app() {
     t_main.is_run = false;
-    printf("Goodbye!)\n");
     gtk_window_destroy(GTK_WINDOW (t_screen.main_window));
     
 }
