@@ -939,6 +939,14 @@ void load_more_messages (GtkScrolledWindow *scrolled_window, GtkPositionType pos
 
 }
 
+static void change_mute() {
+    char buf[544] = {0};
+    sprintf(buf, "<change mute chat_id=%d>", cur_client.cur_chat.id);
+    swiftchat_send(cur_client.ssl, buf, 544);
+    cur_client.cur_chat.mute = cur_client.cur_chat.mute == true ? false : true;
+    
+}
+
 void show_chat_history(GtkWidget *widget, gpointer data)
 {
     (void)widget;
@@ -1104,6 +1112,11 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     else mute_img = gtk_image_new_from_file("client/media/mute_btn_light.png");
     //GtkWidget *mute_img = gtk_image_new_from_file("client/media/mute_inactive.png");
     gtk_widget_set_size_request(mute_img, 35, 35);
+
+    GtkGesture *mute_click = gtk_gesture_click_new();
+    gtk_gesture_set_state(mute_click, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(mute_click, "pressed", G_CALLBACK(change_mute), NULL);
+    gtk_widget_add_controller(mute_img, GTK_EVENT_CONTROLLER(mute_click));
 
     gtk_box_append(GTK_BOX(chat_headerbar_right), mute_img); 
 

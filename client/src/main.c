@@ -662,14 +662,13 @@ gboolean add_sticker_msg(gpointer data) {
     return FALSE;
 }
 
-void *rec_func(void *param) {
+void *rec_func() {
     while(!t_main.loaded) {
         usleep(500);
     }
-    
-    (void)param;
+
     char message[512 + 32] = {0};
-    while (1) {
+    while (t_main.is_run) {
         //printf("wait\n");
         SSL *fd = cur_client.ssl;
 		int receive = swiftchat_recv(fd, message, 512 + 32);
@@ -1273,7 +1272,6 @@ void *rec_func(void *param) {
                 }
             }
             else if(mx_strcmp(mx_strtrim(message), "<image loaded>") == 0) {
-
                 t_main.loaded = true;
             }
             else if (mx_strcmp(mx_strtrim(message), "<chat users avatars>") == 0) {
@@ -1281,12 +1279,7 @@ void *rec_func(void *param) {
                 t_main.loaded = true;
             }
         }  
-        if (receive == 0) {
-            //break;
-            //usleep(500);
-        } else {
-                // -1
-		}
+        
 		clear_message(message, 512);
     }
     return NULL;
@@ -1445,6 +1438,7 @@ int main(int argc, char *argv[]) {
     };
     t_main.default_group_avatar = default_group_avatar;
     cur_client = cur;
+    t_main.is_run = true;
     t_main.ip = mx_strdup(argv[1]);
     t_main.port = mx_atoi(argv[2]);
     //      =====   SSLing    =====
