@@ -50,6 +50,37 @@ static char *swift_weather_trim(char *string, char final_char) {
   return mx_strndup(string, counter);
 }
 
+static char *swift_weather_namer(char *full) {
+  char *new_name = NULL;
+
+  if (mx_strstr(full, "інлив")) {
+    new_name = mx_strdup("overcast");
+    if (mx_strstr(full, "дощ")) {
+      new_name = mx_strrejoin(new_name, "rain");
+    }
+  }
+  else if (mx_strstr(full, "марн")) {
+    new_name = mx_strdup("cloudy");
+    if (mx_strstr(full, "дощ")) {
+      new_name = mx_strrejoin(new_name, "rain");
+    }
+    else if (mx_strstr(full, "сніг")) {
+      new_name = mx_strrejoin(new_name, "snow");
+    }
+  }
+  else if (mx_strstr(full, "Туман")) {
+    new_name = mx_strdup("fog");
+  }
+  else if (mx_strstr(full, "Ясно")) {
+    new_name = mx_strdup("clear");
+  }
+  else {
+    new_name = mx_strdup("unknown");
+  }
+
+  return new_name;
+}
+
 /*char **weather_parse(char *city) {
   char *weather_string = get_weather(city);
   //printf("\n\n%s\n", weather_string);
@@ -115,9 +146,13 @@ char **weather_parse(char *city) {
 
   label_array[3] = mx_strjoin(weather_array[5], "°С"); // temperature 
 
-  char *ntemp = mx_strjoin("client/media/weather/", weather_array[3]);
+  char *new_name = swift_weather_namer(weather_array[3]);
+  printf("\nweather - %s\n", weather_array[3]);
+  printf("weather - %s\n", new_name);
+  char *ntemp = mx_strjoin("client/media/weather/", new_name);
   ntemp = mx_strrejoin(ntemp, ".png");
   label_array[4] = mx_strdup(ntemp);
+  mx_strdel(&new_name);
   mx_strdel(&ntemp);
 
   mx_del_strarr(&weather_array);
