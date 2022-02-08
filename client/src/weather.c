@@ -81,21 +81,6 @@ static char *swift_weather_namer(char *full) {
   return new_name;
 }
 
-/*char **weather_parse(char *city) {
-  char *weather_string = get_weather(city);
-  //printf("\n\n%s\n", weather_string);
-
-  char **weather_array = malloc(8 * sizeof (char *));
-  for (int i = 0; i < 8; i++) {
-    weather_array[i] = NULL;
-  }
-
-  char *temp = mx_strstr(weather_string, "Kharkiv");
-  weather_array[0] = swift_weather_trim(temp, '>');
-
-  return weather_array;
-}*/
-
 char **weather_parse(char *city) {
   char *weather_string = get_weather(city);
 
@@ -147,8 +132,6 @@ char **weather_parse(char *city) {
   label_array[3] = mx_strjoin(weather_array[5], "°С"); // temperature 
 
   char *new_name = swift_weather_namer(weather_array[3]);
-  printf("\nweather - %s\n", weather_array[3]);
-  printf("weather - %s\n", new_name);
   char *ntemp = mx_strjoin("client/media/weather/", new_name);
   ntemp = mx_strrejoin(ntemp, ".png");
   label_array[4] = mx_strdup(ntemp);

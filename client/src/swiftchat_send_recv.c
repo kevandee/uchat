@@ -42,11 +42,10 @@ int swiftchat_send(SSL *ssl, void *buf, int size) {
     int receive = 0;
 
     if (t_main.connected) {
-        printf("send\n");
         while((receive = send_all(ssl, buf, size)) < 0) {
             t_main.connected = false;
             close_connection(cur_client.ssl);
-            printf("closed send\n");
+            printf("Trying to reconnect\n");
             open_ssl_connection();
             ssl = cur_client.ssl;
             char message[32] = {0};
@@ -68,13 +67,11 @@ int swiftchat_send(SSL *ssl, void *buf, int size) {
 
 int swiftchat_recv(SSL *ssl, void *buf, int size) {
     int receive = 0;
-    printf("recv\n");
     if (t_main.connected) {
         while((receive = recv_all(ssl, buf, size)) <= 0) {
             t_main.connected = false;
-            printf("closed recv\n");
+            printf("Trying to reconnect\n");
             close_connection(cur_client.ssl);
-            printf("closed recv\n");
             open_ssl_connection();
             ssl = cur_client.ssl;
             char message[32] = {0};

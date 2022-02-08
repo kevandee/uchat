@@ -29,7 +29,6 @@ void return_to_chatlist(GtkWidget *widget, gpointer data) {
         gtk_box_append(GTK_BOX(swapped[2]), goback);
         g_signal_connect(goback, "clicked", G_CALLBACK(add_chat_dialog), (gpointer)swapped);
     }
-    printf("tut\n");
     t_main.scroll_box_left = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_size_request(GTK_WIDGET(t_main.scroll_box_left), 200, 0);
     gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_left), 200, 600);
@@ -405,11 +404,8 @@ void add_chat_dialog(GtkWidget *widget, gpointer data)
     char message[512+32] = {0};
     sprintf(message, "<users list>");
     swiftchat_send(cur_client.ssl, message, 512+32);
-    printf("gets search list 1\n");
     while (!t_main.loaded)
         usleep(50);
-    printf("gets search list 2\n");
-    //gtk_widget_hide(t_main.scroll_box);
     GtkWidget *add_chat_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_set_name(add_chat_box, "chat_box");
     load_css_main(t_screen.provider, add_chat_box);
@@ -490,13 +486,11 @@ void add_chat_dialog(GtkWidget *widget, gpointer data)
             char buf[544] = {0};
             t_main.loaded = false;
             sprintf(buf, "<get user avatar>%s",temp->data);
-            printf("buf %s\n", buf);
             swiftchat_send(cur_client.ssl, buf, 544);
             while(!t_main.loaded) {
                 usleep(50);
             }
             t_avatar *avatar = t_main.loaded_avatar;
-            //printf("%s\n", avatar.name);
             if (mx_strcmp(avatar->name, "default") == 0) {
                 *avatar = t_main.default_avatar;
             }
@@ -971,17 +965,13 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     t_main.message_widgets_list = NULL;
 
     if (data){
-        printf("id of chat %d\n", ((t_chat *)data)->id);
         cur_client.cur_chat = *((t_chat *)data);
     }
-    printf("1\n");
     t_main.scroll_mes = true;
     if(t_main.sticker_panel)
     {
         gtk_widget_hide(t_main.sticker_panel);
     }
-
-    printf("2\n");
 
     gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.home);
     if(cur_client.theme == DARK_THEME)
@@ -1048,11 +1038,9 @@ void show_chat_history(GtkWidget *widget, gpointer data)
         else 
             sprintf(buf, "<get user avatar>%s",temp->next->data);
         swiftchat_send(cur_client.ssl, buf, 544);
-        printf("here\n");
         while(!t_main.loaded) {
             usleep(50);
         }
-        printf("here\n");
 
         t_avatar *avatar = t_main.loaded_avatar;
         if (mx_strcmp(avatar->name, "default") == 0) {

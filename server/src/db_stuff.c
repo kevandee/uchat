@@ -39,7 +39,6 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
     if (argc == 0)
         return 0;
     for (int i = 0; i < argc; i++) {
-        // printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
         if(argv[i] == NULL)
             mx_push_back(*(&list_data), strdup("NULL"));
         else
@@ -54,8 +53,7 @@ void *sqlite3_exec_db(char *query, int type) {
     char *err_msg = 0;
     t_list *list = NULL;
     int auto_inc;
-
-    //printf("database_request: %s\n", query);
+    
     if (type == 1) {
         rc = sqlite3_exec(db, query, callback, &list, &err_msg);
         sqlite3_close(db);

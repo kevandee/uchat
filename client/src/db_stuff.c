@@ -39,7 +39,6 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
     if (argc == 0)
         return 0;
     for (int i = 0; i < argc; i++) {
-        // printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
         if(argv[i] == NULL)
             mx_push_back(*(&list_data), strdup("NULL"));
         else
@@ -70,13 +69,6 @@ void *user_exec_db(char *login, char *query, int type) {
     }
     return NULL;
 }
-
-/*
-char *query = NULL;
-char *sql_pattern = "UPDATE user SET Что тебе надо = '%s');";
-asprintf(&query, sql_pattern, Переменная);
-user_exec_db(cur_client.login, query, 2);
-*/
 
 char *get_db_name(char *login) {
     struct stat st = {0};

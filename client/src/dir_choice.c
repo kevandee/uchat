@@ -9,7 +9,6 @@ static void on_open_response (GtkDialog *dialog, int response)
         GFile *file = gtk_file_chooser_get_file (chooser);
         
         t_main.choosed_dir = g_file_get_path(file);
-        printf("%s\n", t_main.choosed_dir);
 
         char buf[544] = {0};
         sprintf(buf, "<get file chat_id=%d, mes_id=%d>", cur_client.cur_chat.id, t_main.choosed_file->id);

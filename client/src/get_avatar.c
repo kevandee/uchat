@@ -9,7 +9,6 @@ t_avatar *get_avatar(t_avatar *avatar) {
         asprintf(&avatar->path, pattern, avatar->name);
         recv_image(cur_client.ssl, avatar->path);
         swiftchat_send(cur_client.ssl, "<image loaded>", 14); 
-        printf("a\n");
         swiftchat_recv(cur_client.ssl, &avatar->scaled_w, sizeof(double));
         swiftchat_recv(cur_client.ssl, &avatar->scaled_h, sizeof(double));
         swiftchat_recv(cur_client.ssl, &avatar->x, sizeof(double));

@@ -125,7 +125,6 @@ void text_changed_add_chat(GObject *object, GParamSpec *pspec, gpointer data) {
             GtkWidget *parent = gtk_grid_get_child_at(GTK_GRID (t_main.add_users_grid), 1, row);
             GtkWidget *cur_button = gtk_widget_get_last_child (parent);
             const char *label = gtk_label_get_text (GTK_LABEL (cur_button));
-            printf("%s\n", label);
             if (mx_strcmp(cur_client.login, label) != 0) {
                 if (mx_strncmp(entry_text, label, mx_strlen(entry_text)) == 0) {
                     if (!gtk_widget_get_visible(GTK_WIDGET (parent))) {

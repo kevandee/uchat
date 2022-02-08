@@ -61,8 +61,8 @@ X509 *create_X509(EVP_PKEY *pkey) {
     X509_NAME * name;
     name = X509_get_subject_name(x509);
     X509_NAME_add_entry_by_txt(name, "C",  MBSTRING_ASC, (unsigned char *)"UA", -1, -1, 0);
-    X509_NAME_add_entry_by_txt(name, "O",  MBSTRING_ASC, (unsigned char *)"Glynomesy Inc.", -1, -1, 0);
-    X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char *)"Kukoldinio DimASS de bebrou", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(name, "O",  MBSTRING_ASC, (unsigned char *)"Swift notInc", -1, -1, 0);
+    X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char *)"Swiftchat", -1, -1, 0);
 
     X509_set_issuer_name(x509, name);
     if (!X509_sign(x509, pkey, EVP_sha1())) {
@@ -152,10 +152,8 @@ void certificate_ckeck(SSL *ssl) {
     if ( cert != NULL ) {
         printf("SSL: server certificates:\n");
         char *line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
-        printf("SSL: subject: %s\n", line);
         free(line);
         line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
-        printf("SSL: issuer: %s\n", line);
         free(line);
         X509_free(cert);
     }

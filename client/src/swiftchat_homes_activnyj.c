@@ -7,7 +7,7 @@ static void insert_text_note(GtkTextBuffer *buffer, GtkTextIter *location)
     GtkTextIter start, end, offset;
     gtk_text_buffer_get_start_iter(buffer, &start);
     gtk_text_buffer_get_end_iter(buffer, &end);
-    const char *buf_str = gtk_text_buffer_get_text(buffer, &start, &end, true);
+    //const char *buf_str = gtk_text_buffer_get_text(buffer, &start, &end, true);
 
     if(count>512) {
         gtk_text_buffer_get_iter_at_offset(buffer, &offset, 256);
@@ -15,8 +15,6 @@ static void insert_text_note(GtkTextBuffer *buffer, GtkTextIter *location)
         gtk_text_buffer_delete(buffer, &offset, &end);
         gtk_text_iter_assign(location, &offset);
     }
-    /////// VVV delete this VVV
-    printf("\nnote : %s\n", buf_str);
 }
 
 static void save_note(GtkGestureClick *gesture, int n_press, double x, double y, gpointer buff) {
@@ -31,10 +29,7 @@ static void save_note(GtkGestureClick *gesture, int n_press, double x, double y,
     gtk_text_buffer_get_start_iter(gtk_text_buff, &start);
     gtk_text_buffer_get_end_iter(gtk_text_buff, &end);
 
-
     const char *text_buff = gtk_text_buffer_get_text(gtk_text_buff, &start, &end, true);
-    printf("\nkirill lox %s\n", text_buff);
-
 
     char *query = NULL;
     char *sql_pattern = "UPDATE user SET note = '%s';";
@@ -128,10 +123,6 @@ void show_home()
     GtkWidget *note_saver = gtk_label_new("Save");
     gtk_widget_set_name(GTK_WIDGET(note_saver), "notes_saver");
     gtk_box_set_spacing(GTK_BOX(note_box_header), 321);         // distance between label and button
-    /*GtkWidget *note_saver = gtk_image_new_from_file("client/media/save_home.png");
-    gtk_widget_set_name(GTK_WIDGET(note_saver), "notes_saver");
-    gtk_box_set_spacing(GTK_BOX(note_box_header), 340);         // distance between label and button
-    load_css_main(t_screen.provider, note_saver);*/
 
     gtk_box_append(GTK_BOX(note_box_saver), note_saver);
     gtk_box_append(GTK_BOX(note_box_header), note_box_saver);

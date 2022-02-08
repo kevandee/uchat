@@ -40,8 +40,6 @@ void redraw_actives_chats(GtkWidget *widget, gpointer data)
 
     t_list *temp_widgets = t_main.chat_nodes_info;
     t_list *temp_ch = cur_client.chats;
-
-    g_print("Point: %d\n", point);
     if(point == 1)
     {
         while (temp_ch)
@@ -75,9 +73,9 @@ void redraw_actives_chats(GtkWidget *widget, gpointer data)
 gboolean add_chat_node(gpointer data) {
     t_chat *chat = data;
     if (!chat) {
-        printf("suka\n");
+        perror("unexpected error!\n");
     }
-    printf ("/// chat name %s ///\n", chat->name);
+
     GtkWidget *child_widget = gtk_button_new ();
     gtk_widget_set_size_request(child_widget, 200, 54);
     gtk_widget_set_name(GTK_WIDGET(child_widget), "scroll_buttons_border");
@@ -96,7 +94,6 @@ gboolean add_chat_node(gpointer data) {
         }
         chat->avatar = *t_main.loaded_avatar;
         if (mx_strcmp(chat->avatar.name, "default") == 0) {
-            printf("1\n");
             chat->avatar = t_main.default_avatar;
         }
     }
@@ -108,14 +105,12 @@ gboolean add_chat_node(gpointer data) {
             sprintf(buf, "<get user avatar>%s", chat->users->data);
         else 
             sprintf(buf, "<get user avatar>%s", chat->users->next->data);
-        printf("buf %s\n", buf);
         swiftchat_send(cur_client.ssl, buf, 544);
         while(!t_main.loaded) {
             usleep(50);
         }
         chat->avatar = *t_main.loaded_avatar;
         if (mx_strcmp(chat->avatar.name, "default") == 0) {
-            printf("1\n");
             chat->avatar = t_main.default_avatar;
         }
     }
@@ -123,7 +118,6 @@ gboolean add_chat_node(gpointer data) {
         chat->avatar = t_main.default_group_avatar;
     }
 
-    printf ("chat name %s\n", chat->avatar.name);
     GtkWidget *chat_image = get_circle_widget_from_png_avatar(&chat->avatar, 57, 57, false);
     gtk_widget_set_size_request(GTK_WIDGET(chat_image),  57, 0);
     gtk_widget_set_halign(GTK_WIDGET(chat_image), GTK_ALIGN_FILL);

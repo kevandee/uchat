@@ -25,7 +25,7 @@ void open_client_connection(char* server_IP, int port) {
     adr.sin_port = htons(port);
     if(inet_pton(AF_INET, server_IP, &adr.sin_addr)<=0)
     {
-        printf("\n inet_pton error occured\n");
+        perror("\n inet_pton error occured\n");
         return;
     } 
 
