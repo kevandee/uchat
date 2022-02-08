@@ -1291,6 +1291,9 @@ static void load_css() {
 }
 
  void send_login(GtkWidget *widget, gpointer data) {
+     if (!t_main.connected) {
+        return;
+    }
     (void)widget;
     GtkWidget **entry_field = (GtkWidget **)data;
     GtkEntryBuffer *login_field_buf = gtk_entry_get_buffer(GTK_ENTRY (entry_field[0]));

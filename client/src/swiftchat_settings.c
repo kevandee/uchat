@@ -124,6 +124,10 @@ static void move_image (GtkGestureDrag *gesture, double offset_x, double offset_
 }
 
 static void send_avatar() {
+    if (!t_main.connected) {
+        return;
+    }
+
     char buf[512 + 32] = {0};
     sprintf(buf, "%s", "<setting avatar>");
     swiftchat_send(cur_client.ssl, buf, 512 + 32);
@@ -233,6 +237,10 @@ static void on_open_response (GtkDialog *dialog, int response)
 }
 
 static void choise_photo_file() {
+    if (!t_main.connected) {
+        return;
+    }
+
     GtkWidget *dialog;
     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 
@@ -250,6 +258,9 @@ static void choise_photo_file() {
 
 static void send_settings(GtkWidget *widget, gpointer data) {
     (void)widget;
+    if (!t_main.connected) {
+        return;
+    }
     GtkWidget ** entry_arr = data;
 
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (entry_arr[2]));
@@ -304,6 +315,9 @@ static void send_settings(GtkWidget *widget, gpointer data) {
 
 void show_settings() 
 {
+    if (!t_main.connected) {
+        return;
+    }
     int point = 1;
     redraw_actives_chats(NULL, &point);
     cur_client.cur_chat.id = -1;
@@ -589,13 +603,9 @@ void show_settings()
 
     GtkWidget *delete_box_and_exit = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_set_spacing(GTK_BOX(delete_box_and_exit), 20);
-    gtk_widget_set_halign(GTK_WIDGET(delete_box_and_exit), GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(GTK_WIDGET(delete_box_and_exit), GTK_ALIGN_CENTER);
-    GtkWidget *delete_button = gtk_button_new_with_label("DELETE ACCOUNT");
-    gtk_widget_set_name(GTK_WIDGET(delete_button), "delete_account_btn");
-    load_css_main(t_screen.provider, delete_button);
-    gtk_box_append(GTK_BOX(delete_box_and_exit), delete_button);
-    GtkWidget *exit_button = gtk_button_new_with_label("Log out");
+    gtk_widget_set_halign(GTK_WIDGET(delete_box_and_exit), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(delete_box_and_exit), GTK_ALIGN_START);
+    GtkWidget *exit_button = gtk_button_new_with_label("LOG OUT");
     gtk_widget_set_name(GTK_WIDGET(exit_button), "logOut_btn");
     load_css_main(t_screen.provider, exit_button);
     GtkGesture *click_exit = gtk_gesture_click_new();

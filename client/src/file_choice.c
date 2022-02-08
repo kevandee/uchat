@@ -4,6 +4,10 @@ const char *file_types[] = {"*.txt", "*.mp3", "*.wav", "*.jpeg", "*.jpg", "*.png
 
 static void on_open_response (GtkDialog *dialog, int response)
 {
+    if (!t_main.connected) {
+        return;
+    }////!!!!!!!!!
+
     if (response == GTK_RESPONSE_ACCEPT)
     {
         GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
@@ -73,6 +77,9 @@ static void on_open_response (GtkDialog *dialog, int response)
 }
 
 void choise_file() {
+    if (!t_main.connected) {
+        return;
+    }
     GtkWidget *dialog;
     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 

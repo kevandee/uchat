@@ -64,6 +64,9 @@ void load_css_auth(GtkCssProvider *provider, GtkWidget *widget, gint widg)
 
 static void register_button_click(GtkWidget *widget, gpointer data)
 {
+    if (!t_main.connected) {
+        return;
+    }
     GtkWidget **entry_field = data;
     GtkEntryBuffer *login_field_buf = gtk_entry_get_buffer(GTK_ENTRY (entry_field[0]));
     GtkEntryBuffer *password_field_buf1 = gtk_entry_get_buffer(GTK_ENTRY (entry_field[1]));
@@ -169,6 +172,9 @@ static void register_button_click(GtkWidget *widget, gpointer data)
 }
 
 static void register_signin_click(GtkWidget *widget) {
+    if (!t_main.connected) {
+        return;
+    }
     gtk_widget_unparent(widget);
     chat_show_auth_screen();
 }
@@ -272,6 +278,9 @@ void chat_show_reg_screen()
 
 static void account_button_click(GtkWidget *widget)
 {
+    if (!t_main.connected) {
+        return;
+    }
     if(widget){}
     gtk_widget_unparent(widget);
     chat_show_reg_screen();

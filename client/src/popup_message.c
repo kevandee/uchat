@@ -44,6 +44,9 @@ void show_message_menu(GtkGestureClick *gesture, int n_press, double x, double y
     (void)data;
     (void)x;
     (void)y;
+    if (!t_main.connected) {
+        return;
+    }
     t_list *gesture_list = data;
     GtkWidget **arr = gesture_list->data;
     GActionGroup *act = G_ACTION_GROUP (g_simple_action_group_new());

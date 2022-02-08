@@ -16,6 +16,7 @@
         "string_view": "c",
         "vector": "c",
         "libmx.h": "c",
-        "functional": "c"
+        "functional": "c",
+        "typeinfo": "c"
     }
 }
