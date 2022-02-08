@@ -47,6 +47,7 @@ typedef struct s_chat {
     int last_mes_id;
 
     bool is_new; // для сервера
+    bool mute;
     bool is_avatar;
     t_avatar avatar;
 }              t_chat;
