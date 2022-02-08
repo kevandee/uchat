@@ -51,11 +51,21 @@ static void on_open_response (GtkDialog *dialog, int response)
         gtk_widget_set_name(GTK_WIDGET(file_name_label), "message");
         load_css_main(t_screen.provider, file_name_label);
 
-        GtkWidget *file_sender = get_circle_widget_current_user_avatar();
-        
+        GtkWidget *file_sender = NULL;
+        if(mx_strncmp(cur_client.cur_chat.name, ".dialog", 7)!=0)
+            file_sender = get_circle_widget_current_user_avatar();
+        time_t t;
+        time(&t);
+        char *time = mx_strndup(ctime(&t) + 11, 5);
+        GtkWidget *file_action_time = gtk_label_new(time);
+        gtk_widget_set_name(file_action_time, "user_action");
+        load_css_main(t_screen.provider, file_action_time);
+        gtk_box_append(GTK_BOX(file_box), file_action_time);
+
         gtk_box_append(GTK_BOX(file_box), file_icon);
         gtk_box_append(GTK_BOX(file_box), file_name_label);
-        gtk_box_append(GTK_BOX(file_box), file_sender);
+        if(file_sender)
+            gtk_box_append(GTK_BOX(file_box), file_sender);
         gtk_box_append(GTK_BOX (t_main.scroll_box_right), file_box);
     }
 

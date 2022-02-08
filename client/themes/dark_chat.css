@@ -344,8 +344,8 @@ scrolledwindow {
 }
 
 #scroll_button_active {
-  background: #6c6c6c;
-  border-radius: 0px 0px 0px 0px;
+  background: #7b7b7b;
+  border-radius: 10px;
 }
 
 #scroll_buttons_border {
@@ -476,6 +476,16 @@ scrolledwindow {
 
 
 /*----------HOMES ACTIVNYJ--------------*/
+#hello_user{
+  font-weight: 900;
+  font-family: Arial, sans-serif;
+  font-size: 36px;
+  color: #fff;
+  text-transform: uppercase;
+  margin-left: 2px;
+  letter-spacing: 2px;
+}
+
 #note_box {
   padding: 5px 5px 5px 5px;
 }
@@ -515,14 +525,16 @@ scrolledwindow {
 }
 
 #weather_box  {
-  background-color: red;
-  padding: 20px 10px 20px 20px;
+  background-color: #9c9c9c;
+  padding: 30px 25px 9px 35px;
+  border-radius: 20px 20px 20px 20px;
 }
 
 #weather_day_box {
   font-size: 52px;
   font-weight: 700;
   color: #fff;
+  letter-spacing: 2px;
 }
 
 #weather_month_box {
@@ -532,6 +544,7 @@ scrolledwindow {
 
 #weather_month_label {
   text-transform: capitalize;
+  margin-top: -7px;
 }
 
 #weather_location_box {
@@ -544,6 +557,8 @@ scrolledwindow {
 }
 
 #weather_temperature_box {
+  font-family: Arial, sans-serif;
   font-size: 48px;
   color: #fff;
+  font-weight: 700;
 }

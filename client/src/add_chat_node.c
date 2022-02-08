@@ -46,7 +46,7 @@ void redraw_actives_chats(GtkWidget *widget, gpointer data)
     {
         while (temp_ch)
         {
-            gtk_widget_set_name (temp_widgets->data, "scroll_buttons");
+            gtk_widget_set_name (gtk_widget_get_parent(temp_widgets->data), "scroll_buttons_border");
             temp_widgets = temp_widgets->next;
             temp_ch = temp_ch->next;
         }
@@ -57,13 +57,13 @@ void redraw_actives_chats(GtkWidget *widget, gpointer data)
     {
         if (((t_chat *)temp_ch->data)->id == cur_client.cur_chat.id) 
         {
-            gtk_widget_set_name (temp_widgets->data, "scroll_button_active");
+            gtk_widget_set_name (gtk_widget_get_parent(temp_widgets->data), "scroll_button_active");
             temp_widgets = temp_widgets->next;
             temp_ch = temp_ch->next;
         }
         else
         {
-            gtk_widget_set_name (temp_widgets->data, "scroll_buttons");
+            gtk_widget_set_name (gtk_widget_get_parent(temp_widgets->data), "scroll_buttons_border");
             temp_widgets = temp_widgets->next;
             temp_ch = temp_ch->next;
         }
