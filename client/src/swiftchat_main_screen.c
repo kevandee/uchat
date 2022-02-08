@@ -324,8 +324,12 @@ static void send_chat(GtkWidget *widget, gpointer data) {
     GtkWidget **swapped = data;
     GtkWidget *name_entry = GTK_WIDGET (swapped[3]);
     cur_client.sender_new_chat = true;
-    const char *name = gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY(name_entry)));
 
+    const char *name = gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY(name_entry)));
+    if (name[0] == '.' || mx_strlen(name) == 0)
+    {
+        return;
+    }
     t_list *temp = t_main.check_buttons_user_list;
     t_list *result_users = NULL;
     while (temp) {
@@ -336,6 +340,8 @@ static void send_chat(GtkWidget *widget, gpointer data) {
 
         temp = temp->next;
     }
+    if (!result_users)
+        return;
 
     char *users = NULL;
     temp = result_users;
@@ -800,6 +806,9 @@ static void send_sticker(GtkGestureClick *gesture, int n_press, double x, double
     gtk_widget_set_margin_bottom(sticker, 5);
     gtk_widget_set_size_request(GTK_WIDGET(sticker), 130, 130);
     gtk_box_append(GTK_BOX (t_main.scroll_box_right), sticker);
+
+    pthread_t display_thread = NULL;
+    pthread_create(&display_thread, NULL, scroll_func, NULL);
 }
 
 static void show_stickers(gpointer data)
@@ -907,7 +916,7 @@ static void change_mute() {
     sprintf(buf, "<change mute chat_id=%d>", cur_client.cur_chat.id);
     swiftchat_send(cur_client.ssl, buf, 544);
     cur_client.cur_chat.mute = cur_client.cur_chat.mute == true ? false : true;
-    
+
 }
 
 void show_chat_history(GtkWidget *widget, gpointer data)

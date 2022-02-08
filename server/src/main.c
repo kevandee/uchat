@@ -514,12 +514,12 @@ void *client_work(void *param) {
             sql_pattern = "INSERT INTO messages (chat_id, user_id, text, time, type) VALUES (%d, %d, '%s', '%s', '%s');";
             asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, path, get_time(), "file");
             int *mes_id = sqlite3_exec_db(query, 2);
-            
+            char *time = mx_strndup(get_time()+11, 5);
             cur->cur_chat.last_mes_id = *mes_id;
             recv_file(cur->ssl, path, mode);
 
             char buf[544] = {0};
-            sprintf(buf, "<file chat_id=%d, mes_id=%d, from=%s, prev=0>%s", chat_id, *mes_id, cur->login, name);
+            sprintf(buf, "<file chat_id=%d, mes_id=%d, from=%s, time=%s, prev=0>%s", chat_id, *mes_id, cur->login, time, name);
 
             send_message(buf, cur->login, &cur->cur_chat, false);
         }
