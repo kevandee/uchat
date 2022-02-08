@@ -44,6 +44,7 @@ static void save_note(GtkGestureClick *gesture, int n_press, double x, double y,
 
 void show_home() 
 {
+    cur_client.cur_chat.id = -1;
     int point = 1;
     redraw_actives_chats(NULL, &point);
     gtk_box_remove(GTK_BOX(t_main.search_panel), t_actives.settings);
@@ -74,6 +75,16 @@ void show_home()
     gtk_widget_set_valign(GTK_WIDGET(t_main.right_panel), GTK_ALIGN_START);
     gtk_widget_set_margin_start(GTK_WIDGET(t_main.right_panel), 50);
 
+    char *hello = mx_strjoin("Hello, ", cur_client.login);
+
+    GtkWidget *hello_user_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(hello_user_box, GTK_ALIGN_START);
+    gtk_widget_set_valign(hello_user_box, GTK_ALIGN_CENTER);
+
+    GtkWidget *hello_user = gtk_label_new(hello);
+    gtk_widget_set_name(hello_user, "hello_user");
+    gtk_box_append(GTK_BOX(hello_user_box), hello_user);
+    load_css_main(t_screen.provider, hello_user);
 
     GtkWidget *home_grid = gtk_grid_new();
     //gtk_widget_set_name(GTK_WIDGET(home_grid, "home_grid");
@@ -168,12 +179,8 @@ void show_home()
     gtk_widget_set_name(GTK_WIDGET(weather_box), "weather_box");
     load_css_main(t_screen.provider, weather_box);
     GtkWidget *weather_grid = gtk_grid_new();
-    //gtk_widget_set_name(GTK_WIDGET(home_grid, "weather_grid");
     gtk_grid_set_row_spacing(GTK_GRID(weather_grid), 10);
     gtk_grid_set_column_spacing(GTK_GRID(weather_grid), 10);
-    /*gtk_widget_set_halign(GTK_WIDGET(weather_box), GTK_ALIGN_START);
-    gtk_widget_set_valign(GTK_WIDGET(weather_box), GTK_ALIGN_START);
-    gtk_box_set_spacing(GTK_BOX(weather_box), 10);*/
 
     char *city = "харків";
     char **weather_label_array = weather_parse(city);
@@ -207,6 +214,8 @@ void show_home()
     gtk_box_append(GTK_BOX(weather_date_box), weather_month_box);
 
     GtkWidget *weather_image_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(weather_image_box, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(weather_image_box, GTK_ALIGN_CENTER);
     gtk_widget_set_name(GTK_WIDGET(weather_image_box), "weather_image_box");
     load_css_main(t_screen.provider, weather_image_box);
     GtkWidget *weather_image = gtk_image_new_from_file(weather_image_path);
@@ -234,14 +243,23 @@ void show_home()
     load_css_main(t_screen.provider, weather_temperature_label);
     gtk_box_append(GTK_BOX(weather_temperature_box), weather_temperature_label);
     gtk_box_append(GTK_BOX(weather_bottom_box), weather_temperature_box);
+
+    GtkWidget *united_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 20);
+    gtk_box_append(GTK_BOX(united_box), weather_date_box);
+    gtk_box_append(GTK_BOX(united_box), weather_image_box);
+    gtk_widget_set_margin_top(weather_image_box, 20);
     
-    gtk_grid_attach(GTK_GRID(weather_grid), weather_date_box, 0, 0, 1, 1);
-    gtk_grid_attach(GTK_GRID(weather_grid), weather_bottom_box, 0, 2, 1, 1);
-    gtk_grid_attach(GTK_GRID(weather_grid), weather_image_box, 2, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(weather_grid), united_box, 0, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(weather_grid), weather_bottom_box, 0, 1, 1, 1);
     gtk_box_append(GTK_BOX(weather_box), weather_grid);
+    gtk_widget_set_margin_bottom(weather_box, 4);
 
     gtk_grid_attach(GTK_GRID(home_grid), weather_box, 1, 0, 1, 1);
 
+    gtk_box_append(GTK_BOX(t_main.right_panel), hello_user_box);
     gtk_box_append(GTK_BOX(t_main.right_panel), home_grid);
+    gtk_box_set_spacing(GTK_BOX(t_main.right_panel), 23);
+    gtk_widget_set_margin_top(t_main.right_panel, 20);
+
     gtk_grid_attach(GTK_GRID(t_main.grid), t_main.right_panel, 1, 0, 1, 2);
 }
