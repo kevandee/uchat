@@ -260,7 +260,7 @@ void show_group_settings(GtkWidget *widget, gpointer data)
     gtk_widget_set_halign(GTK_WIDGET(members_label_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(members_label_box), GTK_ALIGN_START);
     GtkWidget *members_label = gtk_label_new("MEMBERS LIST");
-    gtk_widget_set_name(GTK_WIDGET(members_label), "name_label");
+    gtk_widget_set_name(GTK_WIDGET(members_label), "member_list_group_label");
     load_css_main(t_screen.provider, members_label);
     gtk_box_append(GTK_BOX(members_label_box), members_label);
 
@@ -273,6 +273,8 @@ void show_group_settings(GtkWidget *widget, gpointer data)
     while(temp_names)
     {
         GtkWidget *user_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+        gtk_widget_set_name(GTK_WIDGET(user_box), "user_box_group"); 
+        load_css_main(t_screen.provider, user_box);
         gtk_widget_set_valign(user_box,GTK_ALIGN_CENTER);
         gtk_widget_set_halign(user_box,GTK_ALIGN_START);
         t_avatar *avatar_img = NULL;
@@ -289,11 +291,11 @@ void show_group_settings(GtkWidget *widget, gpointer data)
             avatar_img = &cur_client.avatar;
         }
 
-        GtkWidget *avatar = get_circle_widget_from_png_avatar(avatar_img, 45, 45, true);
+        GtkWidget *avatar = get_circle_widget_from_png_avatar(avatar_img, 60, 60, true);
 
         gtk_box_append(GTK_BOX(user_box), avatar);
         GtkWidget *name = gtk_label_new(temp_names->data);
-        gtk_widget_set_name(GTK_WIDGET(name), "chat_name"); 
+        gtk_widget_set_name(GTK_WIDGET(name), "members_names_group"); 
         load_css_main(t_screen.provider, name);
         gtk_box_append(GTK_BOX(user_box), name);
 
@@ -304,7 +306,7 @@ void show_group_settings(GtkWidget *widget, gpointer data)
     }
     gtk_widget_set_size_request(GTK_WIDGET(members_scroll_window), 320, 350);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(members_scroll_window), members_list_box);
-    gtk_widget_set_name(members_scroll_window, "test");
+    gtk_widget_set_name(members_scroll_window, "scrool_member_list");
     load_css_main(t_screen.provider, members_scroll_window);
 
     gtk_box_append(GTK_BOX(members_box), members_label_box);
@@ -1032,11 +1034,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_widget_set_name(GTK_WIDGET(group_or_user_name), "chat_name_inside_label");
     load_css_main(t_screen.provider, group_or_user_name);
     gtk_box_append(GTK_BOX(group_or_user_name_box), group_or_user_name);
-    GtkWidget *status = gtk_label_new("last seen 13 minutes ago");
-    gtk_widget_set_name(GTK_WIDGET(status), "last_online");
-    load_css_main(t_screen.provider, status);
     gtk_box_append(GTK_BOX(info_box), group_or_user_name_box);
-    gtk_box_append(GTK_BOX(info_box), status);
 
     gtk_box_append(GTK_BOX(chat_headerbar_left), photo_box);
     gtk_box_append(GTK_BOX(chat_headerbar_left), info_box);

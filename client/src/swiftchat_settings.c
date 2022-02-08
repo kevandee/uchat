@@ -589,13 +589,9 @@ void show_settings()
 
     GtkWidget *delete_box_and_exit = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_set_spacing(GTK_BOX(delete_box_and_exit), 20);
-    gtk_widget_set_halign(GTK_WIDGET(delete_box_and_exit), GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(GTK_WIDGET(delete_box_and_exit), GTK_ALIGN_CENTER);
-    GtkWidget *delete_button = gtk_button_new_with_label("DELETE ACCOUNT");
-    gtk_widget_set_name(GTK_WIDGET(delete_button), "delete_account_btn");
-    load_css_main(t_screen.provider, delete_button);
-    gtk_box_append(GTK_BOX(delete_box_and_exit), delete_button);
-    GtkWidget *exit_button = gtk_button_new_with_label("Log out");
+    gtk_widget_set_halign(GTK_WIDGET(delete_box_and_exit), GTK_ALIGN_START);
+    gtk_widget_set_valign(GTK_WIDGET(delete_box_and_exit), GTK_ALIGN_START);
+    GtkWidget *exit_button = gtk_button_new_with_label("LOG OUT");
     gtk_widget_set_name(GTK_WIDGET(exit_button), "logOut_btn");
     load_css_main(t_screen.provider, exit_button);
     GtkGesture *click_exit = gtk_gesture_click_new();
