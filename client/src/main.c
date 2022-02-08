@@ -1504,6 +1504,7 @@ int main(int argc, char *argv[]) {
 
     context = CTX_initialize_client();
     ssl = SSL_new(context);
+     SSL_set_mode(ssl, SSL_MODE_ASYNC);
     if (SSL_set_fd(ssl, cur_client.serv_fd) == 0) {
         perror("ERROR: socket descriptor attachment failed!\n");
         ERR_print_errors_fp(stderr);

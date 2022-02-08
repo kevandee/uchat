@@ -813,6 +813,10 @@ int main(int argc, char *argv[]) {
     }
     //daemonize_server();
     //  SSLing
+    struct sockaddr_in adr = {0};
+    socklen_t adrlen = sizeof(adr);
+    int serv_fd = open_server_connection(mx_atoi(argv[1]), &adr, adrlen);
+    daemonize_server();
     SSL_CTX *context;
     SSL_library_init();
     context = CTX_initialize_server();
@@ -831,10 +835,10 @@ int main(int argc, char *argv[]) {
 
     // opening connection
     //daemonize_server();
-    struct sockaddr_in adr = {0};
-    socklen_t adrlen = sizeof(adr);
-    int serv_fd = open_server_connection(mx_atoi(argv[1]), &adr, adrlen);
+    
     printf("SSL: connection opened\n");
+    //EVP_PKEY_free(pkey);
+    //X509_free(x509);
     //daemonize_server();
     // for client serving
     pthread_t thread;
