@@ -876,6 +876,28 @@ void *rec_func() {
                     int status = 0;
                     swiftchat_send(cur_client.ssl, &status, sizeof(int));        
                 }
+                else 
+                {
+                    t_list *temp_widgets = t_main.chat_nodes_info;
+                    t_list *temp_ch = cur_client.chats;
+
+                    while (temp_ch)
+                    {
+                        if (((t_chat *)temp_ch->data)->id == chat_id)
+                        {
+                            t_note.notification_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+                            gtk_widget_set_valign(t_note.notification_box,GTK_ALIGN_CENTER);
+                            gtk_widget_set_halign(t_note.notification_box,GTK_ALIGN_START);
+                            GtkWidget *notification = gtk_image_new_from_file("client/media/unmuted.png");
+                            gtk_box_append(GTK_BOX(t_note.notification_box), notification);
+                            gtk_box_append(GTK_BOX(temp_widgets->data), t_note.notification_box);
+                            ((t_chat *)temp_ch->data)->is_enter = false;
+                        }
+                        temp_widgets = temp_widgets->next;
+                        temp_ch = temp_ch->next;
+                    }
+
+                }
                 
                 if (!prev || t_main.scroll_mes) {           
                     pthread_t display_thread = NULL;

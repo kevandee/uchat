@@ -115,6 +115,12 @@ struct
     GtkWidget *settings;
 } t_actives;
 
+struct 
+{
+    GtkWidget *notification_box;
+}
+t_note;
+
 int swiftchat_send(SSL *ssl, void *buf, int size);
 int swiftchat_recv(SSL *ssl, void *buf, int size);
 
