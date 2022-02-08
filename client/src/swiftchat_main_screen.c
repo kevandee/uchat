@@ -557,6 +557,10 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
     (void)keycode;
     (void)state;
 
+    if (!t_main.connected) {
+        return;
+    }
+
     if (keyval == GDK_KEY_Return) 
     {
         

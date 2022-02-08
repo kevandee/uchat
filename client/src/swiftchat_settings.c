@@ -124,6 +124,10 @@ static void move_image (GtkGestureDrag *gesture, double offset_x, double offset_
 }
 
 static void send_avatar() {
+    if (!t_main.connected) {
+        return;
+    }
+
     char buf[512 + 32] = {0};
     sprintf(buf, "%s", "<setting avatar>");
     swiftchat_send(cur_client.ssl, buf, 512 + 32);
@@ -250,6 +254,9 @@ static void choise_photo_file() {
 
 static void send_settings(GtkWidget *widget, gpointer data) {
     (void)widget;
+    if (!t_main.connected) {
+        return;
+    }
     GtkWidget ** entry_arr = data;
 
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (entry_arr[2]));
