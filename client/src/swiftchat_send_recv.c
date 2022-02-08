@@ -41,24 +41,26 @@ int open_ssl_connection() {
 int swiftchat_send(SSL *ssl, void *buf, int size) {
     int receive = 0;
 
-    if (t_main.connected)
-    while((receive = send_all(ssl, buf, size)) < 0) {
-        t_main.connected = false;
-        close_connection(cur_client.ssl);
-        printf("closed send\n");
-        open_ssl_connection();
-        ssl = cur_client.ssl;
-        char message[32] = {0};
-        // Отправка данных для авторизации на сервер
-        sprintf(message, "reconnect");
-        send_all(cur_client.ssl, message, 32);
-        clear_message(message, 32);
-        sprintf(message, "%s", cur_client.login);
-        send_all(cur_client.ssl, message, 32);
-        clear_message(message, 32);
-        sprintf(message, "%s", cur_client.passwd);
-        send_all(cur_client.ssl, message, 16);
+    if (t_main.connected) {
+        printf("send\n");
+        while((receive = send_all(ssl, buf, size)) < 0) {
+            t_main.connected = false;
+            close_connection(cur_client.ssl);
+            printf("closed send\n");
+            open_ssl_connection();
+            ssl = cur_client.ssl;
+            char message[32] = {0};
+            // Отправка данных для авторизации на сервер
+            sprintf(message, "reconnect");
+            send_all(cur_client.ssl, message, 32);
+            clear_message(message, 32);
+            sprintf(message, "%s", cur_client.login);
+            send_all(cur_client.ssl, message, 32);
+            clear_message(message, 32);
+            sprintf(message, "%s", cur_client.passwd);
+            send_all(cur_client.ssl, message, 16);
 
+        }
     }
 
     return receive;

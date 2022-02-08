@@ -177,7 +177,9 @@ void *client_work(void *param) {
             is_run = false;
         }
         else if (mx_strcmp(message, "<users list>") == 0) {
-            send_all(cur->ssl, "<users list>", 13);
+            char buf[544] = {0};
+            sprintf(buf, "<users list>");
+            send_all(cur->ssl, buf, 544);
             t_list *users_l = sqlite3_exec_db("SELECT login FROM users", 1);
             
             int users_count = mx_list_size(users_l);
