@@ -961,6 +961,7 @@ static void change_mute() {
 void show_chat_history(GtkWidget *widget, gpointer data)
 {
     (void)widget;
+
     if (!t_main.connected || (data && cur_client.cur_chat.id == ((t_chat *)data)->id)) {
         return;
     }
@@ -974,6 +975,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
         printf("id of chat %d\n", ((t_chat *)data)->id);
         cur_client.cur_chat = *((t_chat *)data);
     }
+    
     printf("1\n");
     t_main.scroll_mes = true;
     if(t_main.sticker_panel)
@@ -1083,6 +1085,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     else {
         group_or_user_name = gtk_label_new(cur_client.cur_chat.name);
     }
+    
     GtkWidget *group_or_user_name_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(GTK_WIDGET(info_box), GTK_ALIGN_START);
     gtk_widget_set_name(GTK_WIDGET(group_or_user_name), "chat_name_inside_label");

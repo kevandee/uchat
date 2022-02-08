@@ -308,6 +308,12 @@ void *client_work(void *param) {
             sprintf(buf, "data/avatars/%s/%s", cur->login, recv_avatar.name);
             printf("buf %s\n", buf);
             struct stat st = {0};
+            if (stat("data", &st) == -1) {
+                mkdir("data", 0777);
+            }
+            if (stat("data/avatars", &st) == -1) {
+                mkdir("data/avatars", 0777);
+            }
             if (stat(path, &st) == -1) {
                 mkdir(path, 0777);
             }

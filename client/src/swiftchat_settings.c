@@ -148,6 +148,11 @@ static void send_avatar() {
 
     swiftchat_send(cur_client.ssl, &cur_client.avatar.x, sizeof(double));
     swiftchat_send(cur_client.ssl, &cur_client.avatar.y, sizeof(double));
+    printf("qqqqqq\n");
+    printf("qqqqqq\n");
+    while (!t_main.loaded) {
+        usleep(50);
+    }
     t_avatar *new = (t_avatar *)malloc(sizeof(t_avatar));
     new->image = cur_client.avatar.image;
     new->path = cur_client.avatar.path;
@@ -155,19 +160,17 @@ static void send_avatar() {
     new->y = cur_client.avatar.y;
     new->scaled_h = cur_client.avatar.scaled_h;
     new->scaled_w = cur_client.avatar.scaled_w;
-    t_main.loaded = false;
-    while (!t_main.loaded) {
-        usleep(50);
-    }
+    printf("qqqqqq\n");
     gtk_box_remove(GTK_BOX (t_main.search_panel), t_main.logo);
-
-    t_main.logo = get_circle_widget_from_png_avatar(new, 45, 45, false);
-
+    printf("qqqqqq\n");
+    t_main.logo = get_circle_widget_from_png_avatar(new, 45, 45, true);
+    printf("qqqqqq\n");
     gtk_widget_set_size_request(t_main.logo, 45, 45);
     gtk_widget_set_name(GTK_WIDGET(t_main.logo), "account_avatar");
     load_css_main(t_screen.provider, t_main.logo);
     gtk_box_prepend(GTK_BOX (t_main.search_panel), t_main.logo);
     show_settings();
+    printf("qqqqqq\n");
 }
 
 static void send_default_avatar() {

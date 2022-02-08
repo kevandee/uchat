@@ -57,13 +57,15 @@ void redraw_actives_chats(GtkWidget *widget, gpointer data)
         if (((t_chat *)temp_ch->data)->id == cur_client.cur_chat.id) 
         {
             gtk_widget_set_name (gtk_widget_get_parent(temp_widgets->data), "scroll_button_active");
-            temp_widgets = temp_widgets->next;
-            temp_ch = temp_ch->next;
-            if(((t_chat *)temp_ch->data)->is_enter == false)
+            if(((t_chat *)temp_ch->data)->is_enter == false && ((t_chat *)temp_ch->data)->notify)
             {
                 ((t_chat *)temp_ch->data)->is_enter = true;
-                gtk_box_remove(GTK_BOX(temp_widgets->data), t_note.notification_box);
+                GtkWidget *notify_circle = gtk_widget_get_last_child(temp_widgets->data);
+                gtk_box_remove(GTK_BOX(temp_widgets->data), notify_circle);
             }
+            temp_widgets = temp_widgets->next;
+            temp_ch = temp_ch->next;
+            
         }
         else
         {

@@ -65,6 +65,10 @@ void get_all_user_data() {
         char buf[32] = {0};
         swiftchat_recv(cur_client.ssl, buf, 32);
         new_chat->avatar.name = mx_strdup(buf);
+        struct stat st = {0};
+        if (stat("client_data", &st) == -1) {
+            mkdir("client_data", 0777);
+        }
         if (mx_strcmp(new_chat->avatar.name, "default") != 0) {
             char *pattern = "client_data/%s";
             asprintf(&new_chat->avatar.path, pattern, new_chat->avatar.name);

@@ -835,6 +835,28 @@ void *rec_func() {
                     int status = 0;
                     swiftchat_send(cur_client.ssl, &status, sizeof(int));        
                 }
+                else if (cur_client.cur_chat.id != chat_id){
+                    t_list *temp_widgets = t_main.chat_nodes_info;
+                    t_list *temp_ch = cur_client.chats;
+                    
+                    while (temp_ch)
+                    {
+                        if (((t_chat *)temp_ch->data)->id == chat_id && ((t_chat *)temp_ch->data)->notify == false)
+                        {
+                            t_note.notification_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+                            gtk_widget_set_valign(t_note.notification_box,GTK_ALIGN_CENTER);
+                            gtk_widget_set_halign(t_note.notification_box,GTK_ALIGN_START);
+                            GtkWidget *notification = gtk_image_new_from_file("client/media/unmuted.png");
+                            gtk_box_append(GTK_BOX(t_note.notification_box), notification);
+                            gtk_box_append(GTK_BOX(temp_widgets->data), t_note.notification_box);
+                            ((t_chat *)temp_ch->data)->is_enter = false;
+                            ((t_chat *)temp_ch->data)->notify = true;
+                        }
+                        temp_widgets = temp_widgets->next;
+                        temp_ch = temp_ch->next;
+                    }
+
+                } 
                 
                 if (!prev || t_main.scroll_mes) {           
                     pthread_t display_thread = NULL;
@@ -905,7 +927,7 @@ void *rec_func() {
                     int status = 0;
                     swiftchat_send(cur_client.ssl, &status, sizeof(int));        
                 }
-                else 
+                /*else 
                 {
                     t_list *temp_widgets = t_main.chat_nodes_info;
                     t_list *temp_ch = cur_client.chats;
@@ -926,7 +948,7 @@ void *rec_func() {
                         temp_ch = temp_ch->next;
                     }
 
-                }
+                }*/
                 
                 if (!prev || t_main.scroll_mes) {           
                     pthread_t display_thread = NULL;
@@ -1152,6 +1174,7 @@ void *rec_func() {
                 printf("a\n");
                 char buf[544] = {0};
                 sprintf(buf, "client_data/%s", cur_client.avatar.name);
+                printf("buf %s\n", buf);
                 recv_image(cur_client.ssl, buf);
                 if (malloc_size (cur_client.avatar.path))
                     mx_strdel(&cur_client.avatar.path);
@@ -1165,6 +1188,9 @@ void *rec_func() {
                 t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
                 get_avatar(t_main.loaded_avatar);
                 printf("gets avatar %s\n", t_main.loaded_avatar->name);
+                if (mx_strcmp(t_main.loaded_avatar->name, "default") == 0) {
+                    *t_main.loaded_avatar = t_main.default_avatar;
+                }
                 t_main.loaded = true;
             }
             else if(mx_strncmp(mx_strtrim(message), "<update avatar chat_id=",23) == 0) {
