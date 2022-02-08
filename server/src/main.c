@@ -430,6 +430,19 @@ void *client_work(void *param) {
             update_chat_name(c_name, chat_id);
             send_message(buf, cur->login, &cur->cur_chat, false);
         }
+        else if(mx_strncmp(message, "<change mute chat_id=", 21) == 0) {
+            char *temp = message + 21;
+            int len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            char *c_id = mx_strndup(temp, len);
+            printf("%s\n", c_id);
+            int chat_id = mx_atoi(c_id);
+            mx_strdel(&c_id);
+
+            change_mute(chat_id, cur->id);
+        }
         else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0) {
             printf("%s\n", message);
             char *temp = message + 15;
@@ -501,12 +514,12 @@ void *client_work(void *param) {
             sql_pattern = "INSERT INTO messages (chat_id, user_id, text, time, type) VALUES (%d, %d, '%s', '%s', '%s');";
             asprintf(&query, sql_pattern, cur->cur_chat.id, cur->id, path, get_time(), "file");
             int *mes_id = sqlite3_exec_db(query, 2);
-            
+            char *time = mx_strndup(get_time()+11, 5);
             cur->cur_chat.last_mes_id = *mes_id;
             recv_file(cur->ssl, path, mode);
 
             char buf[544] = {0};
-            sprintf(buf, "<file chat_id=%d, mes_id=%d, from=%s, prev=0>%s", chat_id, *mes_id, cur->login, name);
+            sprintf(buf, "<file chat_id=%d, mes_id=%d, from=%s, time=%s, prev=0>%s", chat_id, *mes_id, cur->login, time, name);
 
             send_message(buf, cur->login, &cur->cur_chat, false);
         }

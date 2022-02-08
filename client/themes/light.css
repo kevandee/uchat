@@ -303,10 +303,11 @@ menubar popover{
   font-family: Arial, sans-serif;
   font-size: 18px;
   font-weight: 600;
-  color: #474747;
+  color: #ff2c2c;
+  border: solid 1px #ff2c2c;
   background: transparent;
   border-radius: 5px;
-  border: none;
+  margin-top: 10px;
 }
 
 /*------------------------- PREVIEW BOX -------------------------*/
@@ -546,4 +547,29 @@ menubar popover{
   font-size: 48px;
   color: #fff;
   font-weight: 700;
+}
+
+/* ---------------- Group Settings Member list ---------------- */
+
+#scrool_member_list {
+  background-color: transparent;
+}
+
+#members_names_group {
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: #474747;
+}
+
+#user_box_group {
+  margin-top: 5px;
+}
+
+#member_list_group_label {
+  margin-top: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #464646;
 }

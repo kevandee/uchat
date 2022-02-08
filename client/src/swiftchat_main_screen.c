@@ -9,6 +9,9 @@ void load_css_main(GtkCssProvider *provider, GtkWidget *widget)
 void return_to_chatlist(GtkWidget *widget, gpointer data) {
     //gtk_widget_hide(gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW (t_main.scrolled_window_left)));
     (void)widget;
+    if (!t_main.connected) {
+        return;
+    }
 
     if(data != NULL)
     {
@@ -44,6 +47,9 @@ void return_to_chatlist(GtkWidget *widget, gpointer data) {
 }
 
 static void return_to_chat() {
+    if (!t_main.connected) {
+        return;
+    }
     t_chat *swap = NULL;
     t_list *temp = cur_client.chats;
     while (temp) {
@@ -58,6 +64,9 @@ static void return_to_chat() {
 }
 
 static void send_new_chat_name(GtkWidget *widget, gpointer data) {
+    if (!t_main.connected) {
+        return;
+    }
     (void)widget;
     GtkWidget *entry = data;
     const char *tmp_chat_name = gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY (entry)));
@@ -96,6 +105,9 @@ static void send_new_chat_name(GtkWidget *widget, gpointer data) {
 void show_group_settings(GtkWidget *widget, gpointer data)
 {
     (void)widget;
+    if (!t_main.connected) {
+        return;
+    }
     if(t_main.sticker_panel)
     {
         gtk_widget_hide(t_main.sticker_panel);
@@ -260,7 +272,7 @@ void show_group_settings(GtkWidget *widget, gpointer data)
     gtk_widget_set_halign(GTK_WIDGET(members_label_box), GTK_ALIGN_START);
     gtk_widget_set_valign(GTK_WIDGET(members_label_box), GTK_ALIGN_START);
     GtkWidget *members_label = gtk_label_new("MEMBERS LIST");
-    gtk_widget_set_name(GTK_WIDGET(members_label), "name_label");
+    gtk_widget_set_name(GTK_WIDGET(members_label), "member_list_group_label");
     load_css_main(t_screen.provider, members_label);
     gtk_box_append(GTK_BOX(members_label_box), members_label);
 
@@ -273,6 +285,8 @@ void show_group_settings(GtkWidget *widget, gpointer data)
     while(temp_names)
     {
         GtkWidget *user_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+        gtk_widget_set_name(GTK_WIDGET(user_box), "user_box_group"); 
+        load_css_main(t_screen.provider, user_box);
         gtk_widget_set_valign(user_box,GTK_ALIGN_CENTER);
         gtk_widget_set_halign(user_box,GTK_ALIGN_START);
         t_avatar *avatar_img = NULL;
@@ -289,11 +303,11 @@ void show_group_settings(GtkWidget *widget, gpointer data)
             avatar_img = &cur_client.avatar;
         }
 
-        GtkWidget *avatar = get_circle_widget_from_png_avatar(avatar_img, 45, 45, true);
+        GtkWidget *avatar = get_circle_widget_from_png_avatar(avatar_img, 60, 60, true);
 
         gtk_box_append(GTK_BOX(user_box), avatar);
         GtkWidget *name = gtk_label_new(temp_names->data);
-        gtk_widget_set_name(GTK_WIDGET(name), "chat_name"); 
+        gtk_widget_set_name(GTK_WIDGET(name), "members_names_group"); 
         load_css_main(t_screen.provider, name);
         gtk_box_append(GTK_BOX(user_box), name);
 
@@ -304,7 +318,7 @@ void show_group_settings(GtkWidget *widget, gpointer data)
     }
     gtk_widget_set_size_request(GTK_WIDGET(members_scroll_window), 320, 350);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(members_scroll_window), members_list_box);
-    gtk_widget_set_name(members_scroll_window, "test");
+    gtk_widget_set_name(members_scroll_window, "scrool_member_list");
     load_css_main(t_screen.provider, members_scroll_window);
 
     gtk_box_append(GTK_BOX(members_box), members_label_box);
@@ -321,11 +335,18 @@ void show_group_settings(GtkWidget *widget, gpointer data)
 
 static void send_chat(GtkWidget *widget, gpointer data) {
     (void)widget;
+    if (!t_main.connected) {
+        return;
+    }
     GtkWidget **swapped = data;
     GtkWidget *name_entry = GTK_WIDGET (swapped[3]);
     cur_client.sender_new_chat = true;
-    const char *name = gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY(name_entry)));
 
+    const char *name = gtk_entry_buffer_get_text(gtk_entry_get_buffer(GTK_ENTRY(name_entry)));
+    if (name[0] == '.' || mx_strlen(name) == 0)
+    {
+        return;
+    }
     t_list *temp = t_main.check_buttons_user_list;
     t_list *result_users = NULL;
     while (temp) {
@@ -336,6 +357,8 @@ static void send_chat(GtkWidget *widget, gpointer data) {
 
         temp = temp->next;
     }
+    if (!result_users)
+        return;
 
     char *users = NULL;
     temp = result_users;
@@ -358,6 +381,9 @@ static void send_chat(GtkWidget *widget, gpointer data) {
 
 void add_chat_dialog(GtkWidget *widget, gpointer data) 
 {
+    if (!t_main.connected) {
+        return;
+    }
     (void)widget;
     GtkWidget** swapped = data;
     gtk_label_set_label(GTK_LABEL(swapped[0]), "New Group");
@@ -557,6 +583,10 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
     (void)keycode;
     (void)state;
 
+    if (!t_main.connected) {
+        return;
+    }
+
     if (keyval == GDK_KEY_Return) 
     {
         
@@ -739,6 +769,9 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
 
 static void insert_text_bio(GtkTextBuffer *buffer, GtkTextIter *location)
 {
+    if (!t_main.connected) {
+        return;
+    }
     gint count=gtk_text_buffer_get_char_count(buffer);
 
     GtkTextIter  start, end, offset;
@@ -761,6 +794,9 @@ static void show_stickers(gpointer data);
 
 static void hide_stickers(gpointer data)
 {
+    if (!t_main.connected) {
+        return;
+    }
     GtkWidget **change = data;
     gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 818, 588);
     gtk_widget_set_size_request(change[0], 750, 0);
@@ -783,6 +819,9 @@ static void hide_stickers(gpointer data)
 }
 
 static void send_sticker(GtkGestureClick *gesture, int n_press, double x, double y, gpointer data) {
+    if (!t_main.connected) {
+        return;
+    }
     (void)gesture;
     (void)n_press;
     (void)x;
@@ -800,10 +839,16 @@ static void send_sticker(GtkGestureClick *gesture, int n_press, double x, double
     gtk_widget_set_margin_bottom(sticker, 5);
     gtk_widget_set_size_request(GTK_WIDGET(sticker), 130, 130);
     gtk_box_append(GTK_BOX (t_main.scroll_box_right), sticker);
+
+    pthread_t display_thread = NULL;
+    pthread_create(&display_thread, NULL, scroll_func, NULL);
 }
 
 static void show_stickers(gpointer data)
 {
+    if (!t_main.connected) {
+        return;
+    }
     GtkWidget **change = data;
     gtk_widget_set_size_request(GTK_WIDGET(t_main.scrolled_window_right), 543, 588);
     gtk_widget_set_size_request(change[0], 525, 0);
@@ -888,6 +933,9 @@ static void show_stickers(gpointer data)
 
 void load_more_messages (GtkScrolledWindow *scrolled_window, GtkPositionType pos, gpointer data) {
     (void)scrolled_window;
+    if (!t_main.connected) {
+        return;
+    }
     t_chat *chat = data;
     if (pos == GTK_POS_BOTTOM || chat->last_mes_id == 1) {
         return;
@@ -899,6 +947,14 @@ void load_more_messages (GtkScrolledWindow *scrolled_window, GtkPositionType pos
     t_main.adj_pos = gtk_adjustment_get_upper(GTK_ADJUSTMENT(adj));//gtk_adjustment_get_value(GTK_ADJUSTMENT(adj));
     
     get_messages_from_server(chat->id, chat->last_mes_id);
+
+}
+
+static void change_mute() {
+    char buf[544] = {0};
+    sprintf(buf, "<change mute chat_id=%d>", cur_client.cur_chat.id);
+    swiftchat_send(cur_client.ssl, buf, 544);
+    cur_client.cur_chat.mute = cur_client.cur_chat.mute == true ? false : true;
 
 }
 
@@ -1032,11 +1088,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     gtk_widget_set_name(GTK_WIDGET(group_or_user_name), "chat_name_inside_label");
     load_css_main(t_screen.provider, group_or_user_name);
     gtk_box_append(GTK_BOX(group_or_user_name_box), group_or_user_name);
-    GtkWidget *status = gtk_label_new("last seen 13 minutes ago");
-    gtk_widget_set_name(GTK_WIDGET(status), "last_online");
-    load_css_main(t_screen.provider, status);
     gtk_box_append(GTK_BOX(info_box), group_or_user_name_box);
-    gtk_box_append(GTK_BOX(info_box), status);
 
     gtk_box_append(GTK_BOX(chat_headerbar_left), photo_box);
     gtk_box_append(GTK_BOX(chat_headerbar_left), info_box);
@@ -1067,6 +1119,11 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     else mute_img = gtk_image_new_from_file("client/media/mute_btn_light.png");
     //GtkWidget *mute_img = gtk_image_new_from_file("client/media/mute_inactive.png");
     gtk_widget_set_size_request(mute_img, 35, 35);
+
+    GtkGesture *mute_click = gtk_gesture_click_new();
+    gtk_gesture_set_state(mute_click, GTK_EVENT_SEQUENCE_CLAIMED);
+    g_signal_connect_swapped(mute_click, "pressed", G_CALLBACK(change_mute), NULL);
+    gtk_widget_add_controller(mute_img, GTK_EVENT_CONTROLLER(mute_click));
 
     gtk_box_append(GTK_BOX(chat_headerbar_right), mute_img); 
 
