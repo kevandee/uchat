@@ -1424,6 +1424,10 @@ int main(int argc, char *argv[]) {
     };
     t_main.default_group_avatar = default_group_avatar;
     cur_client = cur;
+    struct stat st = {0};
+    if (stat("client_data", &st) == -1) {
+        mkdir("client_data", 0777);
+    }
     t_main.is_run = true;
     t_main.ip = mx_strdup(argv[1]);
     t_main.port = mx_atoi(argv[2]);
