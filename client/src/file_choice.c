@@ -15,12 +15,12 @@ static void on_open_response (GtkDialog *dialog, int response)
         char *name = g_file_get_basename(file);
         if (mx_strstr(name, ".txt")) {
             sprintf(buf, "<file chat_id=%d, name=%s, mode=%s>", cur_client.cur_chat.id,   name, "w");
-            send_all(cur_client.ssl, buf, 544);
+            swiftchat_send(cur_client.ssl, buf, 544);
             send_file(cur_client.ssl, g_file_get_path(file), "r");
         }
         else {
             sprintf(buf, "<file chat_id=%d, name=%s, mode=%s>", cur_client.cur_chat.id,  name, "wb");
-            send_all(cur_client.ssl, buf, 544);
+            swiftchat_send(cur_client.ssl, buf, 544);
             send_file(cur_client.ssl, g_file_get_path(file), "rb");
         }
 

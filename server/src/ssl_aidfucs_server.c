@@ -6,7 +6,7 @@ SSL_CTX* CTX_initialize_server() {
 
     OpenSSL_add_all_algorithms();
     SSL_load_error_strings();
-    ssl_method = TLS_server_method();
+    ssl_method = SSLv23_server_method();
     ssl_context = SSL_CTX_new(ssl_method);
 
     if(ssl_context == NULL) {
@@ -119,11 +119,12 @@ void load_certs(SSL_CTX* context, char* cert_name, char* key_name) {
 }
 
 int open_server_connection(int port, struct sockaddr_in *adr, socklen_t adrlen) {
-    int serv_fd = socket(AF_INET, SOCK_STREAM, 0);
+    int serv_fd = socket(PF_INET, SOCK_STREAM, 0);
     int option = 1;
     (*adr).sin_family = AF_INET;
+    (*adr).sin_addr.s_addr = htonl(INADDR_ANY);
     (*adr).sin_port = htons(port);
-    (*adr).sin_addr.s_addr = inet_addr("127.0.0.1");
+    //(*adr).sin_addr.s_addr = inet_addr("127.0.0.1");
 
     if(setsockopt(serv_fd, SOL_SOCKET,(SO_REUSEADDR),(char*)&option,sizeof(option)) < 0){ //indus magic
 		perror("ERROR: setsockopt failed");
@@ -134,7 +135,7 @@ int open_server_connection(int port, struct sockaddr_in *adr, socklen_t adrlen) 
         perror("ERROR: Socket binding failed\n");
         abort();
     }
-    if ( listen(serv_fd, 5) < 0) {
+    if ( listen(serv_fd, 10) < 0) {
         perror("ERROR: Can't configure listening port\n");
         abort();
     }

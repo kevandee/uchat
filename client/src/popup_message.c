@@ -29,7 +29,7 @@ static void delete ( GSimpleAction *action, G_GNUC_UNUSED GVariant *parameter, G
     char buf[544] = {0};
     sprintf(buf, "<delete mes chat_id=%d, mes_id=%d>", cur_client.cur_chat.id, *((int *)gesture_list->next->data));
     printf("%s\n", buf);
-    send_all(cur_client.ssl, buf, 544);
+    swiftchat_send(cur_client.ssl, buf, 544);
 }
 
 const GActionEntry entries[] =

@@ -16,7 +16,7 @@ static void send_and_choice_new_dialog(GtkWidget *widget, gpointer data) {
     cur_client.sender_new_chat = true;
     sprintf(buf, "<add chat, name=.dialog>%s", users);
     
-    send_all(cur_client.ssl, buf, 512+32);
+    swiftchat_send(cur_client.ssl, buf, 512+32);
     while (!t_main.loaded) {
         usleep(50);
     }
@@ -90,7 +90,7 @@ gboolean add_chat_node(gpointer data) {
         char buf[544] = {0};
         t_main.loaded = false;
         sprintf(buf, "<get user avatar>%s", chat->users->data);
-        send_all(cur_client.ssl, buf, 544);
+        swiftchat_send(cur_client.ssl, buf, 544);
         while(!t_main.loaded) {
             usleep(50);
         }
@@ -109,7 +109,7 @@ gboolean add_chat_node(gpointer data) {
         else 
             sprintf(buf, "<get user avatar>%s", chat->users->next->data);
         printf("buf %s\n", buf);
-        send_all(cur_client.ssl, buf, 544);
+        swiftchat_send(cur_client.ssl, buf, 544);
         while(!t_main.loaded) {
             usleep(50);
         }

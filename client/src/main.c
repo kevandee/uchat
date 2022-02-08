@@ -3,33 +3,6 @@
 t_client cur_client;
 pthread_mutex_t cl_mutex;
 
-void *sender_func(void *param) {
-    (void)param;
-    char *message = (char *)malloc(512);
-    char buf[512 + 32];
-    fseek(stdin,0,SEEK_END);
-    while(1) {
-        printf("> ");
-        fflush(stdout);
-        size_t len;
-        getline(&message, &len, stdin);
-        message = mx_strtrim(message);
-        if (mx_strcmp(message, "users") == 0) {
-            SSL_write(cur_client.ssl, message, mx_strlen(message) - 1);
-        }
-        else if (mx_strcmp(message, "exit") == 0) {
-            SSL_write(cur_client.ssl, message, 4);
-            break;
-        }
-        else {
-            SSL_write(cur_client.ssl, message, mx_strlen(message));
-        }
-        clear_message(message, 512);
-        clear_message(buf, 512 + 32);
-
-    }
-    return NULL;
-}
 
 gboolean add_msg(gpointer data) {
     t_message *message = data;
@@ -340,15 +313,7 @@ gboolean add_file_msg(gpointer data) {
 //icon
     GtkGesture *gesture = gtk_gesture_click_new();
     gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
-    //gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
-    //GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
-    //arr[0] = incoming_msg;
-    //arr[1] = incoming_msg_box;
-    //int *mes_id = (int *)malloc(sizeof(int));
-    //*mes_id = message->id;
-    //t_list *gesture_data = NULL;
-    //mx_push_back(&gesture_data, arr);
-    //mx_push_back(&gesture_data, mes_id);
+
     g_signal_connect_after(gesture, "pressed", G_CALLBACK(choise_dir), file_mes);
     gtk_widget_add_controller(file_icon, GTK_EVENT_CONTROLLER(gesture));
 //icon
@@ -411,7 +376,7 @@ gboolean add_file_msg(gpointer data) {
         GtkWidget *user_action_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
         gtk_widget_set_halign(GTK_WIDGET(user_action_box), GTK_ALIGN_CENTER);
         gtk_widget_set_valign(GTK_WIDGET(user_action_box), GTK_ALIGN_CENTER);
-        GtkWidget *user_action_time = gtk_label_new("13:45");
+        GtkWidget *user_action_time = gtk_label_new(file_mes->time);
         gtk_widget_set_name(user_action_time, "user_action");
         load_css_main(t_screen.provider, user_action_time);
 
@@ -423,20 +388,6 @@ gboolean add_file_msg(gpointer data) {
             gtk_box_prepend(GTK_BOX(incoming_file_box), user_action_box);
             gtk_grid_attach(GTK_GRID(message_content), incoming_file_box, 1, 2, 1, 1);
             gtk_grid_attach(GTK_GRID(message_content), user_logo_box, 2, 1, 1, 2);
-        
-            /*GtkGesture *gesture = gtk_gesture_click_new();
-            gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
-            gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
-            GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
-            arr[0] = incoming_file_name;
-            arr[1] = incoming_file_box;
-            int *mes_id = (int *)malloc(sizeof(int));
-            *mes_id = file_mes->id;
-            t_list *gesture_data = NULL;
-            mx_push_back(&gesture_data, arr);
-            mx_push_back(&gesture_data, mes_id);
-            g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), gesture_data);
-            gtk_widget_add_controller(incoming_file_box, GTK_EVENT_CONTROLLER(gesture));*/
         }
         else
         {
@@ -478,7 +429,7 @@ gboolean add_file_msg(gpointer data) {
         GtkWidget *user_action_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
         gtk_widget_set_halign(GTK_WIDGET(user_action_box), GTK_ALIGN_CENTER);
         gtk_widget_set_valign(GTK_WIDGET(user_action_box), GTK_ALIGN_CENTER);
-        GtkWidget *user_action_time = gtk_label_new("13:45");
+        GtkWidget *user_action_time = gtk_label_new(file_mes->time);
         gtk_widget_set_name(user_action_time, "user_action");
         load_css_main(t_screen.provider, user_action_time);
 
@@ -488,19 +439,6 @@ gboolean add_file_msg(gpointer data) {
         {
             gtk_box_prepend(GTK_BOX(incoming_file_box), incoming_ico_box);
             gtk_box_prepend(GTK_BOX(incoming_file_box), user_action_box);
-            /*GtkGesture *gesture = gtk_gesture_click_new();
-            gtk_gesture_set_state(gesture, GTK_EVENT_SEQUENCE_CLAIMED);
-            gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), 3);
-            GtkWidget **arr = (GtkWidget **)malloc(2*sizeof(GtkWidget *));
-            arr[0] = incoming_msg;
-            arr[1] = incoming_file_box;
-            int *mes_id = (int *)malloc(sizeof(int));
-            *mes_id = message->id;
-            t_list *gesture_data = NULL;
-            mx_push_back(&gesture_data, arr);
-            mx_push_back(&gesture_data, mes_id);
-            g_signal_connect_after(gesture, "pressed", G_CALLBACK(show_message_menu), gesture_data);
-            gtk_widget_add_controller(incoming_file_box, GTK_EVENT_CONTROLLER(gesture));*/
         }
         else
         {
@@ -726,13 +664,15 @@ gboolean add_sticker_msg(gpointer data) {
 
 void *rec_func(void *param) {
     while(!t_main.loaded) {
-        sleep(1);
+        usleep(500);
     }
-    SSL *fd = cur_client.ssl;
+    
     (void)param;
     char message[512 + 32] = {0};
     while (1) {
-		int receive = SSL_read(fd, message, 512 + 32);
+        //printf("wait\n");
+        SSL *fd = cur_client.ssl;
+		int receive = swiftchat_recv(fd, message, 512 + 32);
 
         if (receive > 0) {
             printf("|%s|\n", message);
@@ -743,25 +683,25 @@ void *rec_func(void *param) {
                 new_chat->users = NULL;
 
                 char buf_name[256] = {0};
-                receive = recv_all(fd, buf_name, 256);
+                receive = swiftchat_recv(fd, buf_name, 256);
                 while (receive < 0) {
-                    receive = recv_all(fd, buf_name, 256);
+                    receive = swiftchat_recv(fd, buf_name, 256);
                 }
                 mx_strcpy(new_chat->name, buf_name);
                 printf("recv chatname %s\n", new_chat->name);
-                receive = SSL_read(fd, &new_chat->id, sizeof(int));
+                receive = swiftchat_recv(fd, &new_chat->id, sizeof(int));
                 while (receive < 0) {
-                    receive = SSL_read(fd, &new_chat->id, sizeof(int));
+                    receive = swiftchat_recv(fd, &new_chat->id, sizeof(int));
                 }
-                receive = SSL_read(fd, &new_chat->count_users, sizeof(int));
+                receive = swiftchat_recv(fd, &new_chat->count_users, sizeof(int));
                 while (receive < 0) {
-                    receive = SSL_read(fd, &new_chat->count_users, sizeof(int));
+                    receive = swiftchat_recv(fd, &new_chat->count_users, sizeof(int));
                 }
                 for (int i = 0; i < new_chat->count_users; i++) {
                     char buf[32] = {0};
-                    receive = recv_all(fd, buf, 32);
+                    receive = swiftchat_recv(fd, buf, 32);
                     while (receive < 0) {
-                        receive = recv_all(fd, buf, 32);
+                        receive = swiftchat_recv(fd, buf, 32);
                     }
                     mx_push_back(&new_chat->users,mx_strdup(buf));
                     clear_message(buf, 32);
@@ -805,15 +745,16 @@ void *rec_func(void *param) {
                 fflush(stdout);
             }
             else if (mx_strcmp(mx_strtrim(message), "<users list>") == 0) {
+                printf("loooooooox\n");
                 pthread_mutex_lock(&cl_mutex);
                 t_list *users_list = NULL;
-                int count_users;
+                int count_users = 0;
                 printf("reseive\n");
-                SSL_read(cur_client.ssl, &count_users, sizeof(int));
+                swiftchat_recv(cur_client.ssl, &count_users, sizeof(int));
                 for (int i = 0; i < count_users; i++) {
                     printf("reseive\n");
                     char buf[20] = {0};
-                    recv_all(cur_client.ssl, buf, 20);
+                    swiftchat_recv(cur_client.ssl, buf, 20);
                     mx_push_back(&users_list, mx_strtrim(buf));
                 }
                 t_main.search_users_list = users_list;
@@ -882,7 +823,7 @@ void *rec_func(void *param) {
                     if (prev) {
                         cur_client.cur_chat.last_mes_id = mes->id;
                         int status = 1;
-                        SSL_write(cur_client.ssl, &status, sizeof(int));
+                        swiftchat_send(cur_client.ssl, &status, sizeof(int));
                         mx_push_back(&cur_client.cur_chat.messages, mes);
                     }
                     else {
@@ -893,7 +834,7 @@ void *rec_func(void *param) {
                 }
                 else if (prev) {
                     int status = 0;
-                    SSL_write(cur_client.ssl, &status, sizeof(int));        
+                    swiftchat_send(cur_client.ssl, &status, sizeof(int));        
                 }
                 
                 if (!prev || t_main.scroll_mes) {           
@@ -935,7 +876,7 @@ void *rec_func(void *param) {
                 temp = mx_strstr(message, "prev=") + 5;
                 bool prev = *temp == '0' ? false : true; 
                 printf("bool %i %c\n", prev, *temp);
-
+                char *time = mx_strndup (mx_strstr(message, "time=") + 5, 5);
                 char *name = mx_strchr(message, '>') + 1;
 
                 if (cur_client.cur_chat.id == chat_id) {
@@ -943,6 +884,7 @@ void *rec_func(void *param) {
                     new_file->name = mx_strdup(name);
                     new_file->sender = mx_strdup(sender);
                     new_file->data = NULL;
+                    new_file->time = time;
                     new_file->prev = prev;
                     new_file->id = message_id;
                     pthread_mutex_lock(&cl_mutex);
@@ -951,7 +893,7 @@ void *rec_func(void *param) {
                     if (prev) {
                         cur_client.cur_chat.last_mes_id = new_file->id;
                         int status = 1;
-                        SSL_write(cur_client.ssl, &status, sizeof(int));
+                        swiftchat_send(cur_client.ssl, &status, sizeof(int));
                         //mx_push_back(&cur_client.cur_chat.messages, mes);
                     }
                     /*else {
@@ -962,7 +904,7 @@ void *rec_func(void *param) {
                 }
                 else if (prev) {
                     int status = 0;
-                    SSL_write(cur_client.ssl, &status, sizeof(int));        
+                    swiftchat_send(cur_client.ssl, &status, sizeof(int));        
                 }
                 
                 if (!prev || t_main.scroll_mes) {           
@@ -1023,7 +965,7 @@ void *rec_func(void *param) {
                     if (prev) {
                         cur_client.cur_chat.last_mes_id = new_sticker->id;
                         int status = 1;
-                        SSL_write(cur_client.ssl, &status, sizeof(int));
+                        swiftchat_send(cur_client.ssl, &status, sizeof(int));
                         //mx_push_back(&cur_client.cur_chat.messages, mes);
                     }
                     /*else {
@@ -1034,7 +976,7 @@ void *rec_func(void *param) {
                 }
                 else if (prev) {
                     int status = 0;
-                    SSL_write(cur_client.ssl, &status, sizeof(int));        
+                    swiftchat_send(cur_client.ssl, &status, sizeof(int));        
                 }
                 
                 if (!prev || t_main.scroll_mes) {           
@@ -1075,7 +1017,7 @@ void *rec_func(void *param) {
                 }  
             } // "<get last mes id>"
             else if (mx_strncmp(message, "<get last mes id>", 17) == 0) {
-                SSL_read(cur_client.ssl, &t_main.send_mes_id, sizeof(int));
+                swiftchat_recv(cur_client.ssl, &t_main.send_mes_id, sizeof(int));
                 t_main.loaded = true;
             }
             else if(mx_strncmp(message, "<delete mes chat_id=", 20) == 0) { // "<delete mes chat_id=%d, mes_id=%d>"
@@ -1218,7 +1160,7 @@ void *rec_func(void *param) {
 
                 char buf[544] = {0};
                 sprintf(buf, "<get chat avatar chat_id=%d>",chat_id);
-                send_all(cur_client.ssl, buf, 544);
+                swiftchat_send(cur_client.ssl, buf, 544);
                 t_main.loaded_avatar = (t_avatar *)malloc(sizeof(t_avatar));
                 get_avatar(t_main.loaded_avatar);
                 printf("gets avatar %s\n", t_main.loaded_avatar->name);
@@ -1340,7 +1282,8 @@ void *rec_func(void *param) {
             }
         }  
         if (receive == 0) {
-            break;
+            //break;
+            //usleep(500);
         } else {
                 // -1
 		}
@@ -1405,15 +1348,18 @@ static void load_css() {
 
     char message[32] = {0};
     // Отправка данных для авторизации на сервер
-    SSL_write(cur_client.ssl, "i", 1);
+    sprintf(message, "i");
+    swiftchat_send(cur_client.ssl, message, 32);
+    clear_message(message, 32);
     sprintf(message, "%s", cur_client.login);
-    SSL_write(cur_client.ssl, message, 32);
+    swiftchat_send(cur_client.ssl, message, 32);
     clear_message(message, 32);
     sprintf(message, "%s", cur_client.passwd);
-    SSL_write(cur_client.ssl, message, 16);
+    swiftchat_send(cur_client.ssl, message, 16);
 
-    bool err_aut;
-    SSL_read(cur_client.ssl, &err_aut, sizeof(bool)); // Ожидание ответа от сервера об успешности входа или регистрации
+
+    bool err_aut = true;
+    swiftchat_recv(cur_client.ssl, &err_aut, sizeof(bool)); // Ожидание ответа от сервера об успешности входа или регистрации
 
     if (err_aut) {
         mx_strdel(&cur_client.login);
@@ -1444,6 +1390,8 @@ static void activate(GtkApplication *application) {
     chat_decorate_headerbar();
     gtk_widget_show(t_screen.main_window);
 }
+
+
 
 int main(int argc, char *argv[]) {
     (void)argv;
@@ -1493,61 +1441,17 @@ int main(int argc, char *argv[]) {
         .y = 200
     };
     t_main.default_group_avatar = default_group_avatar;
-    cur_client = cur;;
-
+    cur_client = cur;
+    t_main.ip = mx_strdup(argv[1]);
+    t_main.port = mx_atoi(argv[2]);
     //      =====   SSLing    =====
-    SSL_CTX *context;
-    SSL *ssl;
-    SSL_library_init();
-
-    open_client_connection(argv[1], mx_atoi(argv[2]));
-
-    context = CTX_initialize_client();
-    ssl = SSL_new(context);
-     SSL_set_mode(ssl, SSL_MODE_ASYNC);
-    if (SSL_set_fd(ssl, cur_client.serv_fd) == 0) {
-        perror("ERROR: socket descriptor attachment failed!\n");
-        ERR_print_errors_fp(stderr);
-        return -1;
-    }
-    cur_client.ssl = ssl;
-
-    if (SSL_connect(ssl) == -1) {
-        ERR_print_errors_fp(stderr);
-        return -1;
-    }
-
-    printf("SSL: Connected to server with chipher: %s\n", SSL_get_cipher(ssl));
-    X509 *cert = SSL_get_peer_certificate(ssl);
-    if (cert == NULL) {
-        printf("SSL: No certificates configured.\n");
-    }
-    else {
-        /*printf("SSL: Server certificates:\n");
-        char *line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
-        printf("SSL: Subject: %s\n", line);
-        free(line);
-        line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
-        printf("SSL: Issuer: %s\n", line);
-        free(line);
-        X509_free(cert);*/
-    }
-
-    //      echo server check
-    /*const char *check_request = "Pablo";
-    int check_len = mx_strlen(check_request);
-    SSL_write(ssl, check_request, check_len);
-    char check_reply[6] = {0};
-    SSL_read(ssl, &tempbool, sizeof(bool));
-    printf("SSL: request - %s\nSSL: reply   - %d\n", check_request, tempbool);*/
-    //      =====   SSLing    =====
-
-    // Запуск потоков для приёма и отправки сообщений, будем смотреть. Может, придётся переделать под события из гтк
+    t_main.context = CTX_initialize_client();
+    //cur_client.ssl = SSL_new(t_main.context);
+    open_ssl_connection();
+    printf("b\n");
     t_main.loaded = false;
-    pthread_t sender_th;
     pthread_t rec_th;
     pthread_mutex_init(&cl_mutex, NULL);
-    pthread_create(&sender_th, NULL, sender_func, &cur_client);
     pthread_create(&rec_th, NULL, rec_func, &cur_client.serv_fd);
 
     GtkApplication *application;
@@ -1556,13 +1460,11 @@ int main(int argc, char *argv[]) {
     g_signal_connect(application, "activate", G_CALLBACK(activate), NULL);
     status = g_application_run(G_APPLICATION(application), FALSE, NULL);
 
-    //ожидание завершения потоков, если нужно добавить код, то добавлять до этих функций
-    pthread_join(sender_th, NULL);
     pthread_join(rec_th, NULL);
 
     close(cur_client.serv_fd);
-    SSL_free(ssl);
-    SSL_CTX_free(context);
+    SSL_free(cur_client.ssl);
+    SSL_CTX_free(t_main.context);
 
     return 0;//status;
 }

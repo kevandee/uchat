@@ -13,7 +13,7 @@ static void on_open_response (GtkDialog *dialog, int response)
 
         char buf[544] = {0};
         sprintf(buf, "<get file chat_id=%d, mes_id=%d>", cur_client.cur_chat.id, t_main.choosed_file->id);
-        send_all(cur_client.ssl, buf, 544);
+        swiftchat_send(cur_client.ssl, buf, 544);
     }
 
     gtk_window_destroy (GTK_WINDOW (dialog));

@@ -50,6 +50,10 @@ typedef struct s_sticker{
 
 struct
 {
+    char *ip;
+    int port;
+    SSL_CTX *context;
+
     GtkWidget *grid;
     GtkWidget *left_panel;
     GtkWidget *search_panel;
@@ -72,6 +76,7 @@ struct
     t_list *message_widgets_list;
 
     t_list *search_users_list;
+    bool connected;
     bool loaded;
     bool drawed;
     bool scroll_mes;
@@ -108,6 +113,9 @@ struct
     GtkWidget *home;
     GtkWidget *settings;
 } t_actives;
+
+int swiftchat_send(SSL *ssl, void *buf, int size);
+int swiftchat_recv(SSL *ssl, void *buf, int size);
 
 void chat_show_reg_screen();
 void chat_show_auth_screen();
@@ -159,7 +167,7 @@ char *get_db_name(char *login);
 //SSLing
 SSL_CTX *CTX_initialize_client();
 void open_client_connection(char* server_IP, int port);
-
+int open_ssl_connection();
 //themes
 void on_light_theme();
 void on_dark_theme();

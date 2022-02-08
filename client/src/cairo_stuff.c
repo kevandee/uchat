@@ -131,8 +131,6 @@ cairo_surface_t *get_surface_from_jpg(const char *filename) {
         gdk_cairo_set_source_pixbuf (cr, pixbuf, 0, 0);
         cairo_paint (cr);
        
-        /* Save to a PNG file */
-        cairo_surface_write_to_png (surface, "output.png");
         cairo_destroy (cr);
         return surface;
 }
