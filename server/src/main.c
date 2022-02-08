@@ -15,7 +15,7 @@ void *client_work(void *param) {
     char passwd[16];
     char buff_out[MAX_LEN + NAME_LEN];
     bool is_run = true;
-    char choise;
+    char choise[32];
 
     bool err_msg = true;
     
@@ -27,12 +27,12 @@ void *client_work(void *param) {
 
     while (err_msg) {
         // sign up or sign in
-        if(SSL_read(cur->ssl, &choise, 1) <= 0) {
+        if(SSL_read(cur->ssl, &choise, 32) <= 0) {
             free_client(&cur, &users_list);
             
             return NULL;
         }
-        printf("choise %c\n", choise);
+        printf("choise %s\n", choise);
         // login
         if(SSL_read(cur->ssl, login, NAME_LEN) <= 0 || mx_strlen(login) <  2 || mx_strlen(login) >= 32){
             printf("Didn't enter the name.\n");
@@ -54,8 +54,49 @@ void *client_work(void *param) {
             cur->passwd=mx_strtrim(passwd);
         }
         //DB SWITH
-        printf("%c || %s || %s\n", choise, cur->login, cur->passwd);
-        switch(choise) {
+        printf("%s || %s || %s\n", choise, cur->login, cur->passwd);
+        if (mx_strcmp(choise, "u") == 0) {
+            char *query = NULL;
+            char *sql_pattern = NULL;
+            t_list *list = NULL;
+            sql_pattern = "SELECT EXISTS (SELECT id FROM users WHERE login=('%s'));";
+            asprintf(&query, sql_pattern, cur->login);
+            list = sqlite3_exec_db(query, 1);
+            if (strcmp(list->data, "0") == 0) {
+                //REGESTRATION TO DB
+                sql_pattern = "INSERT INTO users (login, password) VALUES ('%s', '%s');";
+                asprintf(&query, sql_pattern, cur->login, cur->passwd);
+                sqlite3_exec_db(query, 2);
+                const bool success_reg = false;
+                SSL_write(cur->ssl, &success_reg, sizeof(bool));
+            }
+            else {
+                //LOGIN ALREDAY TAKEN
+                SSL_write(cur->ssl, &err_msg, sizeof(bool));
+            }
+        }
+        else if (mx_strcmp(choise, "i") == 0 || mx_strcmp(choise, "reconnect") == 0) {
+            char *query = NULL;
+            char *sql_pattern = NULL;
+            t_list *list = NULL;
+            
+            sql_pattern = "SELECT EXISTS (SELECT id FROM users WHERE login=('%s') AND password=('%s'));";
+            asprintf(&query, sql_pattern, cur->login, cur->passwd);
+            list = sqlite3_exec_db(query, 1);
+            if (strcmp(list->data, "1") == 0) {
+                //USER FOUND
+                err_msg = false;
+                sql_pattern = "SELECT id FROM users WHERE login=('%s') AND password=('%s');";
+                asprintf(&query, sql_pattern, cur->login, cur->passwd);
+                list = sqlite3_exec_db(query, 1);
+            }
+            else {
+                //USER NOT FOUND
+                SSL_write(cur->ssl, &err_msg, sizeof(bool));
+            }
+        }
+
+        /*switch(choise) {
             case 'u': {
                 char *query = NULL;
                 char *sql_pattern = NULL;
@@ -98,11 +139,11 @@ void *client_work(void *param) {
                 }
                 break;
             }
-        }
+        }*/
     }
     
     // auth success
-
+    /*
     switch (choise) {
         case 'u':
             cur->chat_count = 0;
@@ -112,15 +153,17 @@ void *client_work(void *param) {
             //get_client_data(&cur);
             break;
     }
-    
+    */
     cur->id = get_user_id(cur->login);
-    SSL_write(cur->ssl, &err_msg, sizeof(bool));
-    
-    send_all_user_data(cur);
+   
+    if (mx_strcmp(choise, "i") == 0){
+        SSL_write(cur->ssl, &err_msg, sizeof(bool));
+        send_all_user_data(cur);
+    }
     sprintf(buff_out, "%s has joined with password %s\n", cur->login, cur->passwd);
     printf("%s", buff_out);
     sprintf(buff_out, "%s has joined\n", cur->login);
-    send_message(buff_out,login, NULL, true);
+    //send_message(buff_out,login, NULL, true);
     char message[MAX_LEN + NAME_LEN];
     while (is_run) {
         int mes_stat = SSL_read(cur->ssl, message, MAX_LEN + NAME_LEN);
@@ -781,8 +824,15 @@ void client_work_wrapper(SSL_CTX *context, int client_fd, pthread_t *thread, t_c
     pthread_create(thread, NULL, client_work, new_client);
 }
 
-void daemonize_server() {
-    pid_t process_id = 0;
+
+int main_server(int argc, char *argv[]);
+
+int main (int argc, char *argv[]) {
+    if (argc != 2) {
+        mx_printerr("usage: ./uchat_server <port>\n");
+        return -1;
+    }
+    /*pid_t process_id = 0;
     pid_t sid = 0;
     
     process_id = fork();
@@ -800,10 +850,13 @@ void daemonize_server() {
         exit(1);
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
-    close(STDERR_FILENO);
+    close(STDERR_FILENO);*/
+    main_server(argc, argv);
+
+    return 0;
 }
 
-int main(int argc, char *argv[]) {
+int main_server(int argc, char *argv[]) {
     printf("%s\n", SSLeay_version(SSLEAY_VERSION));
     
     //signal(SIGPIPE, SIG_IGN);
@@ -812,11 +865,10 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     //daemonize_server();
+    //daemonize_server();
     //  SSLing
-    struct sockaddr_in adr = {0};
-    socklen_t adrlen = sizeof(adr);
-    int serv_fd = open_server_connection(mx_atoi(argv[1]), &adr, adrlen);
-    daemonize_server();
+    
+    //daemonize_server();
     SSL_CTX *context;
     SSL_library_init();
     context = CTX_initialize_server();
@@ -834,11 +886,10 @@ int main(int argc, char *argv[]) {
 
 
     // opening connection
-    //daemonize_server();
+    
     
     printf("SSL: connection opened\n");
-    //EVP_PKEY_free(pkey);
-    //X509_free(x509);
+
     //daemonize_server();
     // for client serving
     pthread_t thread;
@@ -850,7 +901,9 @@ int main(int argc, char *argv[]) {
     //printf("%s\n", facts);
     int client_id = 0;
     int client_fd;
-
+    struct sockaddr_in adr = {0};
+    socklen_t adrlen = sizeof(adr);
+    int serv_fd = open_server_connection(mx_atoi(argv[1]), &adr, adrlen);
     while (1) {
         // accept client connection
         client_fd = accept(serv_fd, (struct sockaddr*) &adr, &adrlen);
@@ -864,7 +917,7 @@ int main(int argc, char *argv[]) {
     }
 
     close(client_fd);
-    close_server(pkey, x509, context);
+    //close_server(pkey, x509, context);
     //  SSLing
 
     return 0;

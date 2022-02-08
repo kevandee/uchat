@@ -76,7 +76,7 @@ static void send_new_chat_name(GtkWidget *widget, gpointer data) {
     
     char buf[544] = {0};
     sprintf(buf, "<setting chat_id=%d, chat_name=%s>", cur_client.cur_chat.id, tmp_chat_name);
-    send_all(cur_client.ssl, buf, 544);
+    swiftchat_send(cur_client.ssl, buf, 544);
     t_list *temp_widgets = t_main.chat_nodes_info;
     t_list *temp_ch = cur_client.chats;
 
@@ -315,7 +315,7 @@ static void send_chat(GtkWidget *widget, gpointer data) {
     t_main.loaded = false;
     char buf[512 + 32] = {0};
     sprintf(buf, "<add chat, name=%s>%s", name, users);
-    send_all(cur_client.ssl, buf, 512+32);
+    swiftchat_send(cur_client.ssl, buf, 512+32);
     while (!t_main.loaded) {
         usleep(50);
     }
@@ -344,10 +344,11 @@ void add_chat_dialog(GtkWidget *widget, gpointer data)
     t_main.loaded = false;
     char message[512+32] = {0};
     sprintf(message, "<users list>");
-    SSL_write(cur_client.ssl, message, 512+32);
+    swiftchat_send(cur_client.ssl, message, 512+32);
+    printf("gets search list 1\n");
     while (!t_main.loaded)
         usleep(50);
-    printf("gets search list\n");
+    printf("gets search list 2\n");
     //gtk_widget_hide(t_main.scroll_box);
     GtkWidget *add_chat_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_set_name(add_chat_box, "chat_box");
@@ -430,7 +431,7 @@ void add_chat_dialog(GtkWidget *widget, gpointer data)
             t_main.loaded = false;
             sprintf(buf, "<get user avatar>%s",temp->data);
             printf("buf %s\n", buf);
-            send_all(cur_client.ssl, buf, 544);
+            swiftchat_send(cur_client.ssl, buf, 544);
             while(!t_main.loaded) {
                 usleep(50);
             }
@@ -669,7 +670,7 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
             t_main.message_change_id = 0;
         }           
 
-        send_all(cur_client.ssl, message, 512+32);
+        swiftchat_send(cur_client.ssl, message, 512+32);
         gtk_text_buffer_set_text (buffer, "", 0);
 
         ////////////////
@@ -683,7 +684,7 @@ static void return_controll_func(GtkEventControllerKey *controller, guint keyval
             int *mes_id = (int *)malloc(sizeof(int));
             char buf[544] = {0};
             sprintf(buf, "<get last mes id>");
-            send_all(cur_client.ssl, buf, 544);
+            swiftchat_send(cur_client.ssl, buf, 544);
             t_main.loaded = false;
             while (!t_main.loaded) {
                 usleep(50);
@@ -757,7 +758,7 @@ static void send_sticker(GtkGestureClick *gesture, int n_press, double x, double
 
     char buf[544] = {0};
     sprintf(buf, "<sticker chat_id=%d, sticker_num=%d>", cur_client.cur_chat.id, sticker_num);
-    send_all(cur_client.ssl, buf, 544);
+    swiftchat_send(cur_client.ssl, buf, 544);
 
     GtkWidget *sticker = gtk_image_new_from_file(mx_strjoin(mx_strjoin("client/media/stickers/", mx_itoa(sticker_num)), ".png"));
     gtk_widget_set_halign(sticker, GTK_ALIGN_END);
@@ -870,7 +871,7 @@ void load_more_messages (GtkScrolledWindow *scrolled_window, GtkPositionType pos
 void show_chat_history(GtkWidget *widget, gpointer data)
 {
     (void)widget;
-    if (data && cur_client.cur_chat.id == ((t_chat *)data)->id) {
+    if (!t_main.connected || (data && cur_client.cur_chat.id == ((t_chat *)data)->id)) {
         return;
     }
     mx_clear_ldata(&cur_client.cur_chat.messages);
@@ -922,7 +923,7 @@ void show_chat_history(GtkWidget *widget, gpointer data)
     if (mx_strncmp(cur_client.cur_chat.name, ".dialog", 7) != 0) {
         char buf[512+32] = {0};
         sprintf(buf, "<chat users avatars>%d", cur_client.cur_chat.id);
-        send_all(cur_client.ssl,buf, 512+32);
+        swiftchat_send(cur_client.ssl,buf, 512+32);
         t_main.loaded = false;
         while (!t_main.loaded) {
             usleep(50);
@@ -956,10 +957,13 @@ void show_chat_history(GtkWidget *widget, gpointer data)
             sprintf(buf, "<get user avatar>%s",temp->data);
         else 
             sprintf(buf, "<get user avatar>%s",temp->next->data);
-        send_all(cur_client.ssl, buf, 544);
+        swiftchat_send(cur_client.ssl, buf, 544);
+        printf("here\n");
         while(!t_main.loaded) {
             usleep(50);
         }
+        printf("here\n");
+
         t_avatar *avatar = t_main.loaded_avatar;
         if (mx_strcmp(avatar->name, "default") == 0) {
             *avatar = t_main.default_avatar;

@@ -144,16 +144,19 @@ static void register_button_click(GtkWidget *widget, gpointer data)
     }
     
     char message[32] = {0};
-    // Отправка данных для регистрации на сервер
-    SSL_write(cur_client.ssl, "u", 1);
+    // Отправка данных для авторизации на сервер
+    sprintf(message, "u");
+    swiftchat_send(cur_client.ssl, message, 32);
+    clear_message(message, 32);
     sprintf(message, "%s", cur_client.login);
-    SSL_write(cur_client.ssl, message, 32);
+    swiftchat_send(cur_client.ssl, message, 32);
     clear_message(message, 32);
     sprintf(message, "%s", cur_client.passwd);
-    SSL_write(cur_client.ssl, message, 16);
+    swiftchat_send(cur_client.ssl, message, 16);
 
-    bool err_aut;
-    SSL_read(cur_client.ssl, &err_aut, sizeof(bool)); // Ожидание ответа от сервера об успешности регистрации
+
+    bool err_aut = true;
+    swiftchat_recv(cur_client.ssl, &err_aut, sizeof(bool)); // Ожидание ответа от сервера об успешности входа или регистрации
     
     if (err_aut) {
         gtk_label_set_label (GTK_LABEL(t_auth.ErrorMessageRegister), "REGISTRATION ERROR");

@@ -102,11 +102,11 @@ static void send_chat_avatar() { // <setting avatar>chat_id=
 
     char buf[512 + 32] = {0};
     sprintf(buf, "<setting avatar>chat_id=%d", cur_client.cur_chat.id);
-    send_all(cur_client.ssl, buf, 512 + 32);
+    swiftchat_send(cur_client.ssl, buf, 512 + 32);
     clear_message(buf, 512 + 32);
     
     sprintf(buf, "%s", cur_client.cur_chat.avatar.name);
-    send_all(cur_client.ssl, buf, 512 + 32);
+    swiftchat_send(cur_client.ssl, buf, 512 + 32);
     clear_message(buf, 512 + 32);
     t_main.loaded = false;
     send_image(cur_client.ssl, cur_client.cur_chat.avatar.path);
@@ -115,11 +115,11 @@ static void send_chat_avatar() { // <setting avatar>chat_id=
         usleep(50);
     }
 
-    SSL_write(cur_client.ssl, &cur_client.cur_chat.avatar.scaled_w, sizeof(double));
-    SSL_write(cur_client.ssl, &cur_client.cur_chat.avatar.scaled_h, sizeof(double));
+    swiftchat_send(cur_client.ssl, &cur_client.cur_chat.avatar.scaled_w, sizeof(double));
+    swiftchat_send(cur_client.ssl, &cur_client.cur_chat.avatar.scaled_h, sizeof(double));
 
-    SSL_write(cur_client.ssl, &cur_client.cur_chat.avatar.x, sizeof(double));
-    SSL_write(cur_client.ssl, &cur_client.cur_chat.avatar.y, sizeof(double));
+    swiftchat_send(cur_client.ssl, &cur_client.cur_chat.avatar.x, sizeof(double));
+    swiftchat_send(cur_client.ssl, &cur_client.cur_chat.avatar.y, sizeof(double));
     t_avatar *new = (t_avatar *)malloc(sizeof(t_avatar));
     new->image = cur_client.cur_chat.avatar.image;
     new->path = cur_client.cur_chat.avatar.path;

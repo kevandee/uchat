@@ -94,7 +94,7 @@ typedef struct s_client {
 void send_image(SSL *socket, char *file);
 int recv_image(SSL *socket, char *path);
 
-int send_all(SSL *sockfd, const char *buf, int len);
+int send_all(SSL *sockfd, char *buf, int len);
 int recv_all(SSL *sockfd, char * buf, int len);
 
 void clear_message(char *mes, const int size);
