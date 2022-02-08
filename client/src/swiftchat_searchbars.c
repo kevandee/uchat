@@ -29,6 +29,9 @@ static void get_list_users() {
 void text_changed_main_screen(GObject *object, GParamSpec *pspec, gpointer data) {
     (void)data;
     (void)pspec;
+    if (!t_main.connected) {
+        return;
+    }
     
     GtkEntry *entry = GTK_ENTRY (object);
     gboolean has_text;
@@ -102,6 +105,9 @@ void text_changed_main_screen(GObject *object, GParamSpec *pspec, gpointer data)
 void text_changed_add_chat(GObject *object, GParamSpec *pspec, gpointer data) {
     (void)pspec;
     (void)data;
+    if (!t_main.connected) {
+        return;
+    }
     GtkEntry *entry = GTK_ENTRY (object);
     //GtkWidget *scroll_window = data;
     gboolean has_text;

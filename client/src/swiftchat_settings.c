@@ -237,6 +237,10 @@ static void on_open_response (GtkDialog *dialog, int response)
 }
 
 static void choise_photo_file() {
+    if (!t_main.connected) {
+        return;
+    }
+
     GtkWidget *dialog;
     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 
@@ -311,6 +315,9 @@ static void send_settings(GtkWidget *widget, gpointer data) {
 
 void show_settings() 
 {
+    if (!t_main.connected) {
+        return;
+    }
     int point = 1;
     redraw_actives_chats(NULL, &point);
     cur_client.cur_chat.id = -1;
