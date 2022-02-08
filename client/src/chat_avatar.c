@@ -224,6 +224,9 @@ static void on_open_response (GtkDialog *dialog, int response)
 }
 
 void choise_chatphoto_file() {
+    if (!t_main.connected) {
+        return;
+    }
     GtkWidget *dialog;
     GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 

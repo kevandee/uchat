@@ -28,6 +28,12 @@ static void enter_mouse(GtkWidget *widget, gpointer data) {
     gtk_widget_hide(button_box[0]);
     gtk_widget_show(button_box[1]);
 }
+static void close_app() {
+    t_main.is_run = false;
+    printf("Goodbye!)\n");
+    gtk_window_destroy(GTK_WINDOW (t_screen.main_window));
+    
+}
 
 void chat_decorate_headerbar()
 {
@@ -60,7 +66,7 @@ void chat_decorate_headerbar()
 
     GtkWidget *headerbar_button_leave1 = gtk_image_new_from_file("client/media/close_hover.png");
     gtk_widget_set_name(GTK_WIDGET(headerbar_button_leave1), "close");
-    g_signal_connect_swapped(click_close, "pressed", G_CALLBACK(gtk_window_destroy), t_screen.main_window);
+    g_signal_connect_swapped(click_close, "pressed", G_CALLBACK(close_app), NULL);
     gtk_widget_add_controller(headerbar_button_leave1, GTK_EVENT_CONTROLLER(click_close));
     //gtk_header_bar_pack_start (GTK_HEADER_BAR( t_screen.headerbar), headerbar_button1);
     gtk_box_append(GTK_BOX(buttons_box_leave), headerbar_button_leave1);

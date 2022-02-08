@@ -57,6 +57,18 @@ void send_all_user_data(t_client *client) {
         }
         printf("chat sended to %s\n", client->login);
 
+        char *query = NULL;
+        char *sql_pattern = "SELECT mute FROM members WHERE chat_id = %d AND user_id = %d;";
+        asprintf(&query, sql_pattern, chat->id, client->id);
+        t_list *temp_m = sqlite3_exec_db(query, 1);
+        if (strcmp(temp_m->data, "0") == 0) {
+            send_all(client->ssl, "0", 1);
+        }
+        else {
+            send_all(client->ssl, "1", 1);
+        }
+        printf("mute %s\n", temp_m->data);
+
         temp = temp->next;
         char *avatar_info = NULL;
         if (mx_strncmp(chat->name, ".dialog", 7) != 0){

@@ -430,6 +430,19 @@ void *client_work(void *param) {
             update_chat_name(c_name, chat_id);
             send_message(buf, cur->login, &cur->cur_chat, false);
         }
+        else if(mx_strncmp(message, "<change mute chat_id=", 21) == 0) {
+            char *temp = message + 21;
+            int len = 0;
+            while (*(temp + len) != '>') {
+                len++;
+            }
+            char *c_id = mx_strndup(temp, len);
+            printf("%s\n", c_id);
+            int chat_id = mx_atoi(c_id);
+            mx_strdel(&c_id);
+
+            change_mute(chat_id, cur->id);
+        }
         else if (mx_strncmp(message, "<msg, chat_id=", 14) == 0) {
             printf("%s\n", message);
             char *temp = message + 15;

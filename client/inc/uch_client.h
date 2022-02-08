@@ -53,6 +53,7 @@ struct
     char *ip;
     int port;
     SSL_CTX *context;
+    bool is_run;
 
     GtkWidget *grid;
     GtkWidget *left_panel;

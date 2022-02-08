@@ -44,6 +44,9 @@ static void save_note(GtkGestureClick *gesture, int n_press, double x, double y,
 
 void show_home() 
 {
+    if(!t_main.connected) {
+        return;
+    }
     cur_client.cur_chat.id = -1;
     int point = 1;
     redraw_actives_chats(NULL, &point);

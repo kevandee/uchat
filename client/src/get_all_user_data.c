@@ -56,6 +56,10 @@ void get_all_user_data() {
             clear_message(buf, 32);
         }
 
+        char mute;
+        swiftchat_recv(cur_client.ssl, &mute, 1);
+        new_chat->mute = mute == '0' ? false : true;
+        printf("mute %c\n", mute);
         // chat avatar
 
         char buf[32] = {0};
